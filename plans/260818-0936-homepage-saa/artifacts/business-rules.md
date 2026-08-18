@@ -1,0 +1,91 @@
+<!-- layout-exempt: rebuild-spec owns all docs/system|features|generated|flows paths — all references here are output targets or internal definitions -->
+# Business Rules
+
+**Project**: Sun* Annual Awards 2025 (SAA 2025) — Homepage sự kiện
+**Generated**: 2026-08-18
+
+{Quy tắc bằng ngôn ngữ thường, viết lại từ các mục BR-### trong technical spec cho đối
+tượng phi kỹ thuật. Hệ thống này không có backend/database (xem `data-model.md`,
+`behavior-logic.md`) — toàn bộ quy tắc dưới đây là logic phía trình duyệt, tính từ hằng
+số nội bộ hoặc hàm thuần, không có gọi mạng nào đứng sau.}
+
+### Đếm ngược hiển thị đúng trạng thái theo thời điểm sự kiện
+
+**Applies when:** Người dùng mở trang chủ và nhìn vào khối đếm ngược ở phần hero.
+**Says:** Hệ thống tính số ngày/giờ/phút còn lại tới thời điểm sự kiện đã cấu hình. Một
+khi thời điểm đó đã qua, đồng hồ không hiển thị số âm — nó chuyển sang trạng thái "đã hết
+hạn" với mọi ô hiển thị 00. Đồng hồ tự làm mới mỗi phút để số liệu luôn đúng mà không cần
+người dùng tải lại trang.
+**Source artifact:** [Entities — CountdownResult](./data-model.md)
+
+---
+
+### Đếm ngược không được phép vỡ trang khi thiếu cấu hình thời điểm sự kiện
+
+**Applies when:** Thời điểm sự kiện chưa được cấu hình, hoặc giá trị cấu hình sai định
+dạng.
+**Says:** Thay vì làm hỏng trang hay hiện lỗi cho người dùng, hệ thống coi đây là trạng
+thái "không hợp lệ" và hiển thị cùng giao diện 00 như trạng thái "đã hết hạn" — người
+dùng không thấy khác biệt giữa hai trạng thái này trên màn hình, nhưng hệ thống có phân
+biệt nội bộ để phục vụ việc kiểm thử/gỡ lỗi sau này.
+**Source artifact:** [Entities — CountdownResult](./data-model.md)
+
+---
+
+### Mỗi hạng mục giải thưởng có một trang chi tiết cố định, không có cấu hình động
+
+**Applies when:** Người dùng bấm "Chi tiết" trên một thẻ giải thưởng ở trang chủ, hoặc
+bấm thẳng vào một mục trong danh sách giải thưởng.
+**Says:** Hệ thống điều hướng người dùng tới đúng phần nội dung của hạng mục đó trên
+trang Giải thưởng (cuộn tới đúng vị trí bằng liên kết neo). Danh sách 6 hạng mục giải
+thưởng (Top Talent, Top Project, Top Project Leader, Best Manager, Signature 2025 -
+Creator, MVP) là cố định trong bản dựng hiện tại — không có màn hình quản trị nào để
+thêm/sửa/xóa hạng mục, và không có cách nào để một hạng mục "biến mất" khỏi danh sách khi
+đang chạy.
+**Source artifact:** [Entities — MODEL001_Award](./data-model.md)
+
+---
+
+### Thẻ giải thưởng không có định danh hợp lệ thì không nhảy tới vị trí cụ thể
+
+**Applies when:** Một thẻ giải thưởng được hiển thị mà không có định danh hạng mục hợp
+lệ đi kèm (trường hợp dữ liệu bất thường, hiện chưa xảy ra với 6 hạng mục có sẵn).
+**Says:** Hệ thống vẫn đưa người dùng tới trang Giải thưởng nói chung thay vì báo lỗi hay
+dẫn tới một trang không tồn tại, chỉ là sẽ không tự cuộn tới một mục cụ thể nào.
+**Source artifact:** [Entities — MODEL001_Award](./data-model.md)
+
+---
+
+### Ngôn ngữ hiển thị được ghi nhớ cho lần truy cập sau
+
+**Applies when:** Người dùng chọn tiếng Việt hoặc tiếng Anh từ nút chuyển ngôn ngữ trên
+thanh điều hướng.
+**Says:** Toàn bộ văn bản trên trang đổi sang ngôn ngữ vừa chọn ngay lập tức, và lựa chọn
+này được hệ thống nhớ lại trên chính trình duyệt đó cho lần truy cập kế tiếp — không cần
+chọn lại mỗi lần vào trang. Nếu chưa từng chọn, hệ thống mặc định hiển thị tiếng Việt.
+**Source artifact:** [Entities — I18nState/Locale](./data-model.md)
+
+---
+
+### Biểu tượng tài khoản và thông báo chỉ hiện với người dùng đã có "vai trò"
+
+**Applies when:** Người dùng mở trang chủ ở trạng thái mặc định (chưa có vai trò nào
+được thiết lập) so với trạng thái đã có vai trò `user`/`admin`.
+**Says:** Ở trạng thái mặc định, hai biểu tượng tài khoản và thông báo trên thanh điều
+hướng không xuất hiện — không hiện mờ, không hiện khóa, mà biến mất hoàn toàn. Ngay khi
+có vai trò, cả hai biểu tượng xuất hiện đầy đủ. Đây thuần túy là quy tắc hiển thị giao
+diện, không phải một ranh giới bảo mật — chi tiết và cảnh báo quan trọng về giới hạn của
+quy tắc này nằm ở tài liệu Permissions.
+**Source artifact:** [Permissions](./permissions.md)
+
+---
+
+### Số thông báo chưa đọc chỉ hiện khi có ít nhất một thông báo
+
+**Applies when:** Biểu tượng thông báo đang được hiển thị (tức người dùng không ở trạng
+thái mặc định).
+**Says:** Huy hiệu số đỏ trên biểu tượng chuông chỉ xuất hiện khi số thông báo chưa đọc
+lớn hơn 0; bằng 0 thì huy hiệu ẩn hoàn toàn, chỉ còn lại biểu tượng chuông trơn. Bảng
+danh sách thông báo khi mở ra hiện cùng một nội dung "chưa có thông báo nào" cho mọi
+trường hợp — hệ thống hiện tại chưa có nguồn dữ liệu thông báo thật đứng sau con số này.
+**Source artifact:** [Entities — SessionState](./data-model.md)

@@ -1,26 +1,43 @@
 @import "tailwindcss";
 
+/* SAA 2025 homepage — dark theme design tokens (frame is unconditionally dark). */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #00101a;
+  --foreground: #ffffff;
+  --header-bg: rgba(16, 20, 23, 0.8);
+  --accent: #ffea9e;
+  --accent-foreground: #00101a;
+  --accent-glow: #fae287;
+  --border-accent: #998c5f;
+  --divider: #2e3940;
+  --badge-danger: #d4271d;
+  --secondary-button-bg: rgba(255, 234, 158, 0.1);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-header-bg: var(--header-bg);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-glow: var(--accent-glow);
+  --color-border-accent: var(--border-accent);
+  --color-divider: var(--divider);
+  --color-badge-danger: var(--badge-danger);
+  --color-secondary-button-bg: var(--secondary-button-bg);
+  --font-sans: var(--font-montserrat);
+  --font-alt: var(--font-montserrat-alternates);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Shared glow used by CTA buttons, award badges and the floating widget. */
+.saa-glow {
+  box-shadow:
+    0 4px 4px 0 rgba(0, 0, 0, 0.25),
+    0 0 6px 0 var(--accent-glow);
 }

@@ -1,0 +1,34 @@
+// FR-002 — English dictionary. Same key set as `./vi.ts` by construction: an assignment to
+// `Record<DictionaryKey, string>` fails to compile if a key is missing or misspelled here.
+import type { DictionaryKey } from './vi';
+
+export const en: Record<DictionaryKey, string> = {
+  'nav.about': 'About SAA 2025',
+  'nav.awards': 'Award Information',
+  'nav.kudos': 'Sun* Kudos',
+  'language.optionVi': 'VN',
+  'language.optionEn': 'EN',
+  'hero.title': 'ROOT FURTHER',
+  'hero.comingSoon': 'Coming soon',
+  'hero.eventInfo': 'Time: 26/12/2025 · Venue: Âu Cơ Art Center · Live broadcast via Livestream',
+  'hero.ctaAwards': 'ABOUT AWARDS',
+  'hero.ctaKudos': 'ABOUT KUDOS',
+  'countdown.days': 'DAYS',
+  'countdown.hours': 'HOURS',
+  'countdown.minutes': 'MINUTES',
+  'awards.caption': 'Sun* annual awards 2025',
+  'awards.heading': 'Award System',
+  'awards.detailLink': 'Detail',
+  'kudos.label': 'Recognition movement',
+  'kudos.title': 'Sun* Kudos',
+  'kudos.detailLink': 'Detail',
+  'footer.copyright': 'Copyright © 2025 Sun*',
+  'footer.generalStandards': 'General Standards',
+  'notification.title': 'Notifications',
+  'notification.empty': 'No new notifications',
+  'account.profile': 'Profile',
+  'account.signOut': 'Sign out',
+  'account.adminDashboard': 'Admin Dashboard',
+  'widget.writeKudos': 'Write Kudos',
+  'widget.aboutSaa': 'About SAA 2025',
+};

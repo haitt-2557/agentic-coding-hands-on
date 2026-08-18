@@ -1,0 +1,217 @@
+{
+  "generated_at": "2026-08-18T08:08:02Z",
+  "plan": "260818-0936-homepage-saa",
+  "features": [
+    {
+      "fcode": "F001",
+      "name": "Event Overview",
+      "slug": "F001_EventOverview",
+      "priority": "P0",
+      "type": "ui",
+      "related": {
+        "screens": [
+          "SCR001_Home"
+        ],
+        "user_stories": [
+          "US001_ViewHeroSection",
+          "US003_ReadRootFurtherContent"
+        ],
+        "routes": [
+          "ROUTE001"
+        ],
+        "models": [],
+        "bl": [],
+        "perms": []
+      }
+    },
+    {
+      "fcode": "F002",
+      "name": "Event Countdown",
+      "slug": "F002_EventCountdown",
+      "priority": "P0",
+      "type": "ui",
+      "related": {
+        "screens": [
+          "SCR001_Home"
+        ],
+        "user_stories": [
+          "US002_ViewEventCountdown"
+        ],
+        "routes": [
+          "ROUTE001"
+        ],
+        "models": [],
+        "bl": [],
+        "perms": []
+      }
+    },
+    {
+      "fcode": "F003",
+      "name": "Award Discovery",
+      "slug": "F003_AwardDiscovery",
+      "priority": "P0",
+      "type": "ui",
+      "related": {
+        "screens": [
+          "SCR001_Home",
+          "SCR002_Awards"
+        ],
+        "user_stories": [
+          "US004_BrowseAwardCategories",
+          "US006_ViewAwardCategoryDetail",
+          "US007_NavigateToAwardsPage"
+        ],
+        "routes": [
+          "ROUTE001",
+          "ROUTE002"
+        ],
+        "models": [
+          "MODEL001_Award"
+        ],
+        "bl": [],
+        "perms": []
+      }
+    },
+    {
+      "fcode": "F004",
+      "name": "Kudos Promotion",
+      "slug": "F004_KudosPromotion",
+      "priority": "P1",
+      "type": "ui",
+      "related": {
+        "screens": [
+          "SCR001_Home",
+          "SCR003_Kudos"
+        ],
+        "user_stories": [
+          "US005_ReadKudosPromotion",
+          "US008_NavigateToKudosPage"
+        ],
+        "routes": [
+          "ROUTE001",
+          "ROUTE003"
+        ],
+        "models": [],
+        "bl": [],
+        "perms": []
+      }
+    },
+    {
+      "fcode": "F005",
+      "name": "Language Switching",
+      "slug": "F005_LanguageSwitching",
+      "priority": "P1",
+      "type": "ui",
+      "related": {
+        "screens": [
+          "SCR001_Home"
+        ],
+        "user_stories": [
+          "US010_SwitchInterfaceLanguage"
+        ],
+        "routes": [
+          "ROUTE001"
+        ],
+        "models": [],
+        "bl": [],
+        "perms": []
+      }
+    },
+    {
+      "fcode": "F006",
+      "name": "Quick Action Widget",
+      "slug": "F006_QuickActionWidget",
+      "priority": "P1",
+      "type": "ui",
+      "related": {
+        "screens": [
+          "SCR001_Home"
+        ],
+        "user_stories": [
+          "US011_OpenQuickActionWidget"
+        ],
+        "routes": [
+          "ROUTE001"
+        ],
+        "models": [],
+        "bl": [],
+        "perms": []
+      }
+    },
+    {
+      "fcode": "F007",
+      "name": "Account Menu Access",
+      "slug": "F007_AccountMenuAccess",
+      "priority": "P2",
+      "type": "ui",
+      "related": {
+        "screens": [
+          "SCR001_Home",
+          "SCR004_Profile",
+          "SCR005_AdminDashboard"
+        ],
+        "user_stories": [
+          "US013_OpenAccountMenu",
+          "US014_NavigateToProfilePage",
+          "US015_ClickSignOutButton",
+          "US016_NavigateToAdminDashboard"
+        ],
+        "routes": [
+          "ROUTE001",
+          "ROUTE004",
+          "ROUTE005"
+        ],
+        "models": [],
+        "bl": [],
+        "perms": [
+          "PERM001_AccountMenuVisibility",
+          "PERM002_AdminDashboardLinkVisibility"
+        ]
+      }
+    },
+    {
+      "fcode": "F008",
+      "name": "Notification Panel Access",
+      "slug": "F008_NotificationPanelAccess",
+      "priority": "P2",
+      "type": "ui",
+      "related": {
+        "screens": [
+          "SCR001_Home"
+        ],
+        "user_stories": [
+          "US012_OpenNotificationPanel"
+        ],
+        "routes": [
+          "ROUTE001"
+        ],
+        "models": [],
+        "bl": [],
+        "perms": [
+          "PERM003_NotificationBellVisibility"
+        ]
+      }
+    },
+    {
+      "fcode": "F009",
+      "name": "Return To Home Top",
+      "slug": "F009_ReturnToHomeTop",
+      "priority": "P3",
+      "type": "ui",
+      "related": {
+        "screens": [
+          "SCR001_Home"
+        ],
+        "user_stories": [
+          "US009_ReturnToHomeTop"
+        ],
+        "routes": [
+          "ROUTE001"
+        ],
+        "models": [],
+        "bl": [],
+        "perms": []
+      }
+    }
+  ]
+}
