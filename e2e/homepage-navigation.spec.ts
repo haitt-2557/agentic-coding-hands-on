@@ -77,21 +77,32 @@ test.describe('Homepage SAA - Valid Environment', () => {
       await expect(page.getByRole('banner')).toBeVisible();
       await expect(page.getByRole('heading', { name: /ROOT|FURTHER/i })).toBeVisible();
 
-      // Collect all navigation links
-      const links = await page.getByRole('link').all();
-      expect(links.length).toBeGreaterThan(0);
+      // Every internal destination, fragment stripped and deduped — `/awards#top-talent`
+      // and `/awards#mvp` are the same document, so fetching each slug separately would
+      // only re-prove the same route.
+      const hrefs = await page.getByRole('link').evaluateAll((links) =>
+        links.map((link) => link.getAttribute('href')),
+      );
+      const destinations = [
+        ...new Set(
+          hrefs
+            .filter((href): href is string => !!href && href.startsWith('/'))
+            .map((href) => href.split('#')[0])
+            .filter(Boolean),
+        ),
+      ];
 
-      const urls = [];
-      for (const link of links) {
-        const href = await link.getAttribute('href');
-        if (href && !href.startsWith('#')) {
-          urls.push(href);
-        }
+      // Guard the guard: on the stock Next.js scaffold this list is empty and the loop
+      // below would pass by doing nothing.
+      expect(destinations.length).toBeGreaterThan(0);
+
+      // ID-59: the test's name is "no broken links", so it has to actually resolve them.
+      // page.request skips a full navigation per link while still making a real HTTP round
+      // trip, which is what a 404 would show up in.
+      for (const href of destinations) {
+        const response = await page.request.get(href);
+        expect(response.status(), `${href} must not be a broken link`).toBe(200);
       }
-
-      // At least some non-hash links should exist in the rendered page
-      // This assertion fails if the page is still the stock Next.js scaffold
-      expect(urls.length).toBeGreaterThan(0);
     });
   });
 });
