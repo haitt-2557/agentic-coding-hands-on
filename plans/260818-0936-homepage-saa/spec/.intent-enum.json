@@ -1,0 +1,7 @@
+{
+  "mode": "single",
+  "intents": [
+    "visitor browses the SAA 2025 homepage: understands the event (countdown, time, venue, broadcast), reads the Root Further theme, surveys the six award categories, and navigates onward to Award Information or Sun* Kudos"
+  ],
+  "justification": ""
+}

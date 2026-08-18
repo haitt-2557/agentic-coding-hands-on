@@ -1,0 +1,55 @@
+{
+  "task": "Build the SAA 2025 homepage (route /) on Next 16 App Router from the MoMorph screen i87tDx10uM under an e2e-red-first test policy, then integrate, review and document it",
+  "mode": "interactive",
+  "acceptanceCriteria": [
+    "E2E suite green in one clean run with a real exit code",
+    "unit suite green with a real exit code",
+    "npm run build exits 0 with no Next 16 deprecation warnings",
+    "npx tsc --noEmit exits 0",
+    "npm run lint exits 0",
+    "zero critical review findings open",
+    "docs/vi/system/architecture.md and permissions.md describe the code as built and point at a real ADR",
+    "ADR-001 exists and states the replacement triggers for the mock session and the hand-rolled i18n",
+    "the design-defect report names every logged design-data item",
+    "no .env file other than .env.example is committed and no credential appears in the diff"
+  ],
+  "touchpoints": [
+    "app/layout.tsx",
+    "app/page.tsx",
+    "app/awards/page.tsx",
+    "app/kudos/page.tsx",
+    "app/profile/page.tsx",
+    "app/admin/page.tsx",
+    "app/globals.css",
+    "components/home/",
+    "components/layout/",
+    "components/ui/",
+    "lib/session/session-provider.tsx",
+    "lib/i18n/locale-provider.tsx",
+    "lib/i18n/dictionaries/",
+    "lib/awards.ts",
+    "lib/countdown.ts",
+    "e2e/",
+    "playwright.config.ts",
+    "eslint.config.mjs",
+    "docs/vi/",
+    "docs/decisions/ADR-001-mock-session-and-hand-rolled-i18n.md"
+  ],
+  "blastRadius": [
+    "route / renders the full homepage for guest, user and admin roles",
+    "every in-app navigation destination reachable from the homepage resolves (no 404)",
+    "countdown recomputes from NEXT_PUBLIC_EVENT_START_AT and degrades to a Coming soon state on an invalid value",
+    "locale switch swaps the rendered copy between vi and en",
+    "role gating in the header shows and hides the notification bell and account menu",
+    "the four dropdown menus open, close on outside click and restore focus on Escape",
+    "npm run lint stays meaningful (kit and report trees excluded, app source enforced)",
+    "the Playwright webServer pair owns ports 3000 and 3100 and never reuses a borrowed dev server"
+  ],
+  "contracts": [
+    "lib/session/session-provider.tsx exports useSession(): { role: 'guest'|'user'|'admin', unreadCount: number }",
+    "lib/i18n/locale-provider.tsx exports useI18n(): { t(key), locale: 'vi'|'en', setLocale(l) }",
+    "lib/awards.ts exports AWARDS: 6 entries keyed by the slugs top-talent, top-project, top-project-leader, best-manager, signature-2025-creator, mvp",
+    "lib/countdown.ts exports computeCountdown(targetIso, now): { days, hours, minutes, isExpired, isInvalid } and is pure",
+    "NEXT_PUBLIC_EVENT_START_AT is the sole event-time input and is build-time inlined"
+  ]
+}
