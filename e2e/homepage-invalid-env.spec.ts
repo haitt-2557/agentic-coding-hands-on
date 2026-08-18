@@ -2,6 +2,12 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Homepage SAA - Invalid Environment (ID-60)', () => {
   test('invalid event datetime env falls back to zero-state without crashing', async ({ page }) => {
+    // "without crashing" is half the title, so it needs a real assertion. The listener must
+    // be attached BEFORE goto — an uncaught error thrown during hydration fires while the
+    // page loads, and a listener registered afterwards never sees it.
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.toString()));
+
     // This test runs on port 3100 with NEXT_PUBLIC_EVENT_START_AT='not-a-date'
     await page.goto('/');
 
@@ -18,13 +24,13 @@ test.describe('Homepage SAA - Invalid Environment (ID-60)', () => {
     // so `showComingSoon` is false and the label is absent from the DOM.
     await expect(page.getByText(/Coming soon/i)).toHaveCount(0);
 
-    // No uncaught errors in console
-    const errors: string[] = [];
-    page.on('pageerror', (err) => errors.push(err.toString()));
-
-    // If there were errors, the test should be aware of them (though they shouldn't prevent rendering)
-    // For this test, we just verify the page didn't crash (no white screen, key elements render)
+    // The page still renders its hero — an unparseable env value must degrade the countdown,
+    // not white-screen the route.
     const heroSection = page.getByRole('heading', { name: /ROOT|FURTHER/i });
     await expect(heroSection).toBeVisible();
+
+    // ID-60: and it renders without throwing on the way. Reported with the error text so a
+    // failure names the exception instead of just a count.
+    expect(pageErrors, `uncaught page errors: ${pageErrors.join(' | ')}`).toEqual([]);
   });
 });

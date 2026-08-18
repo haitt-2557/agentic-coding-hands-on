@@ -1,5 +1,11 @@
 # RESUME — trạng thái Stage 5 + 6 (ghi trước khi compact, 2026-08-18)
 
+> **ĐÃ HOÀN TẤT 2026-08-18.** Mục "Việc còn lại" bên dưới đã làm xong hết: W9 promote (13 doc,
+> `shasum -c` 13/13), W9.5/W9.6, `wave9-complete.flag`, doc-writer (system + ADR-001 + feature spec),
+> evidence gate `SEALED` exit 0. Trạng thái chính thức nằm ở `plan.md` và
+> `phase-05-integration-and-review.md` — file này giữ lại vì phần **"Sáu lần gate FAIL"** và
+> **"Cảnh báo vận hành"** vẫn còn đúng và còn hữu ích cho lần sau.
+
 Work context: `/Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/my-app` (git root; thư mục cha KHÔNG phải repo).
 Branch `feat/homepage-saa`. Mọi lệnh phải `cd` vào `my-app` trước.
 

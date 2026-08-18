@@ -1,0 +1,82 @@
+{
+  "score": 9,
+  "criticalCount": 0,
+  "decision": "SEALED",
+  "acceptanceCovered": [
+    "E2E suite green in one clean run with a real exit code — temper-results.json: npm run test:e2e exitCode 0, 39 passed (38 chromium + 1 invalid-env project); spot-read 6 of the 8 e2e/*.spec.ts files confirms assertions have real teeth (ID-25 bidirectional locale check, ID-29/32/35 toHaveCount(0) on unmount, ID-59 status-200 check for /profile and /admin)",
+    "unit suite green with a real exit code — temper-results.json: npm run test:unit exitCode 0, 16 passed",
+    "npm run build exits 0 with no Next 16 deprecation warnings — temper-results.json: exitCode 0; app/layout.tsx uses the non-deprecated `export const viewport` for themeColor (not the deprecated metadata.viewport field), confirmed no `priority` prop misuse in Image usages read (hero-keyvisual, award-card use `sizes`/`fill` correctly); the one build warning on record is an unrelated stray pnpm-lock.yaml in $HOME outside the repo",
+    "npx tsc --noEmit exits 0 — temper-results.json: exitCode 0",
+    "npm run lint exits 0 — temper-results.json: exitCode 0; eslint.config.mjs globalIgnores excludes .claude/**, plans/**, test-results/**, playwright-report/** so the gate stays meaningful on app source",
+    "zero critical review findings open — prior reviewer-260818-phase05-code-review.md recorded 0 critical, 4 warnings; two (profile/admin 404, vacuous ID-25 assertion) are verified fixed in current source (app/profile/page.tsx, app/admin/page.tsx exist; e2e/homepage-role-gating.spec.ts and homepage-dropdown-menus.spec.ts ID-25 now asserts both directions); the remaining two (hero-cta role=button, dropdown menu/menuitem ARIA) are deliberately deferred to the design owner (design-defects report D1/D2), not left as silent gaps; my own pass found 0 new critical",
+    "docs/vi/system/architecture.md and permissions.md describe the code as built and point at a real ADR — grep confirms both files link ADR-001-mock-session-and-hand-rolled-i18n.md (no dangling TBD); permissions-matrix.md content verified line-by-line against account-menu.tsx:16,51 and notification-bell.tsx:16 — matches exactly including the explicit 'no server-side enforcement' warning on /admin",
+    "ADR-001 exists and states the replacement triggers for the mock session and the hand-rolled i18n — read in full: session replacement trigger is 'add real server session + route guard/middleware.ts before any route or data is gated on role'; i18n replacement trigger is 'a third locale, real pluralization/date-formatting, or locale-scoped URLs'",
+    "the design-defect report names every logged design-data item — design-defects-260818-homepage-saa.md sections A (2 typos), B (2 stale/contradictory spec rows), C (2 missing-content items), D (3 accessibility semantics deferred from review), E (placeholder pages lack back-navigation chrome) — cross-checked against clarifications.md's own 'Design defects to report back' list and found no omission",
+    "no .env file other than .env.example is committed and no credential appears in the diff — git ls-files shows only .env.example tracked; grep for api-key/secret/password/token patterns across the diff found none real (only the words 'secret'/'token' appearing in a comment disclaiming secrets, and in unrelated file paths under skills/generate-testcases/data)"
+  ],
+  "regressionChecked": [
+    "route / renders the full homepage for guest, user and admin roles — verified via lib/session/session-provider.tsx role resolution + components/ui/account-menu.tsx and notification-bell.tsx early-return-null-for-guest logic + e2e/homepage-role-gating.spec.ts's three role fixtures",
+    "every in-app navigation destination reachable from the homepage resolves (no 404) — verified app/{awards,kudos,profile,admin}/page.tsx all exist as real routes; e2e/homepage-role-gating.spec.ts asserts HTTP 200 on /profile and /admin directly; app/awards/page.tsx carries all 6 anchor sections matching lib/awards.ts slugs",
+    "countdown recomputes from NEXT_PUBLIC_EVENT_START_AT and degrades to a Coming soon state on an invalid value — verified lib/countdown.ts computeCountdown() pure-function logic (zeroState on missing/unparseable input) and components/home/countdown-timer.tsx wiring; e2e/homepage-invalid-env.spec.ts exercises the actual :3100 server seeded with 'not-a-date'",
+    "locale switch swaps the rendered copy between vi and en — verified lib/i18n/locale-provider.tsx dictionary swap logic and localStorage persistence; e2e ID-25 test now asserts the VI string disappears AND the EN string appears (bidirectional, fixed from the prior vacuous assertion)",
+    "role gating in the header shows and hides the notification bell and account menu — verified against e2e/homepage-role-gating.spec.ts guest/user/admin fixtures and the two components' early-return-null branches",
+    "the four dropdown menus open, close on outside click and restore focus on Escape — verified components/ui/dropdown-menu.tsx shared primitive (pointerdown-outside, Escape-refocus via data-dropdown-trigger now baked into DropdownTriggerProps per the Stage-5 fix) and e2e/homepage-dropdown-menus.spec.ts ID-30-35 coverage",
+    "npm run lint stays meaningful (kit and report trees excluded, app source enforced) — verified eslint.config.mjs globalIgnores list",
+    "the Playwright webServer pair owns ports 3000 and 3100 and never reuses a borrowed dev server — verified playwright.config.ts sets reuseExistingServer: false on both webServer entries, matching the clarifications.md Stage-5 note about the prior flaky-green incident"
+  ],
+  "contractStatus": "OK",
+  "refuted": [],
+  "unproven": [],
+  "reachableRegressions": [],
+  "findings": [
+    {
+      "severity": "Suggestion",
+      "category": "Structure",
+      "location": "components/home/hero-cta.tsx:19",
+      "summary": "role=\"button\" on a navigating <Link> promises Space-key activation that native <a> never provides; deliberately deferred to the design owner (design-defects report D1) rather than silently left in place",
+      "disposition": "Defer"
+    },
+    {
+      "severity": "Suggestion",
+      "category": "Structure",
+      "location": "components/ui/dropdown-menu.tsx:96",
+      "summary": "role=\"menu\"/\"menuitem\" commits to APG arrow-key/Home-End navigation that isn't implemented; all four consumers are actually navigation link groups, not command menus — deliberately deferred to the design owner (design-defects report D2)",
+      "disposition": "Defer"
+    },
+    {
+      "severity": "Suggestion",
+      "category": "Structure",
+      "location": "components/home/award-card.tsx:44-70",
+      "summary": "each award card carries 3 links to the same destination, 2 with identical accessible names, forcing extra Tab stops; deliberately deferred to the design owner (design-defects report D3)",
+      "disposition": "Defer"
+    },
+    {
+      "severity": "Medium",
+      "category": "Security",
+      "location": "app/admin/page.tsx:1-4",
+      "summary": "/admin has no server-side guard — reachable by typing the URL regardless of mock role. Explicitly and prominently documented as an interim, non-production contract in the file's own header comment, session-provider.tsx:3-10, ADR-001, and permissions-matrix.md; the page renders no real data, so there is nothing to leak today. Accept as a documented, intentional interim state, not a silent gap.",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "Low",
+      "category": "Logic",
+      "location": "e2e/homepage-navigation.spec.ts:73-95",
+      "summary": "'no broken links (ID-59)' here only asserts non-hash links exist, not that they resolve to 200 — the real status-code check for the two previously-404ing routes lives in a differently-named test in homepage-role-gating.spec.ts. Functionally covered elsewhere, but the test name overpromises what this specific file checks.",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "Low",
+      "category": "Structure",
+      "location": "release-manifest.json:1-1200",
+      "summary": "a 1200-line unrelated tooling/kit release manifest and .repomixignore were committed in the same commit as the homepage feature (349d735). Flagged by the prior reviewer as needing confirmation before commit; already committed. No functional impact on the homepage delivery, but it is scope bleed into the feature commit.",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "Low",
+      "category": "Logic",
+      "location": "e2e/homepage-invalid-env.spec.ts:22-28",
+      "summary": "a pageerror listener collects console errors into an array that is never asserted against — dead code that looks like a check but isn't one. Low value; the surrounding assertions (zero-state digits, heading visible) already prove the page didn't crash.",
+      "disposition": "Accept"
+    }
+  ]
+}

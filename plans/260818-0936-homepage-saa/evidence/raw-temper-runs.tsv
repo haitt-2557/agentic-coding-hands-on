@@ -1,0 +1,5 @@
+0	npx tsc --noEmit	
+0	npm run lint	 > my-app@0.1.0 lint > eslint
+0	npm run test:unit	  ✓  16 [chromium] › lib/countdown.test.ts:92:7 › computeCountdown › never throws regardless of input shape (1ms)    16 passed (391ms)
+0	npm run build	  ○  (Static)  prerendered as static content
+0	npm run test:e2e	  ✓  39 [invalid-env] › e2e/homepage-invalid-env.spec.ts:4:7 › Homepage SAA - Invalid Environment (ID-60) › invalid event datetime env falls back to zero-state without crashing (325ms)    39 passed (16.6s)

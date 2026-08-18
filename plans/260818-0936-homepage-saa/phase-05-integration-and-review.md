@@ -2,7 +2,7 @@
 phase: 5
 title: "Integration, review and documentation"
 owner: reviewer, doc-writer
-status: in-progress
+status: completed
 priority: P2
 effort: 1h
 depends_on: [4]
@@ -90,9 +90,12 @@ phase owner who owns that file
 - [x] `npm run build` succeeds; `next start` spot-check of `/` — countdown live, h1="ROOT FURTHER", heading order valid, `data-scroll-behavior="smooth"` present, hero keyvisual renders, zero console errors
 - [x] `npm run lint` clean
 - [x] `reviewer` verdict recorded; zero critical findings
-- [ ] `docs/system/{architecture,permissions}.md` promoted and reconciled (doc-writer)
-- [ ] `docs/decisions/ADR-001-mock-session-and-hand-rolled-i18n.md` authored (doc-writer)
-- [ ] Design-defect report (4 items) sent to the design owner (doc-writer)
+- [x] `docs/vi/system/{architecture,permissions}.md` promoted and reconciled (doc-writer) — docs root is
+  `docs/vi/` because `primary_lang: vi`; 235 + 94 lines, zero `TBD (draft)` left
+- [x] `docs/decisions/ADR-001-mock-session-and-hand-rolled-i18n.md` authored (doc-writer) — 141 lines;
+  stays at `docs/` root, not under `docs/vi/` (`decisions` is not in `MOVED_LAYERS`)
+- [x] Design-defect report sent to the design owner — `reports/design-defects-260818-homepage-saa.md`,
+  10 items (A1–E), B1 and C1 flagged as blocking public launch
 - [x] `plan.md` statuses updated
 
 ## Success Criteria
