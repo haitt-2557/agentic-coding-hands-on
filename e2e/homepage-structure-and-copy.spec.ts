@@ -6,6 +6,9 @@ test.describe('Homepage SAA - Valid Environment', () => {
 
   test.describe('Structure & Copy (ID-7, ID-8, ID-9, ID-10, ID-13, ID-17)', () => {
     test('renders complete page layout', async ({ page }) => {
+      // Port 3200 has EVENT_START_AT = 2026-08-01T12:00:00+07:00 (past)
+      // Install clock before that date so browser sees running countdown with "Coming soon"
+      await page.clock.install({ time: new Date('2026-07-01T17:00:00+07:00') });
       await page.goto('/');
 
       // Header present (ID-7, ID-8)
@@ -62,6 +65,7 @@ test.describe('Homepage SAA - Valid Environment', () => {
     });
 
     test('header logo renders with correct alt text', async ({ page }) => {
+      await page.clock.install({ time: new Date('2026-07-01T17:00:00+07:00') });
       await page.goto('/');
       // ID-8: Logo in header with alt text - scope to header to be deterministic
       const header = page.getByRole('banner');
@@ -70,6 +74,7 @@ test.describe('Homepage SAA - Valid Environment', () => {
     });
 
     test('navigation link About SAA 2025 is visible', async ({ page }) => {
+      await page.clock.install({ time: new Date('2026-07-01T17:00:00+07:00') });
       await page.goto('/');
       // ID-9: About SAA 2025 link in header - scope to header banner
       const header = page.getByRole('banner');
@@ -77,6 +82,7 @@ test.describe('Homepage SAA - Valid Environment', () => {
     });
 
     test('language button displays VN by default', async ({ page }) => {
+      await page.clock.install({ time: new Date('2026-07-01T17:00:00+07:00') });
       await page.goto('/');
       // ID-10: Language button shows VN
       await expect(page.getByRole('button', { name: /VN|VI/i })).toBeVisible();

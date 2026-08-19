@@ -16,8 +16,9 @@ test.describe('Homepage SAA - Valid Environment', () => {
       await expect(headerLogo).toBeVisible();
       await headerLogo.click();
 
-      // Verify navigated to homepage
-      expect(page.url()).toContain('/');
+      // Verify navigated to homepage. Assert the exact pathname — `toContain('/')` was
+      // vacuous here (every URL contains a slash), so ID-18's navigation half could never fail.
+      expect(new URL(page.url()).pathname).toBe('/');
 
       // Verify scrolled to top
       const scrollPosition = await page.evaluate(() => window.scrollY);
