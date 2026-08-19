@@ -1,0 +1,77 @@
+{
+  "score": 8,
+  "criticalCount": 0,
+  "decision": "SEALED",
+  "contractStatus": "PASS",
+  "acceptanceCovered": [
+    "/prelaunch renders the title and three countdown units with two digit boxes and an uppercase white label each — proven by e2e/prelaunch-countdown-gui.spec.ts 'displays title and countdown structure' and 'page structure renders on initial load', plus the 1512px capture at plans/260819-0913-countdown-prelaunch/design/verified-prelaunch-1512px.png",
+    "countdown values are two-digit zero-padded and update automatically as time passes — proven by 'displays correct values for given target date' (toHaveText '01HOURS'/'29MINUTES'), 'shows 00 days when countdown < 24 hours', and 'countdown updates as time progresses' driving page.clock through 29 -> 28 -> 27 minutes",
+    "while the countdown is above zero every other route redirects to /prelaunch — proven by the four lock-direction tests in e2e/prelaunch-countdown-unlock.spec.ts covering /, /awards, /kudos and /profile on the future-dated port-3000 server",
+    "once the countdown reaches zero the gate opens and /prelaunch redirects to / — proven by e2e/prelaunch-countdown-unlocked.spec.ts on the past-dated port-3200 server, and by lib/prelaunch/gate.test.ts at the exact boundary (now === target unlocked, now === target - 1ms still locked)",
+    "a viewer already on /prelaunch when the countdown crosses zero is moved without a reload — proven by 'initiates navigation to / when countdown expires', which asserts a request whose pathname is exactly '/' is initiated after the clock crosses the target; deliberately scoped to initiation because page.clock moves only the browser clock while the server gate reads server time",
+    "a missing or unparseable NEXT_PUBLIC_EVENT_START_AT fails open and locks nothing — proven by lib/prelaunch/gate.test.ts fail-open cases (targetIso 'not-a-date' never locks any route and never forces /prelaunch to redirect) and by the port-3100 invalid-env server serving normally",
+    "every visual value traces to the MoMorph design table rather than an estimate — the geometry, #FFEA9E border, 180deg white-to-transparent gradient, 24.96px backdrop blur and 73.728px glyph in components/prelaunch/digit-box.tsx match the table in clarifications.md, extracted from MCP node data (the 2268:35135 subtree), not estimated",
+    "the pre-existing homepage E2E suite still passes — 41 pre-existing tests pass after being re-pointed to the gate-open port-3200 server, confirmed in the orchestrator's own npm run test:e2e run totalling 55 passed at exit 0"
+  ],
+  "regressionChecked": [
+    "homepage E2E suite: the gate legitimately broke all homepage specs on the future-dated server; re-pointed to the gate-open server and homepage-countdown.spec.ts given a page.clock instant before that server's past target — all pass",
+    "components/home/countdown-timer.tsx left untouched; it keeps its 60s tick and reads the same NEXT_PUBLIC_EVENT_START_AT, so the two countdowns cannot disagree on the target instant",
+    "lib/countdown.ts unchanged (git diff confirms zero changes); its pre-existing unit tests still pass",
+    "proxy matcher verified to exclude _next/static, _next/image, favicon.ico and every dotted asset — without it /prelaunch would redirect its own CSS, font and background image and render naked",
+    "npm run lint gate restored: the new per-server distDir outputs were being crawled and reported 7308 problems, which would have hidden any real finding",
+    "Playwright project overlap corrected: homepage-invalid-env.spec.ts was running in two projects and passing on both, because an expired countdown and an unparseable one render the same zero state — the duplicate proved nothing about fail-open while looking like coverage",
+    "production build succeeds and /prelaunch prerenders alongside the existing routes"
+  ],
+  "refuted": [],
+  "unproven": [],
+  "reachableRegressions": [],
+  "findings": [
+    {
+      "severity": "high",
+      "category": "correctness",
+      "location": "components/prelaunch/countdown-unit.tsx:22",
+      "summary": "Days above 99 were silently truncated: the unit destructured the first two characters, so a 122-day countdown rendered as '12'. Reachable with the repo's own .env.example default and invisible to the E2E suite, whose clock instants all sit under 24h from target. Fixed by capping at 99 in lib/prelaunch/display.ts (8 regression tests) and rendering one box per character so a broken guarantee shows as a visible extra box instead of vanishing.",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "high",
+      "category": "correctness",
+      "location": "lib/prelaunch/use-prelaunch-countdown.ts:85-88",
+      "summary": "The T-0 unlock guard was scoped to a single mount, so a viewer whose clock ran ahead of the server's would redirect, get bounced back by the proxy, remount, and fire again — a continuous / <-> /prelaunch flicker for the whole skew window. Fixed with a sessionStorage-backed 30s throttle that self-heals rather than stranding the viewer at 00:00:00.",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "medium",
+      "category": "documentation",
+      "location": "docs/vi/system/architecture.md:13",
+      "summary": "The architecture doc asserted the project has no middleware, which proxy.ts made false. Reconciled in this delivery along with the F010 registration, the promoted feature spec and ADR-002.",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "low",
+      "category": "accessibility",
+      "location": "components/prelaunch/countdown-unit.tsx:27",
+      "summary": "aria-label on the unit container alongside readable child text may double-announce in some screen readers. The digit background layer is already aria-hidden. Left as-is rather than churn accessibility semantics with no screen-reader test to verify against.",
+      "disposition": "Defer"
+    },
+    {
+      "severity": "low",
+      "category": "assets",
+      "location": "app/globals.css:10",
+      "summary": "The 'Digital Numbers' font file has not been supplied, so digits render in a monospace fallback and each page load emits one 404 for /fonts/digital-numbers.woff2. @font-face is wired so supplying the file is a zero-code-change swap. Tracked as an open question with the design owner.",
+      "disposition": "Defer"
+    },
+    {
+      "severity": "low",
+      "category": "design-fidelity",
+      "location": "components/prelaunch/prelaunch-countdown.tsx:20",
+      "summary": "Sub-1512px responsive behaviour is derived, not designed — the MoMorph frame exists only at 1512 wide. Floors hold at 45% of frame size below ~680px, preserving the design's 2:1 digit-to-label ratio and fitting a 320px viewport. Flagged to the design owner rather than presented as specified.",
+      "disposition": "Defer"
+    }
+  ],
+  "riskGate": {
+    "touchesSensitiveArea": true,
+    "signoffRequired": false,
+    "humanSignedOff": false
+  }
+}

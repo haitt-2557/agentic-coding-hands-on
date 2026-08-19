@@ -6,9 +6,9 @@
 
 ## Executive Summary
 
-Đây là trang chủ marketing/sự kiện cho Sun* Annual Awards 2025, build bằng Next.js 16 (App Router) + React 19 + Tailwind v4. Hệ thống có đúng 6 route, tất cả đều là `page.tsx` prerender tĩnh: `/` (`app/page.tsx`), `/awards`, `/kudos`, `/profile`, `/admin`, và route `_not-found` mặc định do Next.js tự sinh (không có file `app/not-found.tsx` tùy chỉnh trong repo).
+Đây là trang chủ marketing/sự kiện cho Sun* Annual Awards 2025, build bằng Next.js 16 (App Router) + React 19 + Tailwind v4. Hệ thống có đúng 7 route, tất cả đều là `page.tsx` prerender tĩnh: `/` (`app/page.tsx`), `/prelaunch` (thêm 2026-08-19), `/awards`, `/kudos`, `/profile`, `/admin`, và route `_not-found` mặc định do Next.js tự sinh (không có file `app/not-found.tsx` tùy chỉnh trong repo).
 
-Không có backend dưới bất kỳ hình thức nào: không `app/api/**/route.ts`, không `middleware.ts`, không database/ORM, không biến môi trường bí mật phía server — `.env.example` chỉ khai báo các key `NEXT_PUBLIC_*` hiển thị công khai phía client. Nội dung giải thưởng là một hằng số hard-code trong `lib/awards.ts` (`AWARDS: Award[]`, 6 hạng mục tĩnh), và bộ đếm ngược trên hero section là một hàm thuần (`lib/countdown.ts`) tính từ `NEXT_PUBLIC_EVENT_START_AT`.
+Không có backend dưới bất kỳ hình thức nào: không `app/api/**/route.ts`, không database/ORM, không biến môi trường bí mật phía server — `.env.example` chỉ khai báo các key `NEXT_PUBLIC_*` hiển thị công khai phía client. (Cập nhật 2026-08-19: có một request-interception layer — `proxy.ts`, tên mới của quy ước `middleware.ts` từ Next 16 — nhưng nó chỉ quyết định route nào được phép render theo thời gian, không phải một backend service; xem [architecture.md](architecture.md) § Request-Interception Layer.) Nội dung giải thưởng là một hằng số hard-code trong `lib/awards.ts` (`AWARDS: Award[]`, 6 hạng mục tĩnh), và bộ đếm ngược trên hero section là một hàm thuần (`lib/countdown.ts`) tính từ `NEXT_PUBLIC_EVENT_START_AT` — cùng biến này cũng lái gate đếm-ngược ở `/prelaunch`.
 
 Trạng thái đăng nhập (`role`: `guest|user|admin`) và locale (`vi|en`) đến từ một mock phía client đọc `localStorage` với fallback là biến `NEXT_PUBLIC_*` — xem `lib/session/session-provider.tsx` và `lib/i18n/locale-provider.tsx`. Cơ chế này chỉ dùng để **ẩn/hiện UI**, không phải một ranh giới phân quyền thật (không có kiểm tra phía server nào tồn tại trong repo).
 
@@ -22,7 +22,7 @@ For architecture diagrams and tech stack details, see [architecture.md](architec
 
 **Context**: Đây là trang sự kiện ngắn hạn (SAA 2025), không cần lưu trữ dữ liệu động hay xử lý phía server.
 
-**Decision**: Toàn bộ hệ thống được implement như một Next.js App Router site tĩnh — 6 route, tất cả prerender, không có route handler API, không middleware, không database client hay ORM nào trong cây nguồn.
+**Decision**: Toàn bộ hệ thống được implement như một Next.js App Router site tĩnh — không có route handler API, không database client hay ORM nào trong cây nguồn. (Cập nhật 2026-08-19: một request-interception layer — `proxy.ts` — được thêm sau đó cho gate đếm-ngược-trước-khi-mở-site; đây KHÔNG phải một backend service/API, chỉ quyết định route nào được phép render, và không thay đổi kết luận "static, không backend" ở trên. Xem [architecture.md](architecture.md) § Request-Interception Layer.)
 
 **Rationale**: Scout report xác nhận 0 kết quả khớp trên cả 10 loại Background Logic chuẩn (custom-command, event-listener, integration, mail, middleware, notification, observer, queue-worker, scheduled-job, webhook); duy nhất một manifest ở root (`package.json`, dependencies chỉ gồm `next`, `react`, `react-dom`). Một trang sự kiện ngắn hạn không cần hạ tầng backend để build và vận hành — đúng tinh thần YAGNI.
 

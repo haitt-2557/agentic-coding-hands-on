@@ -35,6 +35,7 @@ export const vi = {
   'account.adminDashboard': 'Admin Dashboard',
   'widget.writeKudos': 'Viết Kudos',
   'widget.aboutSaa': 'Về SAA 2025',
+  'prelaunch.title': 'Sự kiện sẽ bắt đầu sau',
 } as const;
 
 export type DictionaryKey = keyof typeof vi;

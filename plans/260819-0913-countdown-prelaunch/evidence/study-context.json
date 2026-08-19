@@ -1,0 +1,43 @@
+{
+  "task": "Implement the MoMorph 'Countdown - Prelaunch page' (screenId 8PJQswPZmU): a /prelaunch route rendering DAYS/HOURS/MINUTES on a 1s tick, plus an app-wide launch-timing gate in proxy.ts that holds every other route until the countdown crosses zero and reverses at T-0.",
+  "mode": "e2e-red-first",
+  "acceptanceCriteria": [
+    "/prelaunch renders the title and three countdown units with two digit boxes and an uppercase white label each",
+    "countdown values are two-digit zero-padded and update automatically as time passes",
+    "while the countdown is above zero every other route redirects to /prelaunch",
+    "once the countdown reaches zero the gate opens and /prelaunch redirects to /",
+    "a viewer already on /prelaunch when the countdown crosses zero is moved without a reload",
+    "a missing or unparseable NEXT_PUBLIC_EVENT_START_AT fails open and locks nothing",
+    "every visual value traces to the MoMorph design table rather than an estimate",
+    "the pre-existing homepage E2E suite still passes"
+  ],
+  "touchpoints": [
+    "proxy.ts",
+    "lib/prelaunch/gate.ts",
+    "lib/prelaunch/display.ts",
+    "lib/prelaunch/use-prelaunch-countdown.ts",
+    "app/prelaunch/page.tsx",
+    "components/prelaunch/prelaunch-countdown.tsx",
+    "components/prelaunch/countdown-unit.tsx",
+    "components/prelaunch/digit-box.tsx",
+    "app/globals.css",
+    "lib/i18n/dictionaries/vi.ts",
+    "lib/i18n/dictionaries/en.ts",
+    ".env.example",
+    "playwright.config.ts",
+    "next.config.ts",
+    "eslint.config.mjs"
+  ],
+  "blastRadius": [
+    "proxy.ts intercepts EVERY route in the application — the widest possible surface; a matcher mistake would redirect the app's own CSS, font and background image into the gate",
+    "the existing homepage E2E suite ran against a future-dated server and had to be re-pointed to a gate-open server once the gate went live",
+    "lib/countdown.ts is shared with components/home/countdown-timer.tsx and was deliberately left unchanged",
+    "next.config.ts gained a distDir switch, which changed what npm run lint crawls and required an eslint globalIgnores update",
+    "app/globals.css is loaded by every route, so the new @font-face affects the whole app"
+  ],
+  "contracts": [
+    "resolveGateRedirect(pathname, targetIso, now) -> '/prelaunch' | '/' | null, pure with now injected",
+    "usePrelaunchCountdown() -> { days, hours, minutes }, SSR value '00'/'00'/'00', 1s tick, fires router.replace('/') at T-0",
+    "i18n key prelaunch.title present in both the vi and en dictionaries"
+  ]
+}

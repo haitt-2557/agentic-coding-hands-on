@@ -2,7 +2,7 @@
 
 **Project**: Sun* Annual Awards 2025 (SAA 2025) — Homepage sự kiện
 **Generated**: 2026-08-18
-**Analysis Scope**: 5 màn hình trong `screen-list.md` (SCR001–SCR005) + `permissions-matrix.md` (PERM001–PERM003) — enumeration chạy theo `references/user-stories-ipe-protocol.md`, `screen_source: route-view` (web). Nguồn được scan trực tiếp: `components/layout/site-header.tsx`, `components/layout/site-footer.tsx`, `components/layout/quick-action-widget.tsx`, `components/home/hero-cta.tsx`, `components/home/award-card.tsx`, `components/home/kudos-section.tsx`, `components/home/countdown-timer.tsx`, `components/ui/account-menu.tsx`, `components/ui/notification-bell.tsx`, `components/ui/language-switcher.tsx`, `components/ui/dropdown-menu.tsx`, `lib/awards.ts`.
+**Analysis Scope**: 6 màn hình trong `screen-list.md` (SCR001–SCR006, SCR006 thêm 2026-08-19) + `permissions-matrix.md` (PERM001–PERM003) — enumeration chạy theo `references/user-stories-ipe-protocol.md`, `screen_source: route-view` (web). Nguồn được scan trực tiếp: `components/layout/site-header.tsx`, `components/layout/site-footer.tsx`, `components/layout/quick-action-widget.tsx`, `components/home/hero-cta.tsx`, `components/home/award-card.tsx`, `components/home/kudos-section.tsx`, `components/home/countdown-timer.tsx`, `components/ui/account-menu.tsx`, `components/ui/notification-bell.tsx`, `components/ui/language-switcher.tsx`, `components/ui/dropdown-menu.tsx`, `lib/awards.ts`, và (thêm 2026-08-19) `proxy.ts`, `lib/prelaunch/gate.ts`, `lib/prelaunch/use-prelaunch-countdown.ts`, `components/prelaunch/*`.
 
 **Code Format**: All US codes MUST follow `US###_NameSlug` format (e.g., US001_Login, US002_ViewDashboard)
 
@@ -10,9 +10,13 @@
 - `ui` - User-facing stories (require Screen mapping)
 - `system` - System stories: hook, event, observer, bg-job, trigger, etc. (no Screen mapping needed)
 
-**Note**: Feature mapping thuộc `feature-list.md` (Wave 5, chưa tồn tại — `_session-context.md` § Counts: `feature_count: <pending-W5>`). Tài liệu này không mang F### reference nào. Cả 16 US dưới đây đều type `ui` — hệ thống không có backend/BL nào (đối chiếu `system-overview.md` Decision 1: 0/10 category Background Logic có hit), nên không phát sinh US type `system` và không US nào cần mapping BL###.
+**Note**: Feature mapping thuộc `feature-list.md`. Cả 19 US dưới đây đều type `ui` — hệ
+thống có đúng 1 background-logic item thật (BL001_PrelaunchLaunchGate, thêm 2026-08-19,
+xem `behavior-logic.md`), nhưng nó không phát sinh US type `system` riêng vì hành vi của
+nó (chặn điều hướng, tự mở khóa) đã được US018/US019 mô tả trọn vẹn từ góc nhìn actor —
+không cần một US "hệ thống" song song.
 
-**Judgment call (đọc trước khi review)**: Bảng vocabulary chuẩn của IPE Step 1 (CTA/modal/row-action/bulk/destructive/form/filter/nav) được xây cho app có backend; site này gần như thuần nội dung tĩnh. Để không bỏ sót năng lực thật của trang (đọc hero, xem countdown, đọc Root Further, đọc promo Kudos — đều được liệt kê tường minh trong brief là năng lực thật), 5 US **view-content** (US001, US002, US003, US004, US005) được thêm vào ngoài các category interaction chuẩn, gắn `Interaction: secondary-action` và có dòng riêng trong Interaction Inventory. Đây là một mở rộng có chủ đích, không phải điền khống — mỗi US vẫn trace về đúng component/dữ liệu nguồn đã đọc ở trên. Do đó tổng US (16) vượt ước tính pre-gen (~8); phần lớn chênh lệch đến từ việc tách riêng theo actor (guest/user/admin) cho account-menu/notification-bell/admin-link và từ 5 US view-content này.
+**Judgment call (đọc trước khi review)**: Bảng vocabulary chuẩn của IPE Step 1 (CTA/modal/row-action/bulk/destructive/form/filter/nav) được xây cho app có backend; site này gần như thuần nội dung tĩnh. Để không bỏ sót năng lực thật của trang (đọc hero, xem countdown, đọc Root Further, đọc promo Kudos — đều được liệt kê tường minh trong brief là năng lực thật), 5 US **view-content** (US001, US002, US003, US004, US005) được thêm vào ngoài các category interaction chuẩn, gắn `Interaction: secondary-action` và có dòng riêng trong Interaction Inventory. Đây là một mở rộng có chủ đích, không phải điền khống — mỗi US vẫn trace về đúng component/dữ liệu nguồn đã đọc ở trên. Do đó tổng US (16 ở lần sinh gốc, nay 19 sau khi thêm US017–US019 cho `F010_PrelaunchCountdownGate` 2026-08-19) vượt ước tính pre-gen (~8); phần lớn chênh lệch đến từ việc tách riêng theo actor (guest/user/admin) cho account-menu/notification-bell/admin-link và từ 5 US view-content này.
 
 ## Interaction Inventory
 
@@ -39,6 +43,9 @@
 | SCR001_Home | AccountMenu "Profile" link | navigation | Điều hướng tới `/profile` | N/A — client-side Next.js Link |
 | SCR001_Home | AccountMenu "Sign out" button | secondary-action | Đóng menu — **không có logic đăng xuất thật**, không session để xóa | N/A |
 | SCR001_Home | AccountMenu "Admin Dashboard" link — chỉ hiện khi `role==='admin'` | navigation | Điều hướng tới `/admin` | N/A — client-side Next.js Link; route không có guard thật (xem PERM002) |
+| SCR006_Prelaunch | PrelaunchCountdown (`components/prelaunch/prelaunch-countdown.tsx`) — thêm 2026-08-19 | secondary-action | Hiển thị đếm ngược DAYS/HOURS/MINUTES, tick 1s (không phải 60s như SCR001) | N/A — hàm thuần `computeCountdown` (`lib/countdown.ts`), không network |
+| SCR006_Prelaunch | Toàn ứng dụng — `proxy.ts` (request-interception layer, thêm 2026-08-19) | system-action | Chặn mọi route khác `/prelaunch` khi gate khóa, đưa `/prelaunch` về `/` khi gate mở | N/A — `lib/prelaunch/gate.ts`, không network |
+| SCR006_Prelaunch | `usePrelaunchCountdown` client-side unlock (`lib/prelaunch/use-prelaunch-countdown.ts`) — thêm 2026-08-19 | system-action | `router.replace('/')` ngay khi client thấy gate đã mở, để actor đang xem không kẹt tới khi tải lại | N/A — không network, ghi `sessionStorage` để throttle |
 
 ## User Story Index
 
@@ -60,6 +67,13 @@
 | US014_NavigateToProfilePage | Navigate To Profile Page | ui | Medium | SCR001, SCR004 |
 | US015_ClickSignOutButton | Click Sign Out Button | ui | Low | SCR001 |
 | US016_NavigateToAdminDashboard | Navigate To Admin Dashboard | ui | Low | SCR001, SCR005 |
+| US017_ViewPrelaunchCountdown | View Prelaunch Countdown | ui | High | SCR006 |
+| US018_BlockedByLaunchGate | Blocked By Launch Gate While Counting Down | ui | High | SCR001, SCR002, SCR003, SCR004, SCR005, SCR006 |
+| US019_AutoUnlockAtZero | Auto-Unlock And Redirect At Zero | ui | High | SCR006, SCR001 |
+
+**Ghi chú thêm 2026-08-19**: US017–US019 map 1-1 với US017–US019 trong
+`docs/vi/features/countdown-prelaunch/technical-spec.md` (đặt tên khác chút theo convention
+`NameSlug` tiếng Anh ngắn gọn của tài liệu này, cùng nội dung/mã Priority/Screens).
 
 ---
 
@@ -635,23 +649,138 @@ As an admin, I want to navigate to the Admin Dashboard so that I can access the 
 
 ---
 
+## US017_ViewPrelaunchCountdown: View Prelaunch Countdown
+
+**Type**: ui
+**Interaction**: secondary-action
+**Priority**: High
+**Estimate**: M
+**Thêm**: 2026-08-19
+
+### User Story
+
+As a guest, I want to view the prelaunch countdown so that I know when the event unlocks the rest of the site.
+
+### Acceptance Criteria
+
+- [ ] Criterion 1: `/prelaunch` render full-viewport nền ảnh sự kiện + gradient overlay + tiêu đề "Sự kiện sẽ bắt đầu sau" + 3 ô DAYS/HOURS/MINUTES.
+- [ ] Criterion 2: Giá trị tick lại mỗi 1 giây (không phải 60 giây như SCR001), zero-padded 2 chữ số.
+- [ ] Criterion 3: Số ngày còn lại vượt quá 99 hiển thị cố định `99` (không hiển thị sai như `12` của một số 3 chữ số).
+- [ ] Criterion 4: Hiển thị như nhau cho mọi actor (guest/user/admin) — không có điều kiện role nào chi phối khối này.
+
+### Technical Notes
+
+- **Endpoint**: N/A — hàm thuần `computeCountdown` (`lib/countdown.ts`) + `capDisplayDays` (`lib/prelaunch/display.ts`), không network.
+- **Data Required**: `NEXT_PUBLIC_EVENT_START_AT` (cùng biến với SCR001).
+- **Dependencies**: `components/prelaunch/prelaunch-countdown.tsx`, `components/prelaunch/countdown-unit.tsx`, `components/prelaunch/digit-box.tsx`, `lib/prelaunch/use-prelaunch-countdown.ts`.
+
+### Screens
+
+- SCR006_Prelaunch: Prelaunch
+
+### Test Scenarios
+
+| Scenario | Given | When | Then |
+|----------|-------|------|------|
+| Happy Path | `NEXT_PUBLIC_EVENT_START_AT` hợp lệ, còn 5 ngày 3 giờ 9 phút | Actor mở `/prelaunch` | 3 ô hiện `05`, `03`, `09`, tick lại mỗi giây |
+| Edge Case | Còn hơn 99 ngày | Actor mở `/prelaunch` | Ô DAYS hiện `99`, không hiện số sai |
+
+---
+
+## US018_BlockedByLaunchGate: Blocked By Launch Gate While Counting Down
+
+**Type**: ui
+**Interaction**: navigation
+**Priority**: High
+**Estimate**: M
+**Thêm**: 2026-08-19
+
+### User Story
+
+As a guest, I want to be redirected to the prelaunch countdown when I try any other page before launch so that I cannot see content that isn't public yet.
+
+### Acceptance Criteria
+
+- [ ] Criterion 1: Trong lúc gate khóa (`!isExpired && !isInvalid`), request tới `/`, `/awards`, `/kudos`, `/profile`, hoặc `/admin` đều bị `proxy.ts` chặn và đưa về `/prelaunch` trước khi trang đích render.
+- [ ] Criterion 2: Request tới `/prelaunch` trong lúc gate khóa không bị redirect vòng lặp — render bình thường.
+- [ ] Criterion 3: Áp dụng như nhau cho mọi role — gate không đọc `role`/session.
+
+### Technical Notes
+
+- **Endpoint**: N/A — `proxy.ts` (request-interception layer), gọi `lib/prelaunch/gate.ts` (`resolveGateRedirect`).
+- **Data Required**: `NEXT_PUBLIC_EVENT_START_AT`, `pathname` hiện tại.
+- **Dependencies**: `proxy.ts`, `lib/prelaunch/gate.ts`.
+
+### Screens
+
+- SCR001_Home, SCR002_Awards, SCR003_Kudos, SCR004_Profile, SCR005_AdminDashboard (nguồn — bị chặn)
+- SCR006_Prelaunch (đích)
+
+### Test Scenarios
+
+| Scenario | Given | When | Then |
+|----------|-------|------|------|
+| Happy Path | Gate khóa | Actor mở `/awards` | Actor thấy `/prelaunch`, không thấy nội dung `/awards` |
+| Edge Case | Gate khóa | Actor mở `/prelaunch` trực tiếp | Render bình thường, không redirect vòng lặp |
+
+---
+
+## US019_AutoUnlockAtZero: Auto-Unlock And Redirect At Zero
+
+**Type**: ui
+**Interaction**: system-action
+**Priority**: High
+**Estimate**: M
+**Thêm**: 2026-08-19
+
+### User Story
+
+As a guest already viewing the prelaunch countdown, I want to be redirected to the homepage the moment the event starts so that I don't have to reload manually.
+
+### Acceptance Criteria
+
+- [ ] Criterion 1: Khi đếm ngược chạm 0 (hoặc `NEXT_PUBLIC_EVENT_START_AT` không hợp lệ), request mới tới bất kỳ route nào đi thẳng tới đích; `/prelaunch` tự redirect về `/`.
+- [ ] Criterion 2: Actor đang mở sẵn `/prelaunch` được `router.replace('/')` ngay trong tick 1 giây đó mà không cần tải lại.
+- [ ] Criterion 3: Việc thử redirect phía client được throttle tối đa 1 lần/30 giây qua `sessionStorage`, để tránh vòng lặp nhấp nháy khi đồng hồ máy actor lệch server.
+
+### Technical Notes
+
+- **Endpoint**: N/A — `lib/prelaunch/use-prelaunch-countdown.ts` (client), `lib/prelaunch/gate.ts` (server).
+- **Data Required**: `NEXT_PUBLIC_EVENT_START_AT`, đồng hồ client/server.
+- **Dependencies**: `lib/prelaunch/use-prelaunch-countdown.ts`, `proxy.ts`.
+
+### Screens
+
+- SCR006_Prelaunch (nguồn)
+- SCR001_Home (đích)
+
+### Test Scenarios
+
+| Scenario | Given | When | Then |
+|----------|-------|------|------|
+| Happy Path | Actor đang mở `/prelaunch` | Đồng hồ server chạm mốc sự kiện | Actor được đưa về `/` trong vòng 1 giây, không cần thao tác |
+| Edge Case | Đồng hồ client lệch nhanh hơn server | Client tự redirect `/`, server bounce về `/prelaunch` | Nhấp nháy tối đa 1 lần/30 giây (không phải mỗi giây) cho tới khi server cũng đồng ý — xem ADR-002 |
+
+---
+
 ## Screen → US Map
 
 | Screen | US Codes |
 |--------|---------|
-| SCR001_Home | US001, US002, US003, US004, US006, US005, US007, US008, US009, US010, US011, US012, US013, US014, US015, US016 |
-| SCR002_Awards | US006, US007 |
-| SCR003_Kudos | US008 |
-| SCR004_Profile | US014 |
-| SCR005_AdminDashboard | US016 |
+| SCR001_Home | US001, US002, US003, US004, US006, US005, US007, US008, US009, US010, US011, US012, US013, US014, US015, US016, US018, US019 |
+| SCR002_Awards | US006, US007, US018 |
+| SCR003_Kudos | US008, US018 |
+| SCR004_Profile | US014, US018 |
+| SCR005_AdminDashboard | US016, US018 |
+| SCR006_Prelaunch | US017, US018, US019 |
 
-> `[IPE_ZERO]` — SCR002_Awards, SCR003_Kudos, SCR004_Profile, SCR005_AdminDashboard không phát sinh interaction NÀO có nguồn gốc từ chính màn hình đó (cả 4 là placeholder/bare-stub, không có button/link tương tác nào trong source — xem `screen-list.md`). Cả 4 vẫn có US mapping ở trên vì chúng là **đích đến** (destination) của các US điều hướng nguồn từ SCR001_Home, không phải vì tự thân chúng có interaction.
+> `[IPE_ZERO]` — SCR002_Awards, SCR003_Kudos, SCR004_Profile, SCR005_AdminDashboard không phát sinh interaction NÀO có nguồn gốc từ chính màn hình đó (cả 4 là placeholder/bare-stub, không có button/link tương tác nào trong source — xem `screen-list.md`). Cả 4 vẫn có US mapping ở trên vì chúng là **đích đến** (destination) của các US điều hướng nguồn từ SCR001_Home, không phải vì tự thân chúng có interaction. **Thêm 2026-08-19**: US018 (gate) cũng map vào cả 4 vì cùng lý do đối xứng — chúng là điểm mà request bị `proxy.ts` chặn, dù bản thân màn hình không phát sinh interaction đó.
 
 ## Cross-Reference Validation
 
 - [x] All US### codes are unique
 - [x] All acceptance criteria are testable
 - [x] All technical notes are complete
-- [x] All US### codes are referenced in FeatureList.md (`feature-list.md` chưa tồn tại, cùng cơ chế "—"/pending mà `screen-list.md` và `permissions-matrix.md` đã áp dụng cho cột/mục F###) — verified after Wave 5: 16/16 US và 5/5 SCR đều được ít nhất một F### tham chiếu.
+- [x] All US### codes are referenced in FeatureList.md — 19/19 US và 6/6 SCR đều được ít nhất một F### tham chiếu (US017–US019 → F010, thêm 2026-08-19).
 - [x] All `ui` US### mapped to SCR### or SCR###/REG### (parent SCR must exist in ScreenList; system US excluded) — không có REG### nào (toàn bộ SCR đều atomic theo `screen-list.md`)
 - [x] All system US### have at least one BL### mapped (UI US excluded) — N/A, không có US type `system` nào trong tài liệu này

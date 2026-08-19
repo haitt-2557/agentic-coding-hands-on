@@ -9,6 +9,11 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    // The E2E suite builds each fixture server into its own distDir (see `NEXT_DIST_DIR` in
+    // playwright.config.ts) so two concurrent `next build` runs cannot race one output
+    // directory. Those artifacts are gitignored but a bare `eslint` still crawls them —
+    // unignored, they contributed ~7k problems and buried every real finding.
+    ".next-*/**",
     "out/**",
     "build/**",
     "next-env.d.ts",

@@ -12,21 +12,36 @@ export default defineConfig({
 
   projects: [
     {
-      name: 'chromium',
-      testMatch: /^(?!.*invalid-env).*\.spec\.ts$/,
+      name: 'prelaunch-gate',
+      testMatch: /^(?!.*homepage|.*invalid-env|.*prelaunch-countdown-unlocked).*\.spec\.ts$/,
       use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:3000' },
+    },
+    {
+      name: 'homepage-with-open-gate',
+      // `homepage-invalid-env` must be excluded even though it starts with `homepage`:
+      // it also matches the invalid-env project below, so without this it runs twice. Worse,
+      // it PASSES on this past-dated server for the wrong reason — an expired countdown and
+      // an unparseable one render the same zero state, so the duplicate proves nothing about
+      // BR-003 while looking like coverage. Its only meaningful home is port 3100.
+      testMatch: /^(?!.*invalid-env).*homepage.*\.spec\.ts$/,
+      use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:3200' },
     },
     {
       name: 'invalid-env',
       testMatch: /invalid-env\.spec\.ts$/,
       use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:3100' },
     },
+    {
+      name: 'prelaunch-unlocked',
+      testMatch: /prelaunch-countdown-unlocked\.spec\.ts$/,
+      use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:3200' },
+    },
   ],
 
-  // Both servers carry a NEXT_PUBLIC_EVENT_START_AT the assertions depend on, so neither
-  // may be reused: a plain `npm run dev` already on :3000 has no such value, and reusing it
-  // silently turns the countdown assertions into a race the suite can still report green.
-  // Owning the servers costs a cold start; borrowing one costs the suite its meaning.
+  // Three servers with distinct env values: the assertions depend on each server's specific
+  // NEXT_PUBLIC_EVENT_START_AT, so neither may be reused. Port 3000 (future date) drives
+  // clock-based tests; port 3200 (past date) drives server-side redirect tests.
+  // Each built server has its own distDir to avoid race on .next rebuild.
   webServer: [
     {
       command: 'npx next dev --port 3000',
@@ -38,7 +53,20 @@ export default defineConfig({
     {
       command: 'npx next build && npx next start --port 3100',
       port: 3100,
-      env: { NEXT_PUBLIC_EVENT_START_AT: 'not-a-date' },
+      env: {
+        NEXT_PUBLIC_EVENT_START_AT: 'not-a-date',
+        NEXT_DIST_DIR: '.next-invalid-env',
+      },
+      reuseExistingServer: false,
+      timeout: 120_000,
+    },
+    {
+      command: 'npx next build && npx next start --port 3200',
+      port: 3200,
+      env: {
+        NEXT_PUBLIC_EVENT_START_AT: '2026-08-01T12:00:00+07:00',
+        NEXT_DIST_DIR: '.next-unlocked',
+      },
       reuseExistingServer: false,
       timeout: 120_000,
     },

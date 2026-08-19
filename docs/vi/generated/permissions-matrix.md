@@ -14,16 +14,25 @@
 ## ⚠️ Hệ thống này KHÔNG có access control
 
 Đây là điều quan trọng nhất trong tài liệu này, nên nói thẳng trước bảng: **không có
-authorization ở phía server**. `role` (`'guest' | 'user' | 'admin'`) đến từ
+authorization theo VAI TRÒ ở phía server**. `role` (`'guest' | 'user' | 'admin'`) đến từ
 `localStorage` (key `saa.mock-role`) hoặc fallback env `NEXT_PUBLIC_MOCK_ROLE`
 (`lib/session/session-provider.tsx:21,43-49`) — hoàn toàn phía client, bất kỳ ai mở
 DevTools cũng gõ được `localStorage.setItem('saa.mock-role', 'admin')` để tự cấp quyền.
-Không có session server, không có JWT/cookie xác thực, không có route guard, không có
-`middleware.ts` (xác nhận: `route-list.md` § Backend Routes — 0 route; `behavior-logic.md`
-— 0/10 category có hit, bao gồm `middleware`). `/admin` (ROUTE005) render được cho **bất
-kỳ ai** gõ thẳng URL, bất kể `role` — comment nguồn tại `app/admin/page.tsx:1-4` nói
-tường minh: "this page is NOT access-controlled and must not be treated as protected:
-real authorization has to be enforced server-side when real auth arrives (see ADR-001)".
+Không có session server, không có JWT/cookie xác thực, không có route guard nào đọc
+`role`. `/admin` (ROUTE005) render được cho **bất kỳ ai** gõ thẳng URL, bất kể `role` —
+comment nguồn tại `app/admin/page.tsx:1-4` nói tường minh: "this page is NOT
+access-controlled and must not be treated as protected: real authorization has to be
+enforced server-side when real auth arrives (see ADR-001)".
+
+**Cập nhật 2026-08-19**: dòng trên từng ghi thêm "không có `middleware.ts`" — điều đó
+không còn đúng. `proxy.ts` (tên mới của `middleware.ts` từ Next 16) nay chặn mọi route,
+NHƯNG nó gate theo **thời gian** (`NEXT_PUBLIC_EVENT_START_AT` tới/qua hạn hay chưa), đọc
+đúng 2 tham số: `pathname` và đồng hồ server — không đọc `role`/session ở bất kỳ đâu. Kết
+luận "không có authorization theo vai trò" ở trên do đó KHÔNG bị ảnh hưởng: `/admin` vẫn
+xem được bởi bất kỳ ai gõ đúng URL, với điều kiện MỚI (áp dụng như nhau cho mọi role) là
+gate đếm-ngược phải đã mở trước. Không cấp `PERM###` mới cho gate này — nó không phải một
+permission theo vai trò, xem `docs/vi/features/countdown-prelaunch/technical-spec.md` và
+`docs/vi/system/architecture.md` § Request-Interception Layer.
 
 Toàn bộ 3 mục PERM### dưới đây là **UI visibility gating** (ẩn/hiện phần tử giao diện),
 không phải access control thật. Không suy diễn thêm permission nào ngoài 3 mục này —

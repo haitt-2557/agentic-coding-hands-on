@@ -8,16 +8,19 @@
 Đối chiếu hai artifact nguồn cho lượt sinh này:
 
 - `route-list.md` § Backend Routes: **0 backend route** — repo là Next.js App Router thuần
-  client/static, không có `app/api/**/route.ts`, không `middleware.ts`, không server
-  action. 6 route duy nhất trong repo đều là **frontend page** (`ROUTE001`–`ROUTE006`,
-  tất cả `○ Static`, xác nhận bằng `npm run build`).
-- `behavior-logic.md` § Behavior Logic Index: **0 BL item** trên cả 10/10 category
-  (`scheduled-job`, `queue-worker`, `event-listener`, `observer`, `mail`, `notification`,
-  `middleware`, `custom-command`, `integration`, `webhook`) — scout inventory zero-hit,
-  đối chiếu độc lập cũng xác nhận không sót.
+  client/static, không có `app/api/**/route.ts`, không server action. 7 route trong repo
+  đều là **frontend page** (`ROUTE001`–`ROUTE007`, tất cả `○ Static`, xác nhận bằng
+  `npm run build`). **Cập nhật 2026-08-19**: `proxy.ts` (request-interception layer, tên
+  mới của `middleware.ts` từ Next 16) nay tồn tại — nhưng nó không expose endpoint/response
+  body riêng, chỉ quyết định route nào được phép render, nên không đổi kết luận "0 backend
+  route" ở đây.
+- `behavior-logic.md` § Behavior Logic Index: **1 BL item** (`BL001_PrelaunchLaunchGate`,
+  type `middleware`, thêm 2026-08-19) trên 10 category chuẩn — nhưng BL001 không gắn với
+  bất kỳ API handler nào (nó redirect giữa các page, không trả response body của một API),
+  nên vẫn không có hàng nào để thêm vào API Map.
 
-Vì không có backend route nào và không có `BL###` nào để gắn handler, bảng API Map
-dưới đây **không có hàng nào** — đây là kết quả đúng của dữ liệu nguồn, không phải
+Vì không có backend route nào và không có `BL###` nào gắn với một API handler thật, bảng
+API Map dưới đây **không có hàng nào** — đây là kết quả đúng của dữ liệu nguồn, không phải
 thiếu sót của lượt tổng hợp này.
 
 ### API Routes (grouped by domain/resource)
@@ -30,9 +33,9 @@ _(none — no backend route in this codebase)_
 
 ## Ghi chú
 
-- 6 route frontend (`/`, `/awards`, `/kudos`, `/profile`, `/admin`, `/_not-found`) **không**
-  được liệt kê ở đây — đây là page route, không phải API endpoint; chúng đã có đầy đủ ở
-  `route-list.md` § Frontend Routes/Pages.
+- 7 route frontend (`/`, `/prelaunch`, `/awards`, `/kudos`, `/profile`, `/admin`,
+  `/_not-found`) **không** được liệt kê ở đây — đây là page route, không phải API
+  endpoint; chúng đã có đầy đủ ở `route-list.md` § Frontend Routes/Pages.
 - `/admin` có gating hiển thị phía client theo `role === 'admin'` (xem
   `lib/session/session-provider.tsx`, ghi chú tại `route-list.md` dòng ROUTE005) nhưng đây
   không phải auth/permission trên một API — không có `permissions.md` PERM### nào áp dụng
