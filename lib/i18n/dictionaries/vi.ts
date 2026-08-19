@@ -36,6 +36,10 @@ export const vi = {
   'widget.writeKudos': 'Viết Kudos',
   'widget.aboutSaa': 'Về SAA 2025',
   'prelaunch.title': 'Sự kiện sẽ bắt đầu sau',
+  'login.subtitle': 'Bắt đầu hành trình của bạn cùng SAA 2025.',
+  'login.tagline': 'Đăng nhập để khám phá!',
+  'login.button': 'LOGIN With Google',
+  'login.error': 'Đăng nhập không thành công. Vui lòng thử lại.',
 } as const;
 
 export type DictionaryKey = keyof typeof vi;

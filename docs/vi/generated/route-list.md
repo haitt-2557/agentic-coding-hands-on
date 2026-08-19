@@ -5,10 +5,11 @@
 
 ## Backend Routes
 
-Không có backend route nào trong project này — không có `app/api/**/route.ts`, không
-server action, không database client/ORM. Xác nhận bằng scout-report.md § Background
-Logic Source Inventory và bằng chính cấu trúc thư mục `app/` (chỉ gồm `page.tsx`,
-`layout.tsx`, `globals.css`, `favicon.ico` — không có file `route.ts` nào). **None found.**
+Trước 2026-08-19: không có backend route nào trong project này — không có
+`app/api/**/route.ts`, không server action, không database client/ORM. Xác nhận bằng
+scout-report.md § Background Logic Source Inventory và bằng chính cấu trúc thư mục `app/`
+(chỉ gồm `page.tsx`, `layout.tsx`, `globals.css`, `favicon.ico` — không có file `route.ts`
+nào) tại thời điểm đó.
 
 **Cập nhật 2026-08-19**: dòng trên từng ghi thêm "không `middleware.ts`" — điều đó không
 còn đúng. `proxy.ts` ở project root (tên mới của `middleware.ts` từ Next 16) nay chặn mọi
@@ -17,6 +18,14 @@ request trước khi route render, thực hiện gate đếm-ngược-trước-k
 `docs/vi/generated/behavior-logic.md` BL001). Đây KHÔNG phải một backend route (không
 expose endpoint, không trả JSON/response body riêng) nên không được cấp mã `ROUTE###` —
 chỉ can thiệp vào việc route nào được phép render.
+
+**Cập nhật (lượt Login, 2026-08-19)**: `app/auth/callback/route.ts` là route handler THẬT
+đầu tiên của codebase này — có expose một endpoint (`GET`), nên được cấp mã `ROUTE###`,
+khác với `proxy.ts` ở trên.
+
+| Method | Path | File | Code | Owner F### | Ghi chú |
+|---|---|---|---|---|---|
+| GET | /auth/callback | `app/auth/callback/route.ts` | ROUTE008 | F011 | Đổi `code` OAuth (Google, qua Supabase) lấy session; redirect `/` (thành công) hoặc `/login?error=...` (thất bại/huỷ). Không trả JSON — luôn 307/308 redirect. Chi tiết: `docs/vi/system/architecture.md` § Authentication Layer. |
 
 ## Frontend Routes/Pages
 
@@ -37,6 +46,7 @@ chỉ can thiệp vào việc route nào được phép render.
 | /admin | AdminDashboardPage (`app/admin/page.tsx`) | admin | ROUTE005 | F007 | ○ Static | Route placeholder có chủ đích — account-menu chỉ hiện link này khi `role === 'admin'` (gating phía client, xem `lib/session/session-provider.tsx`; không có server-side enforcement). |
 | /_not-found | (Next.js auto-generated) | not-found | ROUTE006 | — (không feature nào sở hữu: route mặc định do Next.js sinh) | ○ Static | Không có file `app/not-found.tsx` tùy biến trong tree — đây là route `_not-found` mặc định do Next.js App Router tự sinh từ `app/layout.tsx`. Xác nhận bằng `npm run build` (in ra `○ /_not-found` trong bảng Route). |
 | /prelaunch | PrelaunchPage (`app/prelaunch/page.tsx`) | prelaunch | ROUTE007 | F010 | ○ Static | Màn đếm ngược full-viewport — bị `proxy.ts` chặn mọi request khác vào cho tới khi `NEXT_PUBLIC_EVENT_START_AT` tới/qua hạn, sau đó tự redirect về `/` (xem § Backend Routes ở trên, `docs/vi/system/architecture.md` § Request-Interception Layer). |
+| /login | LoginPage (`app/login/page.tsx`) | login | ROUTE009 | F011 | ƒ Dynamic (Server Component đọc `searchParams` + gọi `getUser()`) | **Thêm 2026-08-19** — Google OAuth qua Supabase. `getUser()` guard redirect `/` nếu đã có phiên; miễn trừ gate đếm-ngược cả 2 chiều (PERM004, xem `permissions-matrix.md`). |
 
 **Xác thực nguồn route:** không có CLI probe manifest cho Next.js (Wave 0.4 chỉ nhận
 diện Rails/Laravel/Phoenix/Symfony/Django) nên bảng trên suy ra Tier-2 từ static parse
@@ -45,12 +55,27 @@ App Router. Đã đối chiếu với build output thật (`npm run build`, Next
 Turbopack) — bảng Route in ra đúng 6 route ở lần build gốc, **tất cả đều `○ (Static)`**
 (prerendered tại build time, không có route nào `ƒ (Dynamic)`); `/prelaunch` (thêm
 2026-08-19) giữ cùng đặc tính static — vẫn prerender bình thường, chỉ khác ở việc
-`proxy.ts` quyết định request nào được phép chạm tới nó. Toàn bộ site vẫn là static.
+`proxy.ts` quyết định request nào được phép chạm tới nó.
+
+**Cập nhật (lượt Login, 2026-08-19)** — build lại (`npm run build`, cùng Next.js
+16.3.1/Turbopack) sau khi thêm `/login` + `/auth/callback` in ra:
+
+```
+┌ ○ /            ├ ƒ /auth/callback   ├ ○ /kudos     ├ ○ /prelaunch
+├ ○ /_not-found  ├ ○ /awards          ├ ƒ /login     ├ ○ /profile
+├ ○ /admin
+ƒ Proxy (Middleware)
+```
+
+`/login` và `/auth/callback` là 2 route ĐẦU TIÊN trong toàn hệ thống render `ƒ (Dynamic)`
+— cả hai đọc cookie (`getUser()`/`exchangeCodeForSession` qua `lib/supabase/server.ts`),
+nên Next.js không thể prerender tĩnh. 7 route còn lại (kể cả `/prelaunch`) vẫn `○ Static`
+— site vẫn chủ yếu tĩnh, không phải một chuyển dịch kiến trúc toàn phần.
 
 ## Summary
 
 | Category | Count |
 |----------|-------|
-| Backend Routes | 0 (không tính `proxy.ts` — request-interception layer, không phải route) |
-| Frontend Pages | 7 |
-| Total | 7 |
+| Backend Routes | 1 (ROUTE008 `/auth/callback` — thêm 2026-08-19; `proxy.ts` không tính, vẫn là request-interception layer, không phải route) |
+| Frontend Pages | 9 (7 route cũ + ROUTE009 `/login`) |
+| Total | 10 |

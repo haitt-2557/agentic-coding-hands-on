@@ -1,0 +1,5 @@
+{
+  "mode": "single",
+  "intents": ["actor logs into SAA 2025 via Google OAuth through a local Supabase project"],
+  "justification": ""
+}

@@ -1,0 +1,7 @@
+[
+  {
+    "command": "npm run test:e2e",
+    "exitCode": 1,
+    "summary": "VALID RED: 13 login tests fail at prelaunch gate redirect (route does not exist); 56 pre-existing tests pass; harness corrected per coordinator feedback"
+  }
+]

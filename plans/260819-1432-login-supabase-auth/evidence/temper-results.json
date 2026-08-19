@@ -1,0 +1,32 @@
+{
+  "commands": [
+    {
+      "command": "npm run test:e2e",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "69 passed (23.5s) — 13 login-screen assertions plus 56 pre-existing tests, zero regressions. Rerun by the orchestrator on a clean tree after killing leftover dev servers.",
+      "ts": "2026-08-19T09:55:00Z"
+    },
+    {
+      "command": "npm run test:unit",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "62 passed (472ms) — up from a 55 baseline; 7 added (5 getSiteUrl cases, 2 gate near-miss regression guards), none removed or weakened.",
+      "ts": "2026-08-19T09:55:00Z"
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Typecheck clean across the whole project after the Track A and Track B seam closed.",
+      "ts": "2026-08-19T09:55:00Z"
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "ESLint clean. All 182 prior errors originated in the supabase/.temp generated edge-runtime bundle, now ignored in eslint.config.mjs; no real finding was masked.",
+      "ts": "2026-08-19T09:55:00Z"
+    }
+  ]
+}

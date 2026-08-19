@@ -11,6 +11,19 @@ import { computeCountdown } from '@/lib/countdown';
 const PRELAUNCH_PATH = '/prelaunch';
 const HOME_PATH = '/';
 
+// FR-005 / BR-004 — /login and the OAuth callback are launch-timing exemptions, not
+// authorization: they must pass the gate in BOTH directions (locked and unlocked),
+// unlike /prelaunch which only flips one way at launch. A separate early return, not a
+// branch inside the countdown logic, so it can never accidentally exempt only one
+// direction.
+const ALWAYS_ALLOWED = ['/login', '/auth/callback'];
+
+function isAlwaysAllowed(pathname: string): boolean {
+  return ALWAYS_ALLOWED.some(
+    (allowed) => pathname === allowed || pathname.startsWith(`${allowed}/`)
+  );
+}
+
 /**
  * Decide whether a request to `pathname` should be redirected to hold or release the
  * launch gate.
@@ -28,6 +41,10 @@ export function resolveGateRedirect(
   targetIso: string | undefined,
   now: Date,
 ): '/prelaunch' | '/' | null {
+  if (isAlwaysAllowed(pathname)) {
+    return null;
+  }
+
   const { isExpired, isInvalid } = computeCountdown(targetIso, now);
 
   if (isInvalid) {

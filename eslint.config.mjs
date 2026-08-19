@@ -25,6 +25,10 @@ const eslintConfig = defineConfig([
     "plans/**",
     "test-results/**",
     "playwright-report/**",
+    // `supabase start` writes a generated edge-runtime bundle here on every boot. It is
+    // gitignored (supabase/.gitignore) but a bare `eslint` still crawls it, and its ~180
+    // problems are the only thing standing between this gate and a clean exit.
+    "supabase/.temp/**",
   ]),
 ]);
 

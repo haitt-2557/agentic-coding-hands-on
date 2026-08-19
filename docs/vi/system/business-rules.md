@@ -80,6 +80,30 @@ quy tắc này nằm ở tài liệu Permissions.
 
 ---
 
+### Đã đăng nhập Google rồi thì không thấy lại màn đăng nhập (thêm 2026-08-19)
+
+**Applies when:** Một actor đã hoàn tất đăng nhập Google (có phiên Supabase hợp lệ) cố mở
+lại `/login`.
+**Says:** Hệ thống kiểm tra thật ở phía máy chủ (không phải đọc trình duyệt) trước khi hiện
+bất kỳ nội dung nào của màn hình — nếu actor đã có phiên hợp lệ, họ được đưa thẳng về trang
+chủ, không thấy lại nút đăng nhập. Đây là kiểm tra THẬT đầu tiên trong hệ thống, khác với
+mọi quy tắc `role` mock ở trên — nhưng phạm vi của nó chỉ dừng ở đúng màn hình này, không mở
+rộng ra bảo vệ trang nào khác.
+**Source artifact:** [Permissions](./permissions.md), [Entities — Supabase Session](../generated/entities.md)
+
+---
+
+### Huỷ hoặc lỗi khi đăng nhập Google không làm vỡ trang, chỉ hiện một thông báo cố định (thêm 2026-08-19)
+
+**Applies when:** Actor huỷ màn đồng ý của Google, hoặc bước trao đổi phiên đăng nhập với
+Supabase thất bại vì bất kỳ lý do gì.
+**Says:** Hệ thống luôn đưa actor trở lại màn đăng nhập kèm một thông báo lỗi CỐ ĐỊNH, chung
+cho mọi loại lỗi — không bao giờ lộ ra lý do kỹ thuật thật (thông điệp lỗi gốc từ Google hay
+Supabase) cho người dùng cuối, và không bao giờ hiển thị một trang lỗi riêng.
+**Source artifact:** [Entities — Supabase Session](../generated/entities.md), `docs/vi/generated/behavior-logic.md` BL002
+
+---
+
 ### Số thông báo chưa đọc chỉ hiện khi có ít nhất một thông báo
 
 **Applies when:** Biểu tượng thông báo đang được hiển thị (tức người dùng không ở trạng

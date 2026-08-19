@@ -4,13 +4,23 @@
 **Generated**: 2026-08-18
 **Analysis Scope**: 5 route files dưới `app/**/page.tsx` (route-view, web) — đối chiếu với `route-list.md` (ROUTE001–ROUTE005). `ROUTE006` (`/_not-found`) bị loại khỏi phạm vi vì không có file `page.tsx`/`not-found.tsx` nguồn — đây là route mặc định do Next.js tự sinh, không có source file để phân loại H1–H6.
 
+**Cập nhật phạm vi**: `/prelaunch` (SCR006, thêm 2026-08-19) và `/login` (SCR007, thêm
+2026-08-19, lượt Login) mở rộng phạm vi lên 7 screen file — cùng phương pháp H1–H6 áp dụng
+cho cả hai, xem chi tiết ở mục riêng của từng SCR bên dưới.
+
 **Code Format**: `SCR###_NameSlug` (e.g. SCR001_Home).
 
 > **Composite-detection method note**: H1–H6 (composite-screen-detection.md, thứ tự chạy H6→H4→H5→H2→H3→H1→2-of-3 gate) đã áp dụng không điều kiện cho cả 5 screen file. Kết quả: **cả 5 đều atomic** — không có REG### nào được phát sinh. Lý do: H6 (router outlet) không khớp — không route nào có `<Outlet>`/child route; H4 (tab) và H5 (wizard) không khớp — không có UI tab/step nào; H2 (domain-module import gate) fail trên mọi screen — import của các file `page.tsx` chỉ trỏ vào `components/*`, `lib/*` (không có thư mục `features/*`/`modules/*`/`domains/*` trong repo, và `components/*` nằm trong danh sách loại trừ JS/TS của H2); H3 (semantic region wrapper) chỉ pass cho SCR001 (4 khối `<section>`: Hero, RootFurther, Awards, Kudos) nhưng 2-of-3 gate cần thêm H1 hoặc H2 cùng pass — không có, nên SCR001 vẫn atomic theo gate, dù có 4 khối `<section>` trực quan. Quan trọng hơn, Trap 1 (composite-screen-detection.md/verification-checklist) yêu cầu mỗi REG có ≥1 independence signal (API riêng, loading state riêng, scroll container riêng, auth/permission gate riêng, mutation surface riêng, validation path riêng) — hệ thống này không có backend (xác nhận bởi `system-overview.md` Decision 1), nên không khối nào trên SCR001 có tín hiệu độc lập thật sự; tách visual thôi là không đủ (Trap 1). Việc này cũng phù hợp với `[H3_RAW_DIV]`-adjacent tình huống nhưng ở đây H3 pass nhờ `<section>` tag thật (không phải raw div), chỉ là 2-of-3 gate không đạt.
 
 **Note**: Feature mapping (F###) chưa gán — `feature-list.md` là Wave 5 (`_session-context.md` § Counts: `feature_count: <pending-W5>`). Mọi ô Owner F### trong RouteList hiện là `—`; ScreenList tự nó không mang F###/US### (theo đúng contract của template — FeatureList/UserStories sở hữu các mapping đó).
 
-**Service-coverage note**: Rule kiểm tra "service/API hook không có ROUTE### hoặc BL### tương ứng → critical" là vô hiệu (vacuously satisfied) ở đây — không màn hình nào gọi bất kỳ service/API/hook mạng nào. Toàn bộ dữ liệu hiển thị đến từ hằng số nội bộ (`lib/awards.ts`), hàm thuần (`lib/countdown.ts`), hoặc mock client-side (`lib/session/session-provider.tsx`, `lib/i18n/locale-provider.tsx`) — không có network call nào trong toàn bộ `app/`, `components/`, `lib/` (khớp `scout-report.md` § Background Logic Source Inventory — zero hit mọi category).
+**Service-coverage note (2026-08-18, trước lượt Login)**: Rule kiểm tra "service/API hook không có ROUTE### hoặc BL### tương ứng → critical" là vô hiệu (vacuously satisfied) ở đây — không màn hình nào gọi bất kỳ service/API/hook mạng nào. Toàn bộ dữ liệu hiển thị đến từ hằng số nội bộ (`lib/awards.ts`), hàm thuần (`lib/countdown.ts`), hoặc mock client-side (`lib/session/session-provider.tsx`, `lib/i18n/locale-provider.tsx`) — không có network call nào trong toàn bộ `app/`, `components/`, `lib/` (khớp `scout-report.md` § Background Logic Source Inventory — zero hit mọi category).
+
+**Cập nhật (lượt Login, 2026-08-19)**: dòng trên không còn đúng tuyệt đối. SCR007_Login gọi
+`supabase.auth.signInWithOAuth()` (network call thật tới Supabase Auth) — có `ROUTE###`
+tương ứng (`ROUTE008` `/auth/callback` xử lý phần quay lại) và `BL###` tương ứng
+(`BL002_OAuthCallbackExchange`), nên rule trên vẫn PASS (không phải critical), chỉ không
+còn "vacuously satisfied" nữa — đây là service call đầu tiên có mapping thật.
 
 ## Screen Index
 
@@ -22,6 +32,7 @@
 | SCR004_Profile | Profile | atomic | 2 | 0 |
 | SCR005_AdminDashboard | AdminDashboard | atomic | 2 | 0 |
 | SCR006_Prelaunch | Prelaunch | atomic | 4 | 1 |
+| SCR007_Login | Login | atomic | 7 | 0 |
 
 ---
 
@@ -255,9 +266,56 @@ _(none — atomic, cùng lý do các SCR khác: không có tín hiệu độc l�
 
 ---
 
+## SCR007_Login: Login — thêm 2026-08-19
+
+**Type**: atomic
+**Route**: ROUTE009 (`/login`)
+
+### Description
+
+Màn đăng nhập Google OAuth qua Supabase — `app/login/page.tsx` (Server Component). Khác
+với 5 placeholder SCR002–SCR005: đây là màn hình có logic thật, và khác cả SCR006: đây là
+màn ĐẦU TIÊN mang một guard phía server thật (`getUser()`, PERM004) thay vì chỉ đọc env
+công khai. Không có header/footer/nav dùng chung với SCR001 — tự bọc `LoginHeader`/
+`LoginFooter` riêng.
+
+### Components
+
+| Component | Type | Purpose |
+|-----------|------|---------|
+| LoginHeader | layout | Header riêng của màn login (không tái dùng `SiteHeader`). `components/login/login-header.tsx` |
+| LoginMain | layout | Khung bố cục chính. `components/login/login-main.tsx` |
+| LoginIntro | section | Khối giới thiệu/copy tĩnh bọc quanh `LoginClient`. `components/login/login-intro.tsx` |
+| LoginClient | island | Client Component — sở hữu vòng round-trip click → loading → `signInWithOAuth` → điều hướng-hoặc-lỗi. `app/login/login-client.tsx` |
+| LoginButton | button | Nút đăng nhập Google — disabled + hiện loader từ lúc click tới khi trình duyệt điều hướng đi hoặc lỗi. `components/login/login-button.tsx` |
+| LoginErrorAlert | alert | `role="alert"`, chuỗi lỗi CỐ ĐỊNH (không lộ message gốc từ Supabase/Google) — hiện khi `?error` có trên URL HOẶC lần click này thất bại cục bộ. `components/login/login-error-alert.tsx` |
+| LoginFooter | layout | Footer riêng của màn login. `components/login/login-footer.tsx` |
+
+### Data Displayed
+
+_(none — không có data entity nghiệp vụ nào hiển thị; toàn bộ nội dung là copy tĩnh + trạng
+thái UI cục bộ (`loading`, `failedLocally`))_
+
+### Routes/URLs
+
+- `/login`
+- `/login?error=<msg>` (từ `app/auth/callback/route.ts` khi thất bại/huỷ — giá trị chỉ dùng
+  làm boolean gate hiển thị `LoginErrorAlert`, không render vào DOM)
+
+### Related Screens
+
+- SCR001_Home: Home (đích redirect khi `getUser()` thấy phiên hợp lệ, PERM004; cũng là đích
+  sau khi `exchangeCodeForSession` thành công qua `/auth/callback`)
+
+### Regions
+
+_(none — atomic, cùng lý do các SCR khác: không có tín hiệu độc lập thật)_
+
+---
+
 ## Summary
 
-- **Total Screens**: 6 (ROUTE006 `/_not-found` loại khỏi phạm vi — auto-generated, không có source file)
+- **Total Screens**: 7 (ROUTE006 `/_not-found` loại khỏi phạm vi — auto-generated, không có source file)
 - **Composite Screens**: 0 (2-of-3 gate không đạt ở mọi screen — xem ghi chú phương pháp ở đầu tài liệu)
 - **Total Regions**: 0
 
@@ -268,6 +326,6 @@ _(none — atomic, cùng lý do các SCR khác: không có tín hiệu độc l�
 - [x] All SCR### codes are unique
 - [x] All SCR### codes are referenced in ScreenFlow.md (xem `screen-flow.md`)
 - [x] All related screen references are valid
-- [x] All route URLs are properly formatted (đối chiếu `route-list.md` ROUTE001–ROUTE005, ROUTE007)
-- [x] All SCR### codes are referenced in FeatureList.md — 19/19 US và 6/6 SCR đều được ít nhất một F### tham chiếu (SCR006 → F010, thêm 2026-08-19).
+- [x] All route URLs are properly formatted (đối chiếu `route-list.md` ROUTE001–ROUTE005, ROUTE007, ROUTE009)
+- [x] All SCR### codes are referenced in FeatureList.md — SCR006 → F010, SCR007 → F011 (thêm 2026-08-19); 7/7 SCR đều có ≥1 F### tham chiếu.
 - [x] No orphaned screen references
