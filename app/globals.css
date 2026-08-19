@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+/* Prelaunch countdown digit glyph (node I2268:35141;186:2617, Figma font "Digital
+   Numbers"). The file has not been supplied yet — drop it at
+   public/fonts/digital-numbers.woff2 and the swap is automatic, zero code change.
+   Until then the browser silently falls back to the monospace stack below (a missing
+   font is a network log line, not a page error). */
+@font-face {
+  font-family: 'Digital Numbers';
+  src: url('/fonts/digital-numbers.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* SAA 2025 homepage — dark theme design tokens (frame is unconditionally dark). */
 :root {
   --background: #00101a;
@@ -27,6 +40,7 @@
   --color-secondary-button-bg: var(--secondary-button-bg);
   --font-sans: var(--font-montserrat);
   --font-alt: var(--font-montserrat-alternates);
+  --font-digital: 'Digital Numbers', ui-monospace, 'SF Mono', 'Courier New', monospace;
 }
 
 body {
