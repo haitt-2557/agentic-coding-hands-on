@@ -10,13 +10,21 @@
 // `exchangeCodeForSession` can throw instead of returning `{ error }` in some auth-js
 // versions (auth-js#782) — wrapped in try/catch regardless of what the type signature
 // promises (R3).
+//
+// Security review finding (High) — every redirect below is built from `getSiteUrl()`, a
+// trusted config value, never from `request.nextUrl.origin`. This route is unauthenticated
+// and internet-reachable once deployed; `nextUrl.origin` is derived from the incoming
+// `Host`/`X-Forwarded-Host` header, so behind infrastructure that doesn't pin `Host` a
+// forged header would otherwise turn this into an open redirect to an attacker origin.
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getSiteUrl } from '@/lib/supabase/env';
 
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = request.nextUrl;
+  const { searchParams } = request.nextUrl;
+  const origin = getSiteUrl();
   const errorDescription = searchParams.get('error_description');
   const code = searchParams.get('code');
 

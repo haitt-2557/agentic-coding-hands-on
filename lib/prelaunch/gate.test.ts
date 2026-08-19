@@ -77,6 +77,20 @@ test.describe('resolveGateRedirect', () => {
     }
   });
 
+  // Review finding (Low, regression guard) — `isAlwaysAllowed` is exact-match OR
+  // `${allowed}/` prefix, not a bare `startsWith(allowed)`. These near-miss paths share a
+  // prefix with an allowed entry but are NOT sub-paths of it, so they must still be gated.
+  // Pins the distinction so a future refactor to `startsWith` doesn't silently exempt them.
+  test.describe('near-miss paths are NOT exempted (regression guard)', () => {
+    const locked = new Date('2026-12-19T17:00:00+07:00');
+
+    for (const pathname of ['/loginX', '/auth/callbackX']) {
+      test(`${pathname} redirects to /prelaunch while locked (not exempted)`, () => {
+        expect(resolveGateRedirect(pathname, FUTURE_TARGET, locked)).toBe('/prelaunch');
+      });
+    }
+  });
+
   test.describe('exact zero boundary', () => {
     test('now === target is unlocked (/prelaunch redirects to /)', () => {
       const now = new Date(FUTURE_TARGET);
