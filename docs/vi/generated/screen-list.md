@@ -21,6 +21,7 @@
 | SCR003_Kudos | Kudos | atomic | 1 | 0 |
 | SCR004_Profile | Profile | atomic | 2 | 0 |
 | SCR005_AdminDashboard | AdminDashboard | atomic | 2 | 0 |
+| SCR006_Prelaunch | Prelaunch | atomic | 4 | 1 |
 
 ---
 
@@ -210,9 +211,53 @@ _(none — atomic)_
 
 ---
 
+## SCR006_Prelaunch: Prelaunch
+
+**Type**: atomic
+**Route**: ROUTE007 (`/prelaunch`)
+
+### Description
+
+Route mới (2026-08-19) — `app/prelaunch/page.tsx`. Full-viewport, không cuộn: nền ảnh sự
+kiện + gradient overlay + tiêu đề + 3 ô đếm ngược DAYS/HOURS/MINUTES tick 1 giây. Không có
+header/footer/nav — đây là toàn bộ nội dung màn hình. Khác với 4 placeholder SCR002–SCR005
+(chỉ tồn tại để không 404), màn này mang logic thật: một request-interception layer mới
+(`proxy.ts`) chặn 5 route còn lại và đưa về đây cho tới khi `NEXT_PUBLIC_EVENT_START_AT`
+tới/qua hạn — xem `docs/vi/system/architecture.md` § Request-Interception Layer,
+`docs/vi/features/countdown-prelaunch/technical-spec.md`.
+
+### Components
+
+| Component | Type | Purpose |
+|-----------|------|---------|
+| PrelaunchCountdown | widget | Tiêu đề + hàng 3 `CountdownUnit`; tick 1s qua `usePrelaunchCountdown()`. `components/prelaunch/prelaunch-countdown.tsx` |
+| CountdownUnit | widget | Một cặp digit-box + label, `aria-label` đọc trọn giá trị. `components/prelaunch/countdown-unit.tsx` |
+| DigitBox | widget | Một ô số LED (gradient/blur nền + glyph). `components/prelaunch/digit-box.tsx` |
+| Background image + overlay | section | Nền ảnh sự kiện (`public/saa/Prelaunch_BG.png`) + gradient overlay tĩnh. `app/prelaunch/page.tsx` |
+
+### Data Displayed
+
+- Data Entity 1: Thời điểm đếm ngược mục tiêu — cùng `NEXT_PUBLIC_EVENT_START_AT` với
+  SCR001 (không nhân bản dữ liệu; đọc lại qua `lib/countdown.ts`, tick 1s thay vì 60s)
+
+### Routes/URLs
+
+- `/prelaunch`
+
+### Related Screens
+
+- SCR001_Home: Home (đích redirect khi gate mở, `router.replace('/')` phía client hoặc
+  redirect phía server — không phải link `next/link` như các SCR khác)
+
+### Regions
+
+_(none — atomic, cùng lý do các SCR khác: không có tín hiệu độc lập thật)_
+
+---
+
 ## Summary
 
-- **Total Screens**: 5 (ROUTE006 `/_not-found` loại khỏi phạm vi — auto-generated, không có source file)
+- **Total Screens**: 6 (ROUTE006 `/_not-found` loại khỏi phạm vi — auto-generated, không có source file)
 - **Composite Screens**: 0 (2-of-3 gate không đạt ở mọi screen — xem ghi chú phương pháp ở đầu tài liệu)
 - **Total Regions**: 0
 
@@ -223,6 +268,6 @@ _(none — atomic)_
 - [x] All SCR### codes are unique
 - [x] All SCR### codes are referenced in ScreenFlow.md (xem `screen-flow.md`)
 - [x] All related screen references are valid
-- [x] All route URLs are properly formatted (đối chiếu `route-list.md` ROUTE001–ROUTE005)
-- [x] All SCR### codes are referenced in FeatureList.md — **** (`feature-list.md` chưa tồn tại; đối chiếu ngược ở review pass sau khi feature synthesis chạy, cùng cơ chế "—" mà `route-list.md` đã áp dụng cho cột Owner F###) — verified after Wave 5: 16/16 US và 5/5 SCR đều được ít nhất một F### tham chiếu.
+- [x] All route URLs are properly formatted (đối chiếu `route-list.md` ROUTE001–ROUTE005, ROUTE007)
+- [x] All SCR### codes are referenced in FeatureList.md — 19/19 US và 6/6 SCR đều được ít nhất một F### tham chiếu (SCR006 → F010, thêm 2026-08-19).
 - [x] No orphaned screen references

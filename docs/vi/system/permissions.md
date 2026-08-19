@@ -63,7 +63,8 @@ nào diễn ra giữa chừng.
 ## Điểm enforce (client-only) và mã kỹ thuật
 
 Cả 3 điểm ẩn/hiện đều enforce bằng early-return trong thân component (không phải route
-guard, không phải middleware — repo không có `middleware.ts`):
+guard, không phải middleware — không liên quan tới gate đếm-ngược ở `proxy.ts`, xem
+§ Special Conditions bên dưới):
 
 | Mã `PERM###` | Điểm enforce | Loại |
 |---|---|---|
@@ -88,7 +89,18 @@ trang giữ chỗ tĩnh, chưa có nội dung hay dữ liệu cá nhân nào đ�
 
 ## Special Conditions
 
-Không có điều kiện đặc biệt nào theo thời gian, IP, hay môi trường triển khai. Chuyển đổi
-ngôn ngữ (Việt/Anh) trên thanh điều hướng chỉ đổi văn bản hiển thị, không mở khóa hay
-khóa bất kỳ tính năng nào theo ngôn ngữ — không phải một điều kiện phân quyền. Chi tiết
-kỹ thuật của từng điểm ẩn/hiện nằm ở [permissions-matrix.md](./permissions-matrix.md).
+**Cập nhật 2026-08-19**: có một điều kiện MỚI theo thời gian — trong lúc đếm ngược tới sự
+kiện SAA 2025 còn chạy, mọi route (`/`, `/awards`, `/kudos`, `/profile`, `/admin`) đều bị
+chặn và đưa về `/prelaunch` cho tới khi đếm ngược tới/qua hạn. Đây KHÔNG phải một
+permission theo vai trò — áp dụng như nhau cho `guest`/`user`/`admin`, không đọc `role`
+nào ở trên — nên không có mã `PERM###` nào cho nó và không ảnh hưởng tới bảng
+`guest`/`user`/`admin` ở trên (một khi gate mở, mọi phân biệt vai trò cũ vẫn giữ nguyên
+như đã mô tả). Chi tiết ở
+[docs/vi/features/countdown-prelaunch/technical-spec.md](../features/countdown-prelaunch/technical-spec.md)
+và [ADR-002](../../decisions/ADR-002-prelaunch-launch-timing-gate.md).
+
+Ngoài điều kiện trên, không có điều kiện đặc biệt nào khác theo IP hay môi trường triển
+khai. Chuyển đổi ngôn ngữ (Việt/Anh) trên thanh điều hướng chỉ đổi văn bản hiển thị, không
+mở khóa hay khóa bất kỳ tính năng nào theo ngôn ngữ — không phải một điều kiện phân
+quyền. Chi tiết kỹ thuật của từng điểm ẩn/hiện nằm ở
+[permissions-matrix.md](./permissions-matrix.md).

@@ -2,7 +2,11 @@
 
 **Project**: Sun* Annual Awards 2025 (SAA 2025) — Homepage sự kiện
 **Generated**: 2026-08-18
-**Analysis Scope**: 16 user stories (`user-stories.md` US001–US016), 5 màn hình (`screen-list.md` SCR001–SCR005), 6 route frontend (`route-list.md` ROUTE001–ROUTE006, ROUTE006 loại khỏi mapping vì không có source file), 3 permission (`permissions-matrix.md` PERM001–PERM003), 1 data model (`data-model.md` MODEL001), 0 background logic (`behavior-logic.md`).
+**Analysis Scope**: 19 user stories (`user-stories.md` US001–US019), 6 màn hình (`screen-list.md` SCR001–SCR006), 7 route frontend (`route-list.md` ROUTE001–ROUTE007, ROUTE006 `/_not-found` loại khỏi mapping vì không có source file), 3 permission (`permissions-matrix.md` PERM001–PERM003), 1 data model (`data-model.md` MODEL001), 1 background logic (`behavior-logic.md` BL001).
+
+**Cập nhật 2026-08-19**: thêm `F010_PrelaunchCountdownGate` — gate đếm-ngược-trước-khi-mở-site
+(`/prelaunch`, `proxy.ts`). Xem chi tiết đầy đủ ở
+`docs/vi/features/countdown-prelaunch/technical-spec.md`.
 
 **Code Format**: All codes MUST follow `F###_NameSlug` format (e.g., F001_Auth, F002_UserProfile)
 **Screen Code Format**: All screen codes MUST follow `SCR###_NameSlug` format (e.g., SCR001_LoginForm)
@@ -38,6 +42,7 @@
 | F007_AccountMenuAccess | Account Menu Access | ui | TypeScript/TSX | my-app | P2 |
 | F008_NotificationPanelAccess | Notification Panel Access | ui | TypeScript/TSX | my-app | P2 |
 | F009_ReturnToHomeTop | Return To Home Top | ui | TypeScript/TSX | my-app | P3 |
+| F010_PrelaunchCountdownGate | Prelaunch Countdown Gate | ui | TypeScript/TSX | my-app | P0 |
 
 ## Feature Details
 
@@ -316,16 +321,56 @@
 **Related Permissions**:
 - Không có — hiển thị và khả dụng cho mọi actor
 
+### F010_PrelaunchCountdownGate: Prelaunch Countdown Gate
+
+**Type**: ui
+**Description**: Gate đếm-ngược-trước-khi-mở-site cho SAA 2025 — route mới `/prelaunch`
+(full-viewport, nền ảnh sự kiện + đếm ngược DAYS/HOURS/MINUTES tick 1 giây) cộng một
+request-interception layer mới (`proxy.ts`) chặn 5 route hiện có (`/`, `/awards`,
+`/kudos`, `/profile`, `/admin`) và đưa về `/prelaunch` cho tới khi
+`NEXT_PUBLIC_EVENT_START_AT` tới/qua hạn; khi đó chiều ngược lại mở khóa và `/prelaunch`
+tự đưa actor về `/`. Áp dụng cho mọi actor không phân biệt — đây là gate theo THỜI GIAN,
+không phải theo quyền, và không đọc `role`/`SessionState` của F007/F008. Chi tiết đầy đủ:
+`docs/vi/features/countdown-prelaunch/technical-spec.md`.
+
+**Workspace**: my-app
+**Languages**: TypeScript, TSX
+**Components**: 4
+
+**Related Screens**:
+- SCR006_Prelaunch: Prelaunch
+
+**Related User Stories**:
+- US017_XemManHinhDemNguoc: Xem màn hình đếm ngược khi trang bị khóa
+- US018_ChanDieuHuongKhiConDemNguoc: Bị chặn điều hướng trong lúc đếm ngược còn > 0
+- US019_TuDongMoKhoaKhiVeMoc: Tự động mở khóa và điều hướng khi đếm ngược về 0
+
+**Related APIs/Routes**:
+- (page) /prelaunch — ROUTE007
+- 5 route hiện có (ROUTE001–ROUTE005) — hành vi truy cập bị gate này chi phối, file không đổi
+
+**Related Data Models**:
+- Không có — `CountdownResult`/`NavigationGateState` là computed/derived value, không phải
+  MODEL### entity (tái dùng `lib/countdown.ts`, xem `technical-spec.md` § Key Entities)
+
+**Related Background Logic**:
+- BL001_PrelaunchLaunchGate (`behavior-logic.md`) — request-interception layer, type
+  `middleware`
+
+**Related Permissions**:
+- Không có — công khai cho mọi actor, gate theo thời gian không phải theo quyền (xem
+  `permissions-matrix.md`)
+
 ---
 
 ## Summary
 
-- **Total Features**: 9
-- **Total Screens**: 5
-- **Total User Stories**: 16
-- **Total Routes**: 5 (ROUTE001–ROUTE005; ROUTE006 `/_not-found` loại khỏi mapping — tự sinh bởi Next.js, không có source file, cùng phạm vi loại trừ đã áp dụng ở `screen-list.md`)
+- **Total Features**: 10
+- **Total Screens**: 6
+- **Total User Stories**: 19
+- **Total Routes**: 6 (ROUTE001–ROUTE005, ROUTE007; ROUTE006 `/_not-found` loại khỏi mapping — tự sinh bởi Next.js, không có source file, cùng phạm vi loại trừ đã áp dụng ở `screen-list.md`)
 - **Total Data Models**: 1 (MODEL001_Award)
-- **Total Background Logic**: 0
+- **Total Background Logic**: 1 (BL001_PrelaunchLaunchGate)
 - **Total Permissions**: 3
 - **Languages Detected**: TypeScript, TSX (Next.js App Router)
 
@@ -334,14 +379,14 @@
 - [x] All F### codes are unique
 - [ ] All F### codes are referenced in UserStories.md — pending: `user-stories.md` được sinh trước Wave 5 nên chưa mang cột F### (ghi nhận rõ ở dòng "All US### codes are referenced in FeatureList.md — pending Wave 5" của chính tài liệu đó); cần một lượt cập nhật ngược `user-stories.md` sau bước này, ngoài phạm vi task hiện tại
 - [x] All screen references are valid (SCR### hoặc SCR###/REG### trong ScreenList — không có REG### nào trong hệ thống)
-- [x] All user story references are valid (US### trong UserStories, đủ cả 16/16)
+- [x] All user story references are valid (US### trong UserStories, đủ cả 19/19)
 - [x] All route references are valid (ROUTE### trong RouteList)
 - [x] All data model references are valid (MODEL001 trong DataModel)
-- [x] All behavior logic references are valid — vacuously true (0 BL item, không feature nào cần mapping)
+- [x] All behavior logic references are valid (BL001 → F010)
 - [x] All permission references are valid (PERM### trong permissions-matrix.md)
-- [x] Every US has a parent feature (F###) — 16/16 US mapped, không US nào orphan
-- [x] Every screen has a parent feature (F###) — SCR001 (F001–F009), SCR002 (F003), SCR003 (F004), SCR004 (F007), SCR005 (F007)
-- [x] Every route maps to a feature (F###) — ROUTE001–ROUTE005 đều có ≥1 feature owner; ROUTE006 ngoài phạm vi (không có source file)
+- [x] Every US has a parent feature (F###) — 19/19 US mapped, không US nào orphan
+- [x] Every screen has a parent feature (F###) — SCR001 (F001–F009), SCR002 (F003), SCR003 (F004), SCR004 (F007), SCR005 (F007), SCR006 (F010)
+- [x] Every route maps to a feature (F###) — ROUTE001–ROUTE005, ROUTE007 đều có ≥1 feature owner; ROUTE006 ngoài phạm vi (không có source file)
 - [x] Every data model maps to a feature (F###) — MODEL001 → F003
-- [x] Every background logic maps to a feature (F###) — vacuously true (0 BL item)
+- [x] Every background logic maps to a feature (F###) — BL001 → F010
 - [x] Every permission maps to a feature (F###) — PERM001/PERM002 → F007, PERM003 → F008

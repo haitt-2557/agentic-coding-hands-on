@@ -1,0 +1,39 @@
+{
+  "commands": [
+    {
+      "command": "npm run test:e2e",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "55 passed across 4 Playwright projects on 3 servers (prelaunch-gate :3000 future date, homepage-with-open-gate :3200 past date, invalid-env :3100, prelaunch-unlocked :3200). Re-run independently by the orchestrator, not self-reported.",
+      "ts": "2026-08-19T11:00:00+07:00"
+    },
+    {
+      "command": "npm run test:unit",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "40 passed — 32 pre-existing (lib/awards, lib/countdown) plus 8 new in lib/prelaunch/display.test.ts covering the >99-day cap and its computeCountdown integration.",
+      "ts": "2026-08-19T11:00:00+07:00"
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Clean. Required adding .next-* to eslint globalIgnores: the new per-server distDir build outputs had the bare eslint crawl reporting 7308 problems, which made the gate meaningless.",
+      "ts": "2026-08-19T11:00:00+07:00"
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "No type errors.",
+      "ts": "2026-08-19T11:00:00+07:00"
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Production build succeeds; /prelaunch compiles and the Proxy registers in the route manifest.",
+      "ts": "2026-08-19T11:00:00+07:00"
+    }
+  ]
+}

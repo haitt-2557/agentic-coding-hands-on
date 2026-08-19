@@ -2,11 +2,28 @@
 
 ## System Architecture
 
-Ứng dụng là một trang tĩnh Next.js App Router, không có tầng backend. Toàn bộ 6 route
-(`/`, `/awards`, `/kudos`, `/profile`, `/admin`, và `_not-found` do Next tự sinh) được
-prerender ở build time; không có `app/api/**/route.ts`, không có `middleware.ts`, không có
-database/ORM/queue nào trong cây nguồn (xác nhận tại `scout-report.md` § Background Logic
-Source Inventory — mọi hạng mục đều `_(none found)_`).
+Ứng dụng là một trang tĩnh Next.js App Router, không có tầng backend: không có
+`app/api/**/route.ts`, không có database/ORM/queue nào trong cây nguồn (xác nhận tại
+`scout-report.md` § Background Logic Source Inventory — mọi hạng mục đều `_(none found)_`,
+ngoại trừ một request-interception layer thêm sau đó — xem § Request-Interception Layer
+bên dưới). Toàn bộ 7 route (`/`, `/prelaunch`, `/awards`, `/kudos`, `/profile`, `/admin`,
+và `_not-found` do Next tự sinh) được prerender ở build time.
+
+**Đính chính so với bản trước của tài liệu này**: dòng trên từng ghi "không có
+`middleware.ts`" — điều đó không còn đúng. `proxy.ts` (tên mới của quy ước `middleware.ts`
+kể từ Next 16 — quy ước cũ đã deprecated, xem
+`node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md`) nay
+chặn MỌI request tới bất kỳ route nào trước khi route đó render, để thực hiện gate đếm-ngược
+trước-khi-mở-site cho trang `/prelaunch`. Đây là **gate theo THỜI GIAN (launch-timing),
+không phải một ranh giới ủy quyền (authorization boundary)** — nó không đọc
+`role`/`SessionState` của `lib/session/session-provider.tsx` (đã tự ghi rõ là mock, không
+phải access control — xem § Cross-cutting concerns bên dưới) hay bất kỳ state phía client
+nào khác; mọi actor (guest/user/admin) đều nhận cùng một quyết định khóa/mở, không phân
+biệt vai trò. Đừng nhầm layer này với PERM001–PERM003
+(`docs/vi/generated/permissions-matrix.md`) — 3 mã đó vẫn là toàn bộ role-gating tồn tại
+trong hệ thống; gate này nằm trên một trục hoàn toàn khác. Chi tiết cơ chế, quyết định
+kiến trúc, và rationale đầy đủ nằm ở § Request-Interception Layer (Prelaunch Gate) bên
+dưới và [ADR-002](../../decisions/ADR-002-prelaunch-launch-timing-gate.md).
 
 ```mermaid
 graph TB
@@ -182,6 +199,47 @@ tách quyền sở hữu file — `components/**` do Track A (UI trình bày) gi
     match `*.test.ts`), không mở `webServer`, dùng cho `lib/awards.test.ts` và
     `lib/countdown.test.ts`.
 
+## Request-Interception Layer (Prelaunch Gate)
+
+`proxy.ts` ở project root chạy trước mọi route, kể cả `/`. Nó không thêm state mới, không
+thêm bảng CSDL mới — chỉ đọc lại `NEXT_PUBLIC_EVENT_START_AT` (biến đã có sẵn cho đếm
+ngược trang chủ) qua cùng hàm thuần `computeCountdown` (`lib/countdown.ts`), gói trong
+`resolveGateRedirect()` (`lib/prelaunch/gate.ts`) để quyết định redirect. Vì `proxy.ts`
+chạy trên runtime server của Next.js (không có `localStorage`, không có DOM), quyết định
+này KHÔNG đọc `saa.mock-role`/`saa.locale` hay bất kỳ state phía client nào.
+
+```mermaid
+graph TB
+    Browser["Browser — request tới bất kỳ route nào"] --> Proxy["proxy.ts<br/>(chạy trước mọi route)"]
+    Proxy -->|"gate khóa AND route != /prelaunch"| ToPrelaunch["redirect -> /prelaunch"]
+    Proxy -->|"gate mở AND route == /prelaunch"| ToHome["redirect -> /"]
+    Proxy -->|"khác"| PassThrough["pass-through, không đổi"]
+```
+
+**Quy tắc rẽ nhánh** (`resolveGateRedirect`, `lib/prelaunch/gate.ts:26-44`):
+- Khóa (`!isExpired`) và route khác `/prelaunch` → redirect `/prelaunch`.
+- Khóa và đã ở `/prelaunch` → `null` (không tự redirect vào chính nó, tránh vòng lặp).
+- Mở (`isExpired`) và đang ở `/prelaunch` → redirect `/`.
+- `isInvalid` (biến env thiếu/sai định dạng) → luôn `null`, bất kể pathname — **fail-open**:
+  một lỗi cấu hình không bao giờ khóa cứng toàn site. Lý do chọn hướng này thay vì
+  fail-closed nằm ở [ADR-002](../../decisions/ADR-002-prelaunch-launch-timing-gate.md).
+
+**Matcher loại trừ** (`export const config.matcher` trong `proxy.ts`):
+`'/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)'` — loại mọi path chứa dấu chấm
+sau dấu `/` đầu tiên (không chỉ 3 alternative liệt kê tên trong biểu thức), nên bảo vệ
+được `/saa/Prelaunch_BG.png`, `/fonts/digital-numbers.woff2`, và bất kỳ static asset có
+phần mở rộng nào khác — thiếu bước loại trừ này, `/prelaunch` sẽ tự redirect ảnh
+nền/font/CSS của chính nó vào chính nó và render trần trụi.
+
+**Nửa còn lại — client-side unlock**: `proxy.ts` chỉ chặn ở request MỚI. Một actor đang
+mở sẵn `/prelaunch` đúng lúc đếm ngược chạm 0 sẽ không tự nhận request mới nào để proxy
+can thiệp — nếu chỉ có nửa server, actor đó bị "kẹt" ở `00 00 00` cho tới khi tự tải lại.
+`lib/prelaunch/use-prelaunch-countdown.ts` bù lại bằng cách tick mỗi 1 giây và gọi
+`router.replace('/')` ngay khi client thấy `isExpired`/`isInvalid`, có throttle qua
+`sessionStorage` (tối đa 1 lần mỗi 30 giây) để tránh vòng lặp nhấp nháy khi đồng hồ
+client/server lệch nhau. Rationale đầy đủ và giới hạn đã biết của cơ chế throttle này nằm
+ở [ADR-002](../../decisions/ADR-002-prelaunch-launch-timing-gate.md).
+
 ## Configuration
 
 | Biến | Nguồn | Vì sao `NEXT_PUBLIC_` |
@@ -208,6 +266,10 @@ bắt đầu" (`isExpired: true`), UI không phân biệt hai case này (giữ c
 | `/kudos` | `app/kudos/page.tsx` (10 dòng) | Placeholder có chủ đích — chỉ tiêu đề, chưa có nội dung Sun* Kudos |
 | `/profile` | `app/profile/page.tsx` (16 dòng) | Placeholder — đích của mục "Profile" trong account menu, tồn tại để không 404 (TC ID-59) |
 | `/admin` | `app/admin/page.tsx` (16 dòng) | Placeholder — đích của mục "Admin Dashboard"; comment dòng 1-4 nói rõ trang KHÔNG có access control (xem `permissions.md`) |
+| `/prelaunch` | `app/prelaunch/page.tsx` | Màn đếm ngược full-viewport (DAYS/HOURS/MINUTES, tick 1s) — chặn mọi route khác cho tới khi `NEXT_PUBLIC_EVENT_START_AT` tới/qua hạn (xem § Request-Interception Layer ở trên) |
+
+5 route cũ (`/`, `/awards`, `/kudos`, `/profile`, `/admin`) không đổi file nguồn — chỉ đổi
+điều kiện khi nào chúng được phép render, qua `proxy.ts` ở trên.
 
 Hash-anchor scroll (`/awards#top-talent` từ card/CTA/nav) hoạt động nhờ
 `data-scroll-behavior="smooth"` trên thẻ `<html>` (`app/layout.tsx:33`) — Next 16 bỏ việc tự
