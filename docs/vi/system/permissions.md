@@ -24,6 +24,15 @@ menu chỉ là "khuất mắt", không phải "khóa cửa". Khi hệ thống c�
 server), toàn bộ quy tắc dưới đây phải được dựng lại và kiểm tra ở phía máy chủ — không
 được xem những gì mô tả ở đây là đã đủ an toàn.
 
+**Cập nhật (lượt Login, 2026-08-19) — điều trên vẫn đúng cho MỌI route ngoại trừ đúng một
+trang.** Hệ thống giờ có một trang đăng nhập (`/login`, Google OAuth qua Supabase) với một
+kiểm tra THẬT ở phía server: `getUser()` xác minh lại với Supabase Auth, không đọc
+`localStorage`. Nhưng phạm vi của kiểm tra đó chỉ có đúng một tác dụng — quyết định `/login`
+có redirect người xem đi hay không. Nó **không** quyết định `role`, **không** bảo vệ
+`/admin`/`/profile`/route nào khác, và **không** nối với bảng `guest`/`user`/`admin` bên
+dưới. Đọc tiếp phần dưới với giả định "chưa có phân quyền thật" vẫn đúng cho mọi thứ ngoại
+trừ ngoại lệ một-trang này — chi tiết ở § Special Conditions cuối tài liệu.
+
 ## Authorization System Type
 
 **System Type**: `other` — Không có hệ thống authorization thật nào tồn tại. Có một khái
@@ -98,6 +107,19 @@ nào ở trên — nên không có mã `PERM###` nào cho nó và không ảnh h
 như đã mô tả). Chi tiết ở
 [docs/vi/features/countdown-prelaunch/technical-spec.md](../features/countdown-prelaunch/technical-spec.md)
 và [ADR-002](../../decisions/ADR-002-prelaunch-launch-timing-gate.md).
+
+**Cập nhật (lượt Login, 2026-08-19)**: `/login` và `/auth/callback` được miễn trừ khỏi gate
+đếm-ngược ở trên, cùng cách `/prelaunch` đã được miễn trừ — vẫn là gate theo THỜI GIAN,
+không đổi bản chất "launch-timing, không phải authorization" của gate đó.
+
+Tách biệt với gate thời gian ở trên: `/login` (`app/login/page.tsx`) giờ có thêm một kiểm
+tra THẬT khác — `getUser()` phía server, redirect `/` nếu actor đã có phiên Supabase hợp
+lệ. Đây là kiểm tra đầu tiên trong toàn hệ thống KHÔNG dựa trên `localStorage`/mock — được
+ghi nhận là `PERM004_LoginRouteAuthGate`, type `route-guard` (loại đầu tiên khác
+`screen-permission`) trong
+[permissions-matrix.md](./permissions-matrix.md). Nó chỉ chi phối MỘT route (`/login`) và
+không đọc/ghi `role` — không mở rộng ra bất kỳ route nào khác, không thay đổi kết luận
+"không có phân quyền thật theo vai trò" ở đầu tài liệu này.
 
 Ngoài điều kiện trên, không có điều kiện đặc biệt nào khác theo IP hay môi trường triển
 khai. Chuyển đổi ngôn ngữ (Việt/Anh) trên thanh điều hướng chỉ đổi văn bản hiển thị, không

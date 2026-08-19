@@ -25,6 +25,14 @@ trong hệ thống; gate này nằm trên một trục hoàn toàn khác. Chi ti
 kiến trúc, và rationale đầy đủ nằm ở § Request-Interception Layer (Prelaunch Gate) bên
 dưới và [ADR-002](../../decisions/ADR-002-prelaunch-launch-timing-gate.md).
 
+**Cập nhật (lượt Login, 2026-08-19)**: dòng mở đầu ở trên ("không có tầng backend... không
+có `app/api/**/route.ts`") không còn đúng theo nghĩa tuyệt đối. `app/auth/callback/route.ts`
+là route handler thật ĐẦU TIÊN của codebase này (xử lý redirect OAuth từ Google/Supabase),
+và `proxy.ts` (cùng file gate ở trên — Next 16 chỉ nạp đúng MỘT proxy) nay đảm nhiệm THÊM một
+việc: refresh session cookie Supabase trên mọi request. Hệ thống vẫn không có database/ORM
+riêng của app (Supabase tự quản lý schema `auth.users` của nó, app không viết migration nào).
+Chi tiết đầy đủ ở § Authentication Layer (Supabase + Google OAuth) bên dưới.
+
 ```mermaid
 graph TB
     subgraph Browser["Browser (client)"]
@@ -69,8 +77,9 @@ sơ đồ gốc của template vì hệ thống này không có backend tier nà
 | E2E test runner | Playwright (`@playwright/test`, `playwright.config.ts`) | ^1.62.1 |
 | Unit test runner | Playwright (`playwright.unit.config.ts`, chạy `lib/*.test.ts`) | ^1.62.1 (dùng chung install) |
 | Package manager | npm (`package-lock.json`) | — |
-| Backend | none | not-applicable |
-| Database | none | not-applicable |
+| Backend | none cho phần còn lại của app; **thêm 2026-08-19** — 1 route handler thật (`app/auth/callback/route.ts`) cho OAuth callback | not-applicable (ngoại trừ route handler trên) |
+| Database | none do app tự định nghĩa; **thêm 2026-08-19** — Postgres nội bộ của Supabase local (`auth.users`, app không viết migration) | Supabase CLI local (Docker) |
+| Auth | **thêm 2026-08-19** — Supabase Auth (GoTrue) + Google OAuth provider, qua `@supabase/supabase-js` + `@supabase/ssr` (`lib/supabase/{client,server,proxy-session,env}.ts`) | `@supabase/ssr` (xem `package.json`) |
 | Cache | none | not-applicable |
 | Queue | none | not-applicable |
 
@@ -185,6 +194,19 @@ tách quyền sở hữu file — `components/**` do Track A (UI trình bày) gi
     `lib/i18n/locale-provider.tsx:77-79`), không đọc context trực tiếp.
   - Lý do đầy đủ hai quyết định này (vì sao mock session, vì sao hand-rolled i18n, điều kiện
     nâng cấp) → [ADR-001](../../decisions/ADR-001-mock-session-and-hand-rolled-i18n.md).
+  - **Cập nhật (lượt Login, 2026-08-19) — hai ranh giới "trạng thái người dùng" tồn tại song
+    song, KHÔNG hợp nhất ở lượt này**: `SessionProvider` ở trên vẫn y nguyên — mock, đọc
+    `localStorage`, vẫn KHÔNG phải security boundary. Đứng cạnh nó, giờ có một phiên
+    Supabase THẬT (cookie do `@supabase/ssr` quản lý, xác thực qua Google) — không ai giả
+    mạo được từ DevTools như mock role. Hai cái **không đọc lẫn nhau**: `role` hiển thị UI
+    (account menu, notification bell, mục Admin Dashboard) vẫn hoàn toàn do mock session
+    quyết định; phiên Supabase chỉ quyết định đúng một việc — có được xem `/login` hay bị
+    đưa về `/` (xem § Authentication Layer bên dưới, và
+    [permissions.md](permissions.md) đã cập nhật). Đừng đọc nhầm: sự tồn tại của phiên
+    Supabase KHÔNG có nghĩa là các route khác (`/`, `/awards`, `/kudos`, `/profile`,
+    `/admin`) đã được bảo vệ — chúng vẫn y nguyên như mô tả ở trên, không kiểm tra session
+    nào. Việc hợp nhất hai ranh giới này (dùng phiên Supabase để xác định `role` thật, bảo
+    vệ route khác) nằm ngoài phạm vi lượt này.
 - **Testing kép trên cùng một Playwright install**:
   - `playwright.config.ts` (E2E) — 2 project, 2 `webServer` tách biệt cổng 3000/3100, mỗi
     server set một giá trị `NEXT_PUBLIC_EVENT_START_AT` khác nhau (một hợp lệ, một
@@ -240,6 +262,87 @@ can thiệp — nếu chỉ có nửa server, actor đó bị "kẹt" ở `00 00
 client/server lệch nhau. Rationale đầy đủ và giới hạn đã biết của cơ chế throttle này nằm
 ở [ADR-002](../../decisions/ADR-002-prelaunch-launch-timing-gate.md).
 
+## Authentication Layer (Supabase + Google OAuth) — thêm 2026-08-19
+
+Lần đầu tiên hệ thống có một ranh giới xác thực THẬT, cho đúng một mục đích: màn `/login`.
+4 module `lib/supabase/{client,server,proxy-session,env}.ts` đều dùng factory của
+`@supabase/ssr` (không phải `@supabase/auth-helpers-nextjs` đã deprecated) với adapter cookie
+`getAll`/`setAll` — `cookies()` từ `next/headers` là async trong Next 16 nên phải `await`
+trước khi đưa vào adapter.
+
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant LC as "login-client.tsx (Client)"
+    participant SC as "lib/supabase/client.ts"
+    participant G as Google OAuth consent
+    participant CB as "app/auth/callback/route.ts"
+    participant SS as "lib/supabase/server.ts"
+    participant P as "proxy.ts (mọi request khác)"
+
+    B->>LC: Click nút đăng nhập
+    LC->>SC: signInWithOAuth({provider:'google'})
+    SC-->>B: Redirect cùng-tab tới Google
+    B->>G: Consent screen
+    G-->>CB: Redirect kèm ?code= (hoặc ?error_description= nếu huỷ)
+    CB->>CB: Kiểm tra error_description TRƯỚC code (R4)
+    CB->>SS: exchangeCodeForSession(code) — try/catch (auth-js#782)
+    SS-->>CB: session + Set-Cookie
+    CB-->>B: Redirect getSiteUrl()+"/" (thành công) hoặc .../login?error=... (thất bại)
+    B->>P: Request tiếp theo tới route bất kỳ
+    P->>P: updateSupabaseSession() refresh cookie TRƯỚC KHI resolveGateRedirect()
+```
+
+**3 quyết định đáng ghi lại nhất của lớp này:**
+
+1. **`getUser()`, không bao giờ `getSession()`, ở phía server** (`app/login/page.tsx`,
+   `lib/supabase/proxy-session.ts`) — cookie là input không đáng tin trên server; `getUser()`
+   round-trip thật tới Supabase Auth, `getSession()` chỉ đọc cookie tại chỗ mà không xác
+   minh lại.
+2. **Redirect của `app/auth/callback/route.ts` luôn dựng từ `getSiteUrl()`
+   (`lib/supabase/env.ts`), KHÔNG BAO GIỜ từ `request.nextUrl.origin`** — phát hiện từ
+   security review (mức High): route này không xác thực và internet-reachable; `nextUrl.origin`
+   suy ra từ header `Host`/`X-Forwarded-Host` do client gửi, nên phía sau hạ tầng không pin
+   `Host`, một header giả mạo có thể biến route thành open-redirect tới origin của kẻ tấn
+   công. `getSiteUrl()` là config tĩnh (`NEXT_PUBLIC_SITE_URL`, mặc định
+   `http://localhost:3000`), không bao giờ suy ra từ request.
+3. **`proxy.ts` — rủi ro cao nhất của lượt này**: `@supabase/ssr` ghi cookie refresh lên
+   object response nó được giao qua `setAll`. Next 16 chỉ nạp đúng MỘT `proxy.ts`, nên gate
+   đếm-ngược (BL001, xem § Request-Interception Layer ở trên) và việc refresh session
+   Supabase bắt buộc sống chung một file. Nếu gate sau đó trả về một `NextResponse.redirect`
+   KHÁC với response đã có cookie refresh, cookie đó biến mất — actor bị đăng xuất âm thầm
+   trên mọi request có gate can thiệp. Cách xử lý: `updateSupabaseSession()`
+   (`lib/supabase/proxy-session.ts`) trả về cả `response` LẪN danh sách `supabaseCookies` nó
+   đã ghi; `proxy.ts` copy thủ công từng cookie đó lên bất kỳ response nào cuối cùng thật sự
+   được gửi đi (pass-through hoặc redirect của gate) — xem `proxy.ts` dòng 38-41.
+
+**Exemption của gate đếm-ngược**: `/login` và `/auth/callback` được thêm vào
+`ALWAYS_ALLOWED` của `lib/prelaunch/gate.ts`, miễn trừ theo CẢ HAI chiều (khóa và mở) — khác
+với `/prelaunch` chỉ miễn trừ một chiều. Đây vẫn là quyết định launch-timing (cùng trục với
+`/prelaunch`), KHÔNG phải nới lỏng authorization.
+
+**Chưa xác minh bằng round-trip thật**: chưa có Google OAuth client ID/secret thật được cấp
+(`SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID/SECRET` trong `.env.example` là placeholder) — stack
+local (`supabase start`) khởi động và redirect `authorize` bắn ra bình thường, nhưng vòng
+quay lại từ Google chưa được exercise với tài khoản thật. Xem § Local Supabase Development
+Setup ngay dưới đây để cấu hình khi có credentials.
+
+### Local Supabase Development Setup
+
+Yêu cầu Docker chạy được (`colima start` trên máy không có Docker Desktop), sau đó:
+
+```bash
+supabase start   # đọc supabase/config.toml, in ra API URL + anon/publishable key thật
+```
+
+| Việc | Chi tiết |
+|---|---|
+| **Port đã dịch +100** | API `54421` (không phải mặc định `54321`), DB `54422`, Studio `54423`, Inbucket `54424` — một project Supabase local khác (`meeting-translation`) đã chiếm dải `54321-54324` trên máy dev này (`supabase/config.toml` dòng 10-12, R6). Copy đúng port `supabase start` in ra, đừng dùng mặc định CLI. |
+| `.env.local` | `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — lấy từ output `supabase start`, KHÔNG phải giá trị placeholder trong `.env.example`. |
+| Root `.env` (không phải `.env.local`) | `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` + `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET` — Supabase CLI đọc file `.env` ở root qua cú pháp `env(...)` trong `supabase/config.toml`, không đọc `.env.local` của Next.js. Cả hai file đã trong `.gitignore`. |
+| Google Cloud Console — Authorized redirect URI | `http://127.0.0.1:54421/auth/v1/callback` — trỏ vào **Supabase local** (GoTrue), KHÔNG PHẢI `app/auth/callback` của Next.js. Next.js chỉ nhận redirect từ Supabase sau khi Supabase đã tự xử lý xong với Google. |
+| E2E fixture user | `supabase/seed.sql` seed sẵn `e2e-login@example.com` (idempotent, an toàn khi `supabase db reset`) — chỉ hợp lệ với Postgres local này. |
+
 ## Configuration
 
 | Biến | Nguồn | Vì sao `NEXT_PUBLIC_` |
@@ -247,6 +350,10 @@ client/server lệch nhau. Rationale đầy đủ và giới hạn đã biết c
 | `NEXT_PUBLIC_EVENT_START_AT` | `.env.example` — ISO-8601, mặc định `2026-12-19T18:30:00+07:00` (~90 ngày, để dev thấy "Coming soon" với DAYS/HOURS/MINUTES khác 0) | Countdown chạy trên client (`setInterval`/`useEffect` trong `components/home/countdown-timer.tsx`), cần đọc giá trị này trong browser mỗi giây — bắt buộc prefix `NEXT_PUBLIC_` để Next inline lúc build |
 | `NEXT_PUBLIC_MOCK_ROLE` | `.env.example`, mặc định `guest` — chỉ dùng khi `localStorage` (`saa.mock-role`) chưa có giá trị | Fallback seed cho `SessionProvider`, không phải security boundary |
 | `NEXT_PUBLIC_MOCK_UNREAD_COUNT` | `.env.example`, mặc định `0` — cùng cơ chế fallback | Fallback seed số thông báo chưa đọc |
+| `NEXT_PUBLIC_SUPABASE_URL` | **Thêm 2026-08-19** — output thật của `supabase start`, mặc định placeholder `http://127.0.0.1:54321` (chưa dịch port, xem cảnh báo port +100 ở trên) | Supabase browser/server client cần biết endpoint để gọi `/auth/v1/*` |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | **Thêm 2026-08-19** — output thật của `supabase start` | Key công khai cho browser client (`lib/supabase/client.ts`) |
+| `NEXT_PUBLIC_SITE_URL` | **Thêm 2026-08-19** — mặc định `http://localhost:3000` nếu unset | Origin tin cậy mà `getSiteUrl()` dùng để dựng MỌI redirect trong `app/auth/callback/route.ts` — phải khớp `site_url`/`additional_redirect_urls` trong `supabase/config.toml` (Supabase so khớp exact string) |
+| `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` / `_CLIENT_SECRET` | **Thêm 2026-08-19** — người dùng cung cấp, đặt trong `.env` ở root (không phải `.env.local`) | `supabase/config.toml` đọc qua cú pháp `env(...)` để bật provider Google; secret không có prefix `NEXT_PUBLIC_`, không commit |
 
 Giá trị `NEXT_PUBLIC_*` đóng băng lúc `next build`/lúc server process khởi động, không đổi
 được giữa chừng — lý do bộ E2E cần 2 `webServer` trên 2 port thay vì 1 server đổi env giữa
@@ -267,6 +374,8 @@ bắt đầu" (`isExpired: true`), UI không phân biệt hai case này (giữ c
 | `/profile` | `app/profile/page.tsx` (16 dòng) | Placeholder — đích của mục "Profile" trong account menu, tồn tại để không 404 (TC ID-59) |
 | `/admin` | `app/admin/page.tsx` (16 dòng) | Placeholder — đích của mục "Admin Dashboard"; comment dòng 1-4 nói rõ trang KHÔNG có access control (xem `permissions.md`) |
 | `/prelaunch` | `app/prelaunch/page.tsx` | Màn đếm ngược full-viewport (DAYS/HOURS/MINUTES, tick 1s) — chặn mọi route khác cho tới khi `NEXT_PUBLIC_EVENT_START_AT` tới/qua hạn (xem § Request-Interception Layer ở trên) |
+| `/login` | `app/login/page.tsx` | **Thêm 2026-08-19** — Server Component; `getUser()` guard redirect `/` nếu đã có phiên hợp lệ; render `LoginClient` (click → loading → `signInWithOAuth`) nếu chưa. Miễn trừ gate đếm-ngược cả 2 chiều (xem § Authentication Layer). |
+| `/auth/callback` | `app/auth/callback/route.ts` | **Thêm 2026-08-19** — Route handler THẬT đầu tiên của app (`GET`). Đổi `code` OAuth lấy session, redirect `/` hoặc `/login?error=...`. Xem § Authentication Layer. |
 
 5 route cũ (`/`, `/awards`, `/kudos`, `/profile`, `/admin`) không đổi file nguồn — chỉ đổi
 điều kiện khi nào chúng được phép render, qua `proxy.ts` ở trên.
@@ -295,3 +404,8 @@ khác mặc định (`75`) hay query-string cache-busting, nên không cần c�
 - Không xác minh runtime thực tế (không chạy `next dev`/Playwright trong tác vụ này) — toàn
   bộ sơ đồ dựa trên đọc source tĩnh (`grep`/`Read`), phù hợp phạm vi Wave 1 (architecture
   synthesis), không phải một lần kiểm thử hành vi.
+- **Thêm 2026-08-19**: vòng quay Google OAuth thật (Google Console → Supabase → Next.js)
+  chưa được exercise với credentials thật — xem § Authentication Layer, "Chưa xác minh bằng
+  round-trip thật". Bảo vệ các route còn lại (`/`, `/awards`, `/kudos`, `/profile`, `/admin`)
+  bằng phiên Supabase, và thay `lib/session/session-provider.tsx` bằng session thật, đều nằm
+  ngoài phạm vi lượt này.

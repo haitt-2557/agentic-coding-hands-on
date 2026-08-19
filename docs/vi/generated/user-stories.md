@@ -2,7 +2,7 @@
 
 **Project**: Sun* Annual Awards 2025 (SAA 2025) — Homepage sự kiện
 **Generated**: 2026-08-18
-**Analysis Scope**: 6 màn hình trong `screen-list.md` (SCR001–SCR006, SCR006 thêm 2026-08-19) + `permissions-matrix.md` (PERM001–PERM003) — enumeration chạy theo `references/user-stories-ipe-protocol.md`, `screen_source: route-view` (web). Nguồn được scan trực tiếp: `components/layout/site-header.tsx`, `components/layout/site-footer.tsx`, `components/layout/quick-action-widget.tsx`, `components/home/hero-cta.tsx`, `components/home/award-card.tsx`, `components/home/kudos-section.tsx`, `components/home/countdown-timer.tsx`, `components/ui/account-menu.tsx`, `components/ui/notification-bell.tsx`, `components/ui/language-switcher.tsx`, `components/ui/dropdown-menu.tsx`, `lib/awards.ts`, và (thêm 2026-08-19) `proxy.ts`, `lib/prelaunch/gate.ts`, `lib/prelaunch/use-prelaunch-countdown.ts`, `components/prelaunch/*`.
+**Analysis Scope**: 7 màn hình trong `screen-list.md` (SCR001–SCR007; SCR006 thêm 2026-08-19, SCR007 thêm 2026-08-19 lượt Login) + `permissions-matrix.md` (PERM001–PERM004) — enumeration chạy theo `references/user-stories-ipe-protocol.md`, `screen_source: route-view` (web). Nguồn được scan trực tiếp: `components/layout/site-header.tsx`, `components/layout/site-footer.tsx`, `components/layout/quick-action-widget.tsx`, `components/home/hero-cta.tsx`, `components/home/award-card.tsx`, `components/home/kudos-section.tsx`, `components/home/countdown-timer.tsx`, `components/ui/account-menu.tsx`, `components/ui/notification-bell.tsx`, `components/ui/language-switcher.tsx`, `components/ui/dropdown-menu.tsx`, `lib/awards.ts`, và (thêm 2026-08-19) `proxy.ts`, `lib/prelaunch/gate.ts`, `lib/prelaunch/use-prelaunch-countdown.ts`, `components/prelaunch/*`, và (thêm 2026-08-19, lượt Login) `app/login/page.tsx`, `app/login/login-client.tsx`, `app/auth/callback/route.ts`, `components/login/*`.
 
 **Code Format**: All US codes MUST follow `US###_NameSlug` format (e.g., US001_Login, US002_ViewDashboard)
 
@@ -46,6 +46,10 @@ không cần một US "hệ thống" song song.
 | SCR006_Prelaunch | PrelaunchCountdown (`components/prelaunch/prelaunch-countdown.tsx`) — thêm 2026-08-19 | secondary-action | Hiển thị đếm ngược DAYS/HOURS/MINUTES, tick 1s (không phải 60s như SCR001) | N/A — hàm thuần `computeCountdown` (`lib/countdown.ts`), không network |
 | SCR006_Prelaunch | Toàn ứng dụng — `proxy.ts` (request-interception layer, thêm 2026-08-19) | system-action | Chặn mọi route khác `/prelaunch` khi gate khóa, đưa `/prelaunch` về `/` khi gate mở | N/A — `lib/prelaunch/gate.ts`, không network |
 | SCR006_Prelaunch | `usePrelaunchCountdown` client-side unlock (`lib/prelaunch/use-prelaunch-countdown.ts`) — thêm 2026-08-19 | system-action | `router.replace('/')` ngay khi client thấy gate đã mở, để actor đang xem không kẹt tới khi tải lại | N/A — không network, ghi `sessionStorage` để throttle |
+| SCR007_Login | `getUser()` guard (`app/login/page.tsx`) — thêm 2026-08-19, lượt Login | system-action | `redirect('/')` trước khi render nếu actor đã có phiên Supabase hợp lệ | `supabase.auth.getUser()` qua `lib/supabase/server.ts` — network call thật tới Supabase Auth |
+| SCR007_Login | LoginButton (`components/login/login-button.tsx`) — thêm 2026-08-19 | primary-action | Click → loading → `signInWithOAuth({provider:'google'})`, redirect cùng-tab tới Google | `supabase.auth.signInWithOAuth()` (`lib/supabase/client.ts`) — network call thật |
+| SCR007_Login | LoginErrorAlert (`components/login/login-error-alert.tsx`) — thêm 2026-08-19 | secondary-action | Hiện thông báo lỗi cố định khi `?error` có trên URL hoặc click thất bại cục bộ | N/A — đọc prop `errored`/`failedLocally`, không network |
+| SCR007_Login | OAuth callback exchange (`app/auth/callback/route.ts`) — thêm 2026-08-19 | system-action | Đổi `code` OAuth lấy session; redirect `/` (thành công) hoặc `/login?error=...` (thất bại/huỷ) | `supabase.auth.exchangeCodeForSession()` qua `lib/supabase/server.ts` — network call thật |
 
 ## User Story Index
 
@@ -70,10 +74,19 @@ không cần một US "hệ thống" song song.
 | US017_ViewPrelaunchCountdown | View Prelaunch Countdown | ui | High | SCR006 |
 | US018_BlockedByLaunchGate | Blocked By Launch Gate While Counting Down | ui | High | SCR001, SCR002, SCR003, SCR004, SCR005, SCR006 |
 | US019_AutoUnlockAtZero | Auto-Unlock And Redirect At Zero | ui | High | SCR006, SCR001 |
+| US020_ViewLoginScreen | View Login Screen | ui | High | SCR007 |
+| US021_SignInWithGoogle | Sign In With Google | ui | High | SCR007 |
+| US022_SeeLoginErrorMessage | See Login Error Message | ui | Medium | SCR007 |
+| US023_RedirectedAwayWhenAlreadyAuthenticated | Redirected Away When Already Authenticated | ui | High | SCR007, SCR001 |
 
 **Ghi chú thêm 2026-08-19**: US017–US019 map 1-1 với US017–US019 trong
 `docs/vi/features/countdown-prelaunch/technical-spec.md` (đặt tên khác chút theo convention
 `NameSlug` tiếng Anh ngắn gọn của tài liệu này, cùng nội dung/mã Priority/Screens).
+
+**Ghi chú thêm 2026-08-19 (lượt Login)**: US020–US023 mô tả `F011_GoogleOAuthLogin` — được
+đối chiếu ngược trực tiếp từ source đã shipped (không có feature-spec đầy đủ đứng trước, xem
+advisory ở `feature-list.md`). Cả 4 đều `type: ui`, không có US nào `type: system` vì mọi
+hành vi (kể cả BL002_OAuthCallbackExchange) đều mô tả trọn vẹn được từ góc nhìn actor.
 
 ---
 
@@ -763,6 +776,70 @@ As a guest already viewing the prelaunch countdown, I want to be redirected to t
 
 ---
 
+## US020_ViewLoginScreen: View Login Screen
+
+**Type**: ui | **Interaction**: secondary-action | **Priority**: High | **Estimate**: S | **Thêm**: 2026-08-19 (lượt Login)
+
+**Story**: As a guest chưa đăng nhập, I want to view the login screen so that I can start signing in with my Google account.
+
+**Acceptance**: (1) `/login` render header/intro/nút đăng nhập/footer riêng, không tái dùng chrome của SCR001. (2) Đã có phiên hợp lệ → `redirect('/')` trước khi render (US023). (3) `?error=...` trên URL → thông báo lỗi cố định hiện ngay khi tải xong.
+
+**Technical**: `getUser()` (`lib/supabase/server.ts`) chạy trước render. Không có data entity nghiệp vụ. Deps: `app/login/page.tsx`, `components/login/{login-header,login-main,login-intro,login-footer}.tsx`.
+
+**Screens**: SCR007_Login
+
+**Test**: Happy — chưa có phiên, mở `/login` → thấy nút, không lỗi. Edge — quay lại từ `?error=...` → thông báo hiện ngay.
+
+---
+
+## US021_SignInWithGoogle: Sign In With Google
+
+**Type**: ui | **Interaction**: primary-action | **Priority**: High | **Estimate**: M | **Thêm**: 2026-08-19 (lượt Login)
+
+**Story**: As a guest trên màn đăng nhập, I want to click a button to sign in with Google so that I get a real authenticated session without typing a password.
+
+**Acceptance**: (1) Click → nút loading (disabled + loader) ngay. (2) `signInWithOAuth({provider:'google'})` điều hướng CÙNG-TAB (không popup). (3) Lỗi/throw trước khi kịp điều hướng → nút hết loading + thông báo lỗi cố định. (4) Google đồng ý → qua `/auth/callback` → về `/` không cần thao tác thêm.
+
+**Technical**: `supabase.auth.signInWithOAuth()` (`lib/supabase/client.ts`) → `app/auth/callback/route.ts` (BL002). Deps: `app/login/login-client.tsx`, `components/login/login-button.tsx`.
+
+**Screens**: SCR007_Login (nguồn), SCR001_Home (đích thành công)
+
+**Test**: Happy — click, đồng ý ở Google → về `/`, có phiên hợp lệ. Edge — lỗi mạng cục bộ trước redirect → nút hết loading, `LoginErrorAlert` hiện, vẫn ở `/login`.
+
+---
+
+## US022_SeeLoginErrorMessage: See Login Error Message
+
+**Type**: ui | **Interaction**: secondary-action | **Priority**: Medium | **Estimate**: S | **Thêm**: 2026-08-19 (lượt Login)
+
+**Story**: As a guest vừa huỷ hoặc gặp lỗi khi đăng nhập Google, I want to see a clear error message so that I know the attempt didn't succeed.
+
+**Acceptance**: (1) Huỷ consent (`error=access_denied`) → `/login?error=...`, `LoginErrorAlert` (`role="alert"`) hiện câu CỐ ĐỊNH, không lộ message gốc. (2) `exchangeCodeForSession` lỗi/throw → cùng hành vi. (3) Nút vẫn bấm lại được ngay, không "khoá".
+
+**Technical**: Nguồn lỗi từ `app/auth/callback/route.ts` (BL002) qua `?error`. Data: boolean `errored` (prop `searchParams.error`, không phải message thật — xem `business-rules.md`). Deps: `app/login/page.tsx`, `components/login/login-error-alert.tsx`.
+
+**Screens**: SCR007_Login
+
+**Test**: Happy — huỷ ở Google → `LoginErrorAlert` hiện, không lộ chi tiết kỹ thuật. Edge — `exchangeCodeForSession` throw (auth-js#782) → vẫn redirect `?error=...`, không crash, không trang lỗi riêng.
+
+---
+
+## US023_RedirectedAwayWhenAlreadyAuthenticated: Redirected Away When Already Authenticated
+
+**Type**: ui | **Interaction**: system-action | **Priority**: High | **Estimate**: S | **Thêm**: 2026-08-19 (lượt Login)
+
+**Story**: As a user đã đăng nhập Google, I want to be redirected away from the login screen so that I don't see a sign-in prompt I no longer need.
+
+**Acceptance**: (1) Phiên hợp lệ, gõ thẳng `/login` → `redirect('/')` ở Server Component TRƯỚC KHI render bất kỳ gì. (2) Kiểm tra dùng `getUser()` (round-trip thật), KHÔNG chỉ đọc cookie (`getSession()`). (3) Độc lập với `role` mock — PERM004 không đọc `SessionState.role`.
+
+**Technical**: `supabase.auth.getUser()` qua `lib/supabase/server.ts`. Cookie phiên refresh bởi `proxy.ts`/BL001. Deps: `app/login/page.tsx`.
+
+**Screens**: SCR007_Login (nguồn), SCR001_Home (đích)
+
+**Test**: Happy — phiên hợp lệ, gõ `/login` → redirect ngay về `/`. Edge — cookie hết hạn/thu hồi, gõ `/login` → `getUser()` trả `null` → render bình thường, KHÔNG redirect.
+
+---
+
 ## Screen → US Map
 
 | Screen | US Codes |
@@ -773,6 +850,7 @@ As a guest already viewing the prelaunch countdown, I want to be redirected to t
 | SCR004_Profile | US014, US018 |
 | SCR005_AdminDashboard | US016, US018 |
 | SCR006_Prelaunch | US017, US018, US019 |
+| SCR007_Login | US020, US021, US022, US023 |
 
 > `[IPE_ZERO]` — SCR002_Awards, SCR003_Kudos, SCR004_Profile, SCR005_AdminDashboard không phát sinh interaction NÀO có nguồn gốc từ chính màn hình đó (cả 4 là placeholder/bare-stub, không có button/link tương tác nào trong source — xem `screen-list.md`). Cả 4 vẫn có US mapping ở trên vì chúng là **đích đến** (destination) của các US điều hướng nguồn từ SCR001_Home, không phải vì tự thân chúng có interaction. **Thêm 2026-08-19**: US018 (gate) cũng map vào cả 4 vì cùng lý do đối xứng — chúng là điểm mà request bị `proxy.ts` chặn, dù bản thân màn hình không phát sinh interaction đó.
 
@@ -781,6 +859,6 @@ As a guest already viewing the prelaunch countdown, I want to be redirected to t
 - [x] All US### codes are unique
 - [x] All acceptance criteria are testable
 - [x] All technical notes are complete
-- [x] All US### codes are referenced in FeatureList.md — 19/19 US và 6/6 SCR đều được ít nhất một F### tham chiếu (US017–US019 → F010, thêm 2026-08-19).
+- [x] All US### codes are referenced in FeatureList.md — 23/23 US và 7/7 SCR đều được ít nhất một F### tham chiếu (US017–US019 → F010, US020–US023 → F011, thêm 2026-08-19).
 - [x] All `ui` US### mapped to SCR### or SCR###/REG### (parent SCR must exist in ScreenList; system US excluded) — không có REG### nào (toàn bộ SCR đều atomic theo `screen-list.md`)
 - [x] All system US### have at least one BL### mapped (UI US excluded) — N/A, không có US type `system` nào trong tài liệu này

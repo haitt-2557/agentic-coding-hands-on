@@ -1,0 +1,68 @@
+{
+  "score": 9.2,
+  "criticalCount": 0,
+  "decision": "SEALED",
+  "acceptanceCovered": [
+    "/login is reachable while the prelaunch launch gate is locked, and renders the header logo, language selector, ROOT FURTHER hero, intro copy, LOGIN With Google button and copyright footer — proven by e2e/login-screen.spec.ts assertions A1 through A7 and A12 passing against the port-3000 locked-gate server, plus orchestrator browser captures at 1440 and 375 in this directory",
+    "Clicking the login button initiates Google OAuth via Supabase authorize with provider=google and a redirect_to pointing at /auth/callback, in the same tab — proven by assertion A8 intercepting the authorize request and asserting provider, redirect_to and a single open page",
+    "The login button is disabled and reports aria-busy while authentication is in flight — proven by assertion A9 after the intercept was changed to fulfil with HTTP 204, asserting toBeDisabled and aria-busy=true conjunctively",
+    "A failed or cancelled authentication renders the fixed Vietnamese error string in a role=alert region — proven by assertion A10 loading /login?error=access_denied and asserting the role=alert text",
+    "An already-authenticated visitor to /login is redirected to / — proven by e2e/login-auth-redirect.spec.ts assertion A11 against the port-3200 open-gate server with a seeded signInWithPassword session, asserting the exact origin root",
+    "/login and /auth/callback are exempt from the prelaunch launch gate in both the locked and unlocked directions, and the gate remains launch-timing only, never authorization — proven by lib/prelaunch/gate.test.ts locked, unlocked and invalid-config cases plus near-miss guards, and by reviewer confirmation that no auth awareness reached gate.ts",
+    "Supabase session refresh is merged into the single Next 16 proxy.ts and refreshed auth cookies survive a gate redirect rather than being silently dropped — proven by reading proxy.ts, where updateSupabaseSession returns supabaseCookies alongside the response and every cookie is copied onto the gate redirect before it ships",
+    "No secret key is reachable from client code, getUser is used in every server context rather than getSession, and no real credential is committed — proven by greps returning no getSession and no secret-key reference under app, lib or components, and by git ls-files showing only .env.example tracked"
+  ],
+  "regressionChecked": [
+    "56 pre-existing E2E tests across homepage, prelaunch, dropdown, navigation and invalid-env suites still pass unchanged after the proxy.ts merge that runs on every request",
+    "lib/prelaunch/gate.test.ts grew from 40 to 55 to 57 cases additively; the diff is insertions-only, so no prior launch-gate assertion was weakened or removed",
+    "The shared i18n dictionaries gained only login.* keys; every existing screen consuming them still renders and passes its suite",
+    "npm run lint exits clean and the only ignore added is the supabase/.temp generated artifact, verified to be the sole source of all 182 prior errors so no real finding was hidden",
+    "lib/session/session-provider.tsx is byte-unchanged, so the mock-session behaviour every existing screen depends on is untouched by the new auth boundary"
+  ],
+  "contractStatus": "HELD",
+  "refuted": [],
+  "unproven": [],
+  "reachableRegressions": [],
+  "findings": [
+    {
+      "severity": "high",
+      "category": "security",
+      "location": "app/auth/callback/route.ts:26",
+      "summary": "Callback redirects were built from request.nextUrl.origin, which Next derives from the incoming Host header, making this unauthenticated internet-reachable route an open redirect behind infrastructure that does not pin Host. Fixed by resolving every redirect against a canonical NEXT_PUBLIC_SITE_URL via getSiteUrl().",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "low",
+      "category": "test-coverage",
+      "location": "lib/prelaunch/gate.test.ts:96",
+      "summary": "ALWAYS_ALLOWED prefix matching was correct but untested for near-misses, so a future refactor to a bare startsWith would silently exempt /loginX from the launch gate. Added regression guards asserting /loginX and /auth/callbackX still redirect while locked.",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "medium",
+      "category": "performance",
+      "location": "components/login/login-main.tsx:42",
+      "summary": "Login_Keyvisual.png is 468 KB with no WebP or AVIF variant and no smaller source for sm and md widths. Deferred: it is already down from 2.2 MB, and the real remedy is a clean layer export from the design owner, which is a tracked follow-up.",
+      "disposition": "Defer"
+    },
+    {
+      "severity": "low",
+      "category": "observability",
+      "location": "app/login/login-client.tsx:37",
+      "summary": "When signInWithOAuth returns an error object rather than throwing, the underlying Supabase message is discarded and only a boolean surfaces. Deferred: this is the recorded BR-002 behaviour, and a future maintainer debugging a silent failure has nothing to grep.",
+      "disposition": "Defer"
+    },
+    {
+      "severity": "low",
+      "category": "correctness",
+      "location": "app/login/login-client.tsx:26",
+      "summary": "A very fast double click can re-enter handleClick in the window before React commits the disabled attribute. Deferred: signInWithOAuth navigates away immediately and the practical risk is negligible.",
+      "disposition": "Defer"
+    }
+  ],
+  "riskGate": {
+    "touchesSensitiveArea": true,
+    "signoffRequired": true,
+    "humanSignedOff": true
+  }
+}

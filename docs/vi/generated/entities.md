@@ -9,7 +9,10 @@
 ## Ghi chú phạm vi (đọc trước ERD)
 
 Codebase này **không có database, không ORM, không schema, không migration, không entity
-nào được persist ở phía server**. Toàn bộ cây nguồn (`app/`, `components/`, `lib/`, `e2e/`)
+nào được app tự viết để persist ở phía server**. (**Cập nhật 2026-08-19**: Supabase Auth
+local nay quản lý một schema `auth.users` riêng của nó cho đăng nhập — app không viết
+migration/model nào cho nó; xem § Supabase Session ở cuối tài liệu. Kết luận "0 entity của
+app" dưới đây không đổi.) Toàn bộ cây nguồn (`app/`, `components/`, `lib/`, `e2e/`)
 chỉ có đúng **1 file được scout-report.md gắn nhãn `model`**: `lib/awards.ts`. Đây là một
 static dataset hard-code trong code, không phải runtime schema.
 
@@ -124,6 +127,29 @@ liên quan gì tới `SessionState`.
 > trong bản nháp đầu nhưng đã rút lại — boolean flag không phải discriminator; hành vi của
 > chúng nằm ở BR-002/BR-003. Không có DISC nào khác trong source.
 
+### Supabase Session (`lib/supabase/{client,server,proxy-session}.ts`) — thêm 2026-08-19
+
+**KHÔNG phải MODEL### của app** — Supabase Auth (GoTrue) tự quản lý schema `auth.users`
+của nó trong Postgres local; app không viết migration, không có ORM/query nào chạm vào bảng
+đó. Ghi lại ở đây (không phải ERD) vì nó là "hình dạng dữ liệu" thứ 4 mang ý nghĩa hành vi
+quan trọng: đây là **ranh giới xác thực THẬT duy nhất** trong toàn hệ thống, tương phản trực
+tiếp với `SessionState` (mock, phía trên) — nhưng phạm vi tác dụng của nó, ở lượt này, chỉ
+có đúng một nơi: `PERM004_LoginRouteAuthGate` (`permissions-matrix.md`), quyết định `/login`
+có redirect actor đi hay không. Nó **không đọc/ghi `SessionState.role`** — hai shape này
+không nối với nhau.
+
+| Field (qua `supabase.auth.getUser()`) | Type | Description |
+|-------|------|--------------|
+| user | `User \| null` (từ `@supabase/supabase-js`) | `null` nếu chưa đăng nhập hoặc token hết hạn/không hợp lệ; `getUser()` round-trip xác minh thật với Supabase Auth — khác `getSession()` (chỉ đọc cookie tại chỗ, không dùng ở phía server trong codebase này) |
+
+**Discriminator Fields**: _(none)_ — sự hiện diện của `user` (có/`null`) là một boolean
+condition (dùng trong `if (user) redirect('/')`), không phải một enum nhiều giá trị, nên
+không cấp mã DISC theo cùng quy tắc đã áp dụng cho `isExpired`/`isInvalid`.
+
+**Persistence**: cookie do `@supabase/ssr` quản lý (adapter `getAll`/`setAll` trong
+`lib/supabase/{server,proxy-session}.ts`), refresh trên mọi request qua `proxy.ts`
+(BL001, xem `behavior-logic.md`) — KHÔNG phải `localStorage` như `SessionState`/`Locale`.
+
 ---
 
 ## Client-Side Persisted State (localStorage)
@@ -155,6 +181,6 @@ Không có entity thứ hai nên không có mục Validation Rules bổ sung.
 
 - **Total Entities**: 1 (`MODEL001_Award`)
 - **Total Relationships**: 0
-- **Non-Entity Data Shapes documented**: 3 (`SessionState`, `CountdownResult`, `I18nState`/`Locale`)
-- **Total Discriminator Fields (DISC-###)**: 2 (`role`, `locale`) — cả hai nằm trong Non-Entity Data Shapes; không entity nào có discriminator. `isExpired`/`isInvalid` là boolean flag → Business Rules, không phải DISC.
-- **Persistence tier**: None server-side; 3 `localStorage` keys là toàn bộ client-side persisted state.
+- **Non-Entity Data Shapes documented**: 4 (`SessionState`, `CountdownResult`, `I18nState`/`Locale`, `Supabase Session` — thêm 2026-08-19)
+- **Total Discriminator Fields (DISC-###)**: 2 (`role`, `locale`) — cả hai nằm trong Non-Entity Data Shapes; không entity nào có discriminator. `isExpired`/`isInvalid` và Supabase `user` presence là boolean condition → không phải DISC.
+- **Persistence tier**: Không có server-side storage do app tự định nghĩa; **thêm 2026-08-19** — Postgres nội bộ của Supabase local (`auth.users`, app không viết migration) là persistence tier ĐẦU TIÊN app không tự sở hữu. 3 `localStorage` keys vẫn là toàn bộ client-side persisted state không đổi.

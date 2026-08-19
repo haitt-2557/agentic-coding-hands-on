@@ -1,0 +1,42 @@
+{
+  "task": "Implement the /login screen from MoMorph screen GzbNeVGJHz and wire Google OAuth through a local Supabase project, scoped to the login screen and session only.",
+  "mode": "interactive",
+  "acceptanceCriteria": [
+    "/login is reachable while the prelaunch launch gate is locked, and renders the header logo, language selector, ROOT FURTHER hero, intro copy, LOGIN With Google button and copyright footer",
+    "Clicking the login button initiates Google OAuth via Supabase authorize with provider=google and a redirect_to pointing at /auth/callback, in the same tab",
+    "The login button is disabled and reports aria-busy while authentication is in flight",
+    "A failed or cancelled authentication renders the fixed Vietnamese error string in a role=alert region",
+    "An already-authenticated visitor to /login is redirected to /",
+    "/login and /auth/callback are exempt from the prelaunch launch gate in both the locked and unlocked directions, and the gate remains launch-timing only, never authorization",
+    "Supabase session refresh is merged into the single Next 16 proxy.ts and refreshed auth cookies survive a gate redirect rather than being silently dropped",
+    "No secret key is reachable from client code, getUser is used in every server context rather than getSession, and no real credential is committed"
+  ],
+  "touchpoints": [
+    "app/login/page.tsx",
+    "app/login/login-client.tsx",
+    "app/auth/callback/route.ts",
+    "lib/supabase/client.ts",
+    "lib/supabase/server.ts",
+    "lib/supabase/proxy-session.ts",
+    "lib/supabase/env.ts",
+    "lib/prelaunch/gate.ts",
+    "proxy.ts",
+    "components/login/login-header.tsx",
+    "components/login/login-main.tsx",
+    "components/login/login-intro.tsx",
+    "components/login/login-button.tsx",
+    "components/login/login-error-alert.tsx",
+    "components/login/login-footer.tsx",
+    "lib/i18n/dictionaries/vi.ts",
+    "lib/i18n/dictionaries/en.ts",
+    "supabase/config.toml",
+    "supabase/seed.sql"
+  ],
+  "blastRadius": "The merged proxy.ts runs on every non-asset request app-wide, so a fault there reaches every route, not just /login. lib/prelaunch/gate.ts governs the launch lock for the whole site. The i18n dictionaries are shared by every existing screen. Everything else is new and reachable only via /login or /auth/callback. lib/session/session-provider.tsx is deliberately untouched and remains a non-security client mock alongside the new real auth boundary.",
+  "contracts": [
+    "Track A to Track B seam: components/login/* are presentational only and must never import @/lib/supabase/*; LoginButton is controlled via loading and onClick and sets disabled plus aria-busy",
+    "Accessible-name freeze asserted by the E2E: button name 'LOGIN With Google', header logo alt 'Sun* Annual Awards 2025' with no link or button ancestor, hero logo alt 'ROOT FURTHER', role=alert text 'Dang nhap khong thanh cong. Vui long thu lai.'",
+    "Env-name freeze: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, NEXT_PUBLIC_SITE_URL",
+    "resolveGateRedirect stays a pure clock-injected function with no auth awareness"
+  ]
+}

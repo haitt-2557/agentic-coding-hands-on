@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+try { process.loadEnvFile('.env.local'); } catch { /* optional in CI */ }
+
 const isCI = !!process.env.CI;
 
 export default defineConfig({
@@ -13,7 +15,7 @@ export default defineConfig({
   projects: [
     {
       name: 'prelaunch-gate',
-      testMatch: /^(?!.*homepage|.*invalid-env|.*prelaunch-countdown-unlocked).*\.spec\.ts$/,
+      testMatch: /^(?!.*homepage|.*invalid-env|.*prelaunch-countdown-unlocked|.*login-auth-redirect).*\.spec\.ts$/,
       use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:3000' },
     },
     {
@@ -34,6 +36,11 @@ export default defineConfig({
     {
       name: 'prelaunch-unlocked',
       testMatch: /prelaunch-countdown-unlocked\.spec\.ts$/,
+      use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:3200' },
+    },
+    {
+      name: 'login-auth-redirect',
+      testMatch: /login-auth-redirect\.spec\.ts$/,
       use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:3200' },
     },
   ],

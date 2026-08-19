@@ -2,7 +2,7 @@
 
 **Project**: Sun* Annual Awards 2025 (SAA 2025) — Homepage sự kiện
 **Generated**: 2026-08-18
-**Analysis Scope**: 5 screens (SCR001–SCR005) từ `screen-list.md`, route-view (web), Next.js App Router static.
+**Analysis Scope**: 5 screens (SCR001–SCR005) từ `screen-list.md`, route-view (web), Next.js App Router static. **Cập nhật**: mở rộng lên 7 screens — SCR006_Prelaunch (thêm 2026-08-19) và SCR007_Login (thêm 2026-08-19, lượt Login) — xem § Screen Transitions cho từng screen mới.
 
 **Code Format**: `SCR###_NameSlug`.
 
@@ -25,9 +25,12 @@ graph TD
     SCR003 -.->|"proxy.ts redirect nếu gate khóa lúc truy cập"| SCR006
     SCR004 -.->|"proxy.ts redirect nếu gate khóa lúc truy cập"| SCR006
     SCR005 -.->|"proxy.ts redirect nếu gate khóa lúc truy cập"| SCR006
+    Start -.->|"Direct URL /login — KHÔNG có link nào trong app trỏ tới đây"| SCR007["SCR007_Login ( /login )"]
+    SCR007 -->|"click nút Google, thành công"| SCR001
+    SCR007 -.->|"getUser() đã có phiên hợp lệ (PERM004) — redirect trước khi render"| SCR001
 ```
 
-**Đọc sơ đồ:** Mọi cạnh đi ra từ SCR001 là link thật (`next/link` `href`). 4 cạnh nét đứt quay về SCR001 là **giả định browser Back**, không phải link trong app — SCR002–SCR005 tự render `<main>` trần (không có `SiteHeader`/`SiteFooter`, vì layout gốc `app/layout.tsx` chỉ bọc `SessionProvider`/`LocaleProvider`, không có chrome dùng chung). Cạnh nét đứt từ SCR002–SCR005 vào SCR006 và cạnh đậm SCR006 → SCR001 là **thêm 2026-08-19**: không phải link người dùng bấm, mà là redirect do `proxy.ts` (server) hoặc `router.replace()` (client) thực hiện — xem § Guard Logic bên dưới và `docs/vi/system/architecture.md` § Request-Interception Layer. Xem chi tiết ở § Screen Transitions.
+**Đọc sơ đồ:** Mọi cạnh đi ra từ SCR001 là link thật (`next/link` `href`). 4 cạnh nét đứt quay về SCR001 là **giả định browser Back**, không phải link trong app — SCR002–SCR005 tự render `<main>` trần (không có `SiteHeader`/`SiteFooter`, vì layout gốc `app/layout.tsx` chỉ bọc `SessionProvider`/`LocaleProvider`, không có chrome dùng chung). Cạnh nét đứt từ SCR002–SCR005 vào SCR006 và cạnh đậm SCR006 → SCR001 là **thêm 2026-08-19**: không phải link người dùng bấm, mà là redirect do `proxy.ts` (server) hoặc `router.replace()` (client) thực hiện — xem § Guard Logic bên dưới và `docs/vi/system/architecture.md` § Request-Interception Layer. **Thêm 2026-08-19 (lượt Login)**: SCR007_Login chỉ vào được bằng URL trực tiếp — không có mục menu/link nào trong `SiteHeader`/`AccountMenu` trỏ tới `/login` (out of scope cho lượt này); cạnh SCR007 → SCR001 xảy ra theo 2 con đường khác nhau — thành công qua `/auth/callback` (round-trip Google), hoặc bị `getUser()` chặn ngay tại `/login` nếu đã có phiên. Xem chi tiết ở § Screen Transitions.
 
 ## Feature Entry Points
 
@@ -49,6 +52,10 @@ graph TD
 | START | SCR006_Prelaunch | Initial load / direct URL bất kỳ (kể cả `/`, `/awards`, `/kudos`, `/profile`, `/admin`) | Gate khóa (`!isExpired && !isInvalid`) — `proxy.ts` redirect trước khi route đích render | |
 | SCR001_Home / SCR002–SCR005 | SCR006_Prelaunch | `proxy.ts` redirect (request mới) | Gate khóa | |
 | SCR006_Prelaunch | SCR001_Home | `proxy.ts` redirect (request mới tới `/prelaunch`) HOẶC `router.replace('/')` phía client (actor đang mở sẵn trang) | Gate mở (`isExpired \|\| isInvalid`) | |
+| START | SCR007_Login | Direct URL `/login` — không có link nào trong app trỏ tới đây | Chưa có phiên Supabase hợp lệ (nếu đã có, `getUser()` redirect thẳng `/`, xem dòng dưới) | |
+| SCR007_Login | SCR001_Home | `getUser()` (Server Component) thấy phiên hợp lệ → `redirect('/')` trước khi render bất kỳ nội dung nào | Actor đã có phiên Supabase hợp lệ (PERM004) | |
+| SCR007_Login | SCR001_Home | Click nút "Đăng nhập Google" → Google consent → `/auth/callback` đổi `code` lấy session thành công → redirect `/` | `exchangeCodeForSession` không lỗi | |
+| SCR007_Login | SCR007_Login | Click nút → Google consent bị huỷ, hoặc `exchangeCodeForSession` lỗi → `/auth/callback` redirect `/login?error=...` | Huỷ hoặc lỗi ở bất kỳ bước nào của round-trip OAuth | |
 
 > Region column: bỏ trống ở mọi dòng — không có REG### nào (0 composite screen, xem `screen-list.md`).
 
@@ -152,6 +159,31 @@ graph TD
 
 ---
 
+### SCR007_Login (Login) — thêm 2026-08-19, lượt Login
+
+**Entry Points**:
+- Direct URL access `/login` — **không có link nào trong app trỏ tới màn này**
+  (`SiteHeader`/`AccountMenu` không có mục "Đăng nhập"; out of scope cho lượt này)
+- Redirect từ `/auth/callback` khi round-trip OAuth thất bại/huỷ (`?error=<msg>`)
+
+**Exit Points**:
+- To SCR001_Home: `getUser()` (Server Component) thấy phiên hợp lệ → `redirect('/')` NGAY,
+  trước khi render bất kỳ nội dung nào (PERM004)
+- To SCR001_Home: click nút → Google consent → `/auth/callback` đổi `code` lấy session
+  thành công → redirect `/`
+- Ở lại SCR007_Login: Google consent bị huỷ HOẶC `exchangeCodeForSession` lỗi →
+  `/auth/callback` redirect `/login?error=...` → `LoginErrorAlert` hiện
+
+**Decision Points**:
+- `getUser()` trước render: có phiên hợp lệ → redirect `/`; không có → render `LoginClient`
+- Trong `LoginClient` (client-side): `loading` giữ nút disabled từ lúc click tới khi trình
+  duyệt điều hướng đi (thành công) hoặc `error`/throw đưa `loading` về `false` (thất bại
+  cục bộ, vd mạng lỗi trước khi kịp redirect tới Google)
+- `errored || failedLocally` → hiện `LoginErrorAlert` với thông báo CỐ ĐỊNH, không phân biệt
+  loại lỗi
+
+---
+
 ## Region Transitions
 
 `N/A — không có REG### nào trong screen-list.md (0 composite screen).`
@@ -168,9 +200,18 @@ graph LR
     A --> E["SCR004_Profile"]
     A --> F["SCR005_AdminDashboard"]
     A --> G["SCR006_Prelaunch"]
+    H["SCR007_Login"] -->|"getUser() = user"| B
+    I["Chưa có phiên"] --> H
 ```
 
 **Không có hệ thống authentication nào trong codebase** (khớp `system-overview.md` § Security Overview: "Không có — không tồn tại luồng đăng nhập/đăng xuất nào"). `role` (`guest|user|admin`) là **mock phía client** đọc từ `localStorage`/`NEXT_PUBLIC_*` (`lib/session/session-provider.tsx`), có cảnh báo tường minh ngay trong source rằng giá trị này sửa được từ DevTools và không có kiểm tra server nào tồn tại. Nó chỉ điều khiển **hiển thị UI** (ẩn/hiện AccountMenu, NotificationBell, mục "Admin Dashboard"), không phải một ranh giới bảo mật.
+
+**Cập nhật (lượt Login, 2026-08-19)**: dòng trên KHÔNG còn đúng tuyệt đối. `system-overview.md`
+§ Security Overview đã cập nhật: nay CÓ một luồng authentication thật — Google OAuth qua
+Supabase Auth (SCR007_Login). Nhưng phạm vi của nó chỉ có đúng một tác dụng: quyết định
+SCR007_Login có redirect actor đi hay không (node `H` ở sơ đồ trên). Nó KHÔNG mở rộng
+"Authorization Level" của 6 screen còn lại trong bảng dưới đây — cả 6 vẫn y nguyên `Public`,
+không đọc phiên Supabase.
 
 | Screen | Authentication Required | Authorization Level |
 |--------|-------------------------|----------------------|
@@ -180,6 +221,7 @@ graph LR
 | SCR004_Profile | No | Public (route không kiểm tra role; chỉ mục menu dẫn tới bị ẩn theo mock role) |
 | SCR005_AdminDashboard | No | Public (route KHÔNG được bảo vệ — comment nguồn `app/admin/page.tsx` cảnh báo tường minh; chỉ mục menu bị ẩn theo mock role, ai gõ thẳng URL vẫn xem được) |
 | SCR006_Prelaunch | No | Public (mọi actor, không phân biệt role — nhưng KHÁC 5 dòng trên: có một request-interception layer thật (`proxy.ts`) chặn theo THỜI GIAN, không phải theo role; xem § Guard Logic ngay bên dưới) |
+| SCR007_Login | No (route tự nó công khai) | Public để VÀO, nhưng có **route-guard THẬT** (PERM004, `getUser()`) quyết định có được Ở LẠI hay bị redirect `/` — loại authorization đầu tiên trong bảng này không dựa trên mock `role` |
 
 ---
 
@@ -189,8 +231,11 @@ graph LR
 |--------|-------|----------|-------|
 | SCR001_Home | `NEXT_PUBLIC_EVENT_START_AT` thiếu hoặc không parse được (ISO date không hợp lệ) | `computeCountdown()` (`lib/countdown.ts`) trả `isInvalid: true`, CountdownTimer giữ nguyên zero-state ("00/00/00" + text "Coming soon") — không throw, không crash | screen |
 | Toàn ứng dụng (`proxy.ts`, thêm 2026-08-19) | Cùng biến `NEXT_PUBLIC_EVENT_START_AT` thiếu/không hợp lệ, nhưng ở tầng gate chứ không phải hiển thị | `resolveGateRedirect()` (`lib/prelaunch/gate.ts:33-35`) trả `null` bất kể pathname — **fail-open**: gate coi như đã mở, không route nào bị khóa vì lỗi cấu hình | app-wide |
+| SCR007_Login (thêm 2026-08-19, lượt Login) | Google consent bị huỷ (`?error=access_denied`) | `app/auth/callback/route.ts` kiểm tra `error_description` TRƯỚC `code` → redirect `/login?error=<msg>` — `LoginErrorAlert` hiện thông báo cố định | screen (`/login`) |
+| SCR007_Login (thêm 2026-08-19) | `exchangeCodeForSession` trả `{ error }` HOẶC throw (auth-js#782) | Cả 2 nhánh đều bọc try/catch, redirect `/login?error=<msg>` — không bao giờ render trang lỗi riêng, không lộ message gốc | screen (`/login`) |
+| SCR007_Login (thêm 2026-08-19) | Click nút đăng nhập nhưng `signInWithOAuth` trả `{ error }` hoặc throw TRƯỚC KHI kịp điều hướng đi (vd lỗi mạng cục bộ) | `LoginClient` set `failedLocally = true`, `loading = false` → `LoginErrorAlert` hiện ngay tại chỗ, không rời trang | screen (`/login`) |
 
-> Không có network/API error nào khác để document — hệ thống không gọi API nào (0 backend route, xác nhận `route-list.md` + `scout-report.md`). SCR002–SCR005 là nội dung tĩnh thuần, không có logic nào có thể lỗi. SCR006_Prelaunch không gọi API nào (đếm ngược là hàm thuần) — dòng lỗi duy nhất liên quan tới nó là dòng "Toàn ứng dụng" ở trên, vì gate ảnh hưởng tới việc nó có được hiển thị hay không, không phải lỗi xảy ra trên chính nó.
+> Không có network/API error nào khác để document ngoài 3 dòng trên (thêm 2026-08-19). SCR002–SCR005 là nội dung tĩnh thuần, không có logic nào có thể lỗi. SCR006_Prelaunch không gọi API nào (đếm ngược là hàm thuần) — dòng lỗi duy nhất liên quan tới nó là dòng "Toàn ứng dụng" ở trên. SCR007_Login là màn ĐẦU TIÊN có network/API error thật để document (trước đó: 0 backend route, xác nhận `route-list.md` + `scout-report.md`).
 
 ---
 
@@ -219,6 +264,14 @@ xem `docs/vi/system/architecture.md` § Request-Interception Layer,
 
 **Role-based guard: vẫn N/A — no route guards detected theo role.**
 
+**Cập nhật (lượt Login, 2026-08-19) — guard KHÁC LOẠI, không phải role-based**: `/login`
+(`app/login/page.tsx`) có một guard THẬT — `getUser()` (`lib/supabase/server.ts`), redirect
+`/` nếu actor đã có phiên Supabase hợp lệ. Đây KHÔNG mâu thuẫn với dòng "vẫn N/A" ở trên: đó
+là guard THEO ĐÃ-ĐĂNG-NHẬP-HAY-CHƯA (`PERM004_LoginRouteAuthGate`, type `route-guard`), không
+đọc/quyết định `role` (`guest|user|admin`). Nó chỉ chi phối đúng route `/login` — 6 route còn
+lại (`/`, `/awards`, `/kudos`, `/profile`, `/admin`, `/prelaunch`) không đổi, vẫn không có
+guard nào theo role hay theo phiên Supabase.
+
 Mục "Admin Dashboard" trong AccountMenu chỉ là **hiển thị/ẩn UI** theo mock role
 (`lib/session/session-provider.tsx`) — nó không chặn navigation. Điều hướng thẳng URL
 `/admin` (gõ tay, bookmark, chia sẻ link) render trang bình thường bất kể `role`, kể cả
@@ -238,6 +291,13 @@ hướng nào.
 
 SCR002_Awards dùng hash anchor (`/awards#<slug>`) để trình duyệt tự cuộn tới `<section id={slug}>` — đây là hành vi cuộn gốc của trình duyệt (CSS `scroll-mt-24`), KHÔNG phải app đọc `useSearchParams`/`router.query` để dựng lại state. Không có state nào được "restore" — trang render y hệt nhau dù có hash hay không, chỉ khác vị trí cuộn ban đầu.
 
+**Cập nhật (lượt Login, 2026-08-19)**: `app/login/page.tsx` đọc prop `searchParams`
+(`Promise<{ error?: string }>`, quy ước Server Component của Next App Router — không phải
+hook `useSearchParams`, nên không khớp grep signature dưới đây) để suy ra một boolean
+`errored`. Đây KHÔNG phải deep-link state restoration — giá trị của `?error` không bao giờ
+được đọc lại hay render vào DOM, chỉ dùng làm cờ true/false để hiện/ẩn `LoginErrorAlert`
+(BR đã ghi ở `business-rules.md`).
+
 ---
 
 ## Unsaved-Changes Protection
@@ -251,7 +311,7 @@ Không có form nhập liệu nào trong 5 screen — không có gì để mất
 ## Extraction Signatures
 
 ### Guard Logic
-Grep `beforeEnter|canActivate|middleware|loader|before_action` trên `app/**/page.tsx` — không có kết quả khớp (không guard nào gắn trực tiếp vào route config theo role). **Cập nhật 2026-08-19**: `proxy.ts` (root, không phải `app/**`) là request-interception layer thật — grep phạm vi ban đầu (`app/**/page.tsx`) không bắt được nó vì nó nằm ngoài `app/`; xác nhận trực tiếp bằng cách đọc `proxy.ts` + `lib/prelaunch/gate.ts`. Guard này gate theo thời gian (`NEXT_PUBLIC_EVENT_START_AT`), không đọc `role`/session nào — không mâu thuẫn với kết luận "no role-based guard" ở trên.
+Grep `beforeEnter|canActivate|middleware|loader|before_action` trên `app/**/page.tsx` — không có kết quả khớp (không guard nào gắn trực tiếp vào route config theo role). **Cập nhật 2026-08-19**: `proxy.ts` (root, không phải `app/**`) là request-interception layer thật — grep phạm vi ban đầu (`app/**/page.tsx`) không bắt được nó vì nó nằm ngoài `app/`; xác nhận trực tiếp bằng cách đọc `proxy.ts` + `lib/prelaunch/gate.ts`. Guard này gate theo thời gian (`NEXT_PUBLIC_EVENT_START_AT`), không đọc `role`/session nào — không mâu thuẫn với kết luận "no role-based guard" ở trên. **Cập nhật (lượt Login, 2026-08-19)**: `app/login/page.tsx` có một guard thật đọc trực tiếp trong thân Server Component (`getUser()`) — không khớp pattern grep trên (không dùng tên hàm `beforeEnter`/`canActivate`/`loader` nào), xác nhận bằng đọc trực tiếp source. Đây là guard đầu tiên trong hệ thống dựa trên phiên xác thực thật thay vì role mock hay đồng hồ.
 
 ### Deep-Link State Restoration
 Grep `useSearchParams|useQuery|router\.query|URLSearchParams|params\[` trên `app/**/page.tsx` và các component import trực tiếp — không có kết quả khớp.

@@ -8,6 +8,11 @@
 (`/prelaunch`, `proxy.ts`). Xem chi tiết đầy đủ ở
 `docs/vi/features/countdown-prelaunch/technical-spec.md`.
 
+**Cập nhật (lượt Login, 2026-08-19)**: thêm `F011_GoogleOAuthLogin` — đăng nhập Google qua
+Supabase Auth local (`/login`, `app/auth/callback/route.ts`). Feature-spec đầy đủ
+(`docs/vi/features/login-supabase-auth/`) CHƯA được sinh trong lượt này — chỉ inventory
+(route/screen/US/BL/PERM) được đối chiếu ngược ở đây; xem ghi chú cuối tài liệu.
+
 **Code Format**: All codes MUST follow `F###_NameSlug` format (e.g., F001_Auth, F002_UserProfile)
 **Screen Code Format**: All screen codes MUST follow `SCR###_NameSlug` format (e.g., SCR001_LoginForm)
 **User Story Code Format**: All US codes MUST follow `US###_NameSlug` format (e.g., US001_Login)
@@ -43,6 +48,7 @@
 | F008_NotificationPanelAccess | Notification Panel Access | ui | TypeScript/TSX | my-app | P2 |
 | F009_ReturnToHomeTop | Return To Home Top | ui | TypeScript/TSX | my-app | P3 |
 | F010_PrelaunchCountdownGate | Prelaunch Countdown Gate | ui | TypeScript/TSX | my-app | P0 |
+| F011_GoogleOAuthLogin | Google OAuth Login | ui | TypeScript/TSX | my-app | P0 |
 
 ## Feature Details
 
@@ -363,30 +369,87 @@ không phải theo quyền, và không đọc `role`/`SessionState` của F007/F
 
 ---
 
+### F011_GoogleOAuthLogin: Google OAuth Login — thêm 2026-08-19
+
+**Type**: ui
+**Description**: Đăng nhập bằng tài khoản Google qua Supabase Auth (GoTrue) local — màn
+`/login` (`app/login/page.tsx`) + route handler `/auth/callback`
+(`app/auth/callback/route.ts`). Actor bấm nút → chuyển cùng-tab tới Google consent →
+Google redirect về Supabase → Supabase redirect về `/auth/callback` kèm `code` → đổi lấy
+session → về `/`. Đây là ranh giới xác thực THẬT đầu tiên của hệ thống (song song, KHÔNG
+hợp nhất, với mock `role` của F007/F008 — xem `docs/vi/system/architecture.md`
+§ Authentication Layer). Feature-spec đầy đủ (business-context/technical-spec/screens/
+edge-cases) chưa được sinh trong lượt này — cần chạy pass feature-spec riêng để có tài
+liệu tại `docs/vi/features/login-supabase-auth/`.
+
+**Workspace**: my-app
+**Languages**: TypeScript, TSX
+**Components**: 7
+
+**Related Screens**:
+- SCR007_Login: Login
+
+**Related User Stories**:
+- US020_ViewLoginScreen: Xem màn hình đăng nhập
+- US021_SignInWithGoogle: Đăng nhập bằng Google
+- US022_SeeLoginErrorMessage: Thấy thông báo lỗi khi đăng nhập thất bại/huỷ
+- US023_RedirectedAwayWhenAlreadyAuthenticated: Bị đưa về trang chủ nếu đã đăng nhập
+
+**Related APIs/Routes**:
+- (page) /login — ROUTE009
+- (route handler) GET /auth/callback — ROUTE008
+
+**Related Data Models**:
+- Không có `MODEL###` mới — Supabase tự quản lý schema `auth.users` của nó, app không viết
+  migration/model nào (xem `entities.md` § Supabase Session)
+
+**Related Background Logic**:
+- BL002_OAuthCallbackExchange (`behavior-logic.md`) — type `integration`
+- BL001_PrelaunchLaunchGate (`behavior-logic.md`) — cập nhật, nay cũng refresh session
+  Supabase trên mọi request trước khi chạy gate
+
+**Related Permissions**:
+- PERM004_LoginRouteAuthGate (`permissions-matrix.md`) — type `route-guard`, kiểm tra THẬT
+  phía server, chỉ chi phối `/login`
+
+---
+
 ## Summary
 
-- **Total Features**: 10
-- **Total Screens**: 6
-- **Total User Stories**: 19
-- **Total Routes**: 6 (ROUTE001–ROUTE005, ROUTE007; ROUTE006 `/_not-found` loại khỏi mapping — tự sinh bởi Next.js, không có source file, cùng phạm vi loại trừ đã áp dụng ở `screen-list.md`)
+- **Total Features**: 11
+- **Total Screens**: 7
+- **Total User Stories**: 23
+- **Total Routes**: 8 (ROUTE001–ROUTE005, ROUTE007–ROUTE009; ROUTE006 `/_not-found` loại khỏi mapping — tự sinh bởi Next.js, không có source file, cùng phạm vi loại trừ đã áp dụng ở `screen-list.md`)
 - **Total Data Models**: 1 (MODEL001_Award)
-- **Total Background Logic**: 1 (BL001_PrelaunchLaunchGate)
-- **Total Permissions**: 3
+- **Total Background Logic**: 2 (BL001_PrelaunchLaunchGate, BL002_OAuthCallbackExchange)
+- **Total Permissions**: 4
 - **Languages Detected**: TypeScript, TSX (Next.js App Router)
+
+**Ghi chú (lượt Login, 2026-08-19)**: `F011_GoogleOAuthLogin` được thêm bằng cách đối chiếu
+ngược trực tiếp từ source đã shipped (`app/login/`, `app/auth/callback/`, `lib/supabase/`),
+KHÔNG đi qua toàn bộ pipeline Wave 1→5 như 10 feature trước. Đây là bổ sung inventory tối
+thiểu (route/screen/US/BL/PERM), không thay thế một lượt feature-spec đầy đủ — xem advisory
+ở cuối tài liệu.
 
 ## Cross-Reference Validation
 
 - [x] All F### codes are unique
 - [ ] All F### codes are referenced in UserStories.md — pending: `user-stories.md` được sinh trước Wave 5 nên chưa mang cột F### (ghi nhận rõ ở dòng "All US### codes are referenced in FeatureList.md — pending Wave 5" của chính tài liệu đó); cần một lượt cập nhật ngược `user-stories.md` sau bước này, ngoài phạm vi task hiện tại
 - [x] All screen references are valid (SCR### hoặc SCR###/REG### trong ScreenList — không có REG### nào trong hệ thống)
-- [x] All user story references are valid (US### trong UserStories, đủ cả 19/19)
+- [x] All user story references are valid (US### trong UserStories, đủ cả 23/23 sau khi thêm US020–US023)
 - [x] All route references are valid (ROUTE### trong RouteList)
 - [x] All data model references are valid (MODEL001 trong DataModel)
-- [x] All behavior logic references are valid (BL001 → F010)
-- [x] All permission references are valid (PERM### trong permissions-matrix.md)
-- [x] Every US has a parent feature (F###) — 19/19 US mapped, không US nào orphan
-- [x] Every screen has a parent feature (F###) — SCR001 (F001–F009), SCR002 (F003), SCR003 (F004), SCR004 (F007), SCR005 (F007), SCR006 (F010)
-- [x] Every route maps to a feature (F###) — ROUTE001–ROUTE005, ROUTE007 đều có ≥1 feature owner; ROUTE006 ngoài phạm vi (không có source file)
+- [x] All behavior logic references are valid (BL001 → F010, BL002 → F011)
+- [x] All permission references are valid (PERM### trong permissions-matrix.md, đủ cả PERM001–004)
+- [x] Every US has a parent feature (F###) — 23/23 US mapped, không US nào orphan
+- [x] Every screen has a parent feature (F###) — SCR001 (F001–F009), SCR002 (F003), SCR003 (F004), SCR004 (F007), SCR005 (F007), SCR006 (F010), SCR007 (F011)
+- [x] Every route maps to a feature (F###) — ROUTE001–ROUTE005, ROUTE007–ROUTE009 đều có ≥1 feature owner; ROUTE006 ngoài phạm vi (không có source file)
 - [x] Every data model maps to a feature (F###) — MODEL001 → F003
-- [x] Every background logic maps to a feature (F###) — BL001 → F010
+- [x] Every background logic maps to a feature (F###) — BL001 → F010, BL002 → F011
+
+**Advisory (lượt Login, 2026-08-19)**: `F011_GoogleOAuthLogin` chưa có thư mục feature-spec
+đầy đủ (`docs/vi/features/login-supabase-auth/{business-context,technical-spec,screens,
+edge-cases}.md`) — tạo mới thư mục per-feature nằm ngoài quyền surgical-edit của lượt này.
+**Khuyến nghị: chạy `/tkm:rebuild-spec --features F011`** để sinh bộ feature-spec đầy đủ cho
+`F011_GoogleOAuthLogin`.
 - [x] Every permission maps to a feature (F###) — PERM001/PERM002 → F007, PERM003 → F008
