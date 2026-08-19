@@ -13,6 +13,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { computeCountdown } from '@/lib/countdown';
+import { capDisplayDays } from '@/lib/prelaunch/display';
 
 export interface PrelaunchCountdown {
   days: string;
@@ -23,6 +24,44 @@ export interface PrelaunchCountdown {
 const SSR_DEFAULT: PrelaunchCountdown = { days: '00', hours: '00', minutes: '00' };
 const TICK_MS = 1000;
 
+// The unlock is a race between two clocks. This hook reads the BROWSER clock; `proxy.ts`
+// decides on the SERVER clock. If the viewer's machine runs ahead, `router.replace('/')`
+// fires, the proxy bounces the request back to /prelaunch, the component remounts, and a
+// guard scoped to one mount would reset and fire again immediately — a continuous flicker
+// for the whole skew window, at exactly the moment the page is being watched.
+//
+// So the attempt is throttled across mounts via sessionStorage. A skewed client retries at
+// most every 30s instead of every second, and still lands on / by itself once the server
+// agrees. Deliberately not a one-shot flag: that would strand a waiting viewer at 00:00:00
+// until they reloaded, which is the failure mode the client-side unlock exists to prevent.
+const UNLOCK_ATTEMPT_KEY = 'saa.prelaunch-unlock-attempted-at';
+const UNLOCK_RETRY_MS = 30_000;
+
+/**
+ * True when an unlock navigation should be attempted now, recording the attempt so a
+ * bounced redirect cannot immediately retry on the next mount.
+ *
+ * Storage being unavailable (private mode, disabled cookies) degrades to "always attempt" —
+ * the per-mount guard still prevents repeats within a single mount, and a working unlock
+ * matters more than throttling an edge case we cannot detect.
+ */
+function claimUnlockAttempt(nowMs: number): boolean {
+  let storage: Storage;
+  try {
+    storage = window.sessionStorage;
+  } catch {
+    return true;
+  }
+
+  const previous = Number.parseInt(storage.getItem(UNLOCK_ATTEMPT_KEY) ?? '', 10);
+  if (Number.isFinite(previous) && nowMs - previous < UNLOCK_RETRY_MS) {
+    return false;
+  }
+
+  storage.setItem(UNLOCK_ATTEMPT_KEY, String(nowMs));
+  return true;
+}
+
 export function usePrelaunchCountdown(): PrelaunchCountdown {
   const router = useRouter();
   const [display, setDisplay] = useState<PrelaunchCountdown>(SSR_DEFAULT);
@@ -30,10 +69,22 @@ export function usePrelaunchCountdown(): PrelaunchCountdown {
 
   useEffect(() => {
     function tick() {
-      const result = computeCountdown(process.env.NEXT_PUBLIC_EVENT_START_AT, new Date());
-      setDisplay({ days: result.days, hours: result.hours, minutes: result.minutes });
+      const now = new Date();
+      const result = computeCountdown(process.env.NEXT_PUBLIC_EVENT_START_AT, now);
+      // `result.days` is the true remaining day count and is not capped at 99; the two
+      // digit boxes can only show two characters. Clamp here so the display contract this
+      // hook advertises ("exactly two digits") is actually enforced at its source.
+      setDisplay({
+        days: capDisplayDays(result.days),
+        hours: result.hours,
+        minutes: result.minutes,
+      });
 
-      if ((result.isExpired || result.isInvalid) && !hasRedirected.current) {
+      if (
+        (result.isExpired || result.isInvalid) &&
+        !hasRedirected.current &&
+        claimUnlockAttempt(now.getTime())
+      ) {
         hasRedirected.current = true;
         clearInterval(intervalId);
         router.replace('/');
