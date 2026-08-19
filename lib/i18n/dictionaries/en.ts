@@ -31,4 +31,5 @@ export const en: Record<DictionaryKey, string> = {
   'account.adminDashboard': 'Admin Dashboard',
   'widget.writeKudos': 'Write Kudos',
   'widget.aboutSaa': 'About SAA 2025',
+  'prelaunch.title': 'Event starts in',
 };
