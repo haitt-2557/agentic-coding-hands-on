@@ -1,19 +1,28 @@
 'use client';
 
 // R1 Header (mms_A1_Header) — sticky top nav. FR-009/FR-010: logo scrolls to top of `/`,
-// nav links go to `/awards` / `/kudos`. "About SAA 2025" is the current-page indicator
-// (frame's selected-state nav item), not a cross-page link.
+// nav links go to `/awards` / `/kudos`. FR-002: the current-page indicator now derives from
+// the route via `usePathname()` — "About SAA 2025" is active on `/`, "Award Information" is
+// active on `/awards` (clarifications.md "header nav current-page state moves"); both stay
+// visible cross-page links regardless of which one is current.
 // mm:I2167:9091;178:1033;178:1030
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useI18n } from '@/lib/i18n/locale-provider';
 import { AccountMenu } from '@/components/ui/account-menu';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { NotificationBell } from '@/components/ui/notification-bell';
 
+const ACTIVE_NAV_CLASSES =
+  'rounded border-b-2 border-accent px-4 py-2 text-sm font-bold tracking-wide text-accent [text-shadow:0_4px_4px_rgba(0,0,0,0.25),0_0_6px_#FAE287]';
+const INACTIVE_NAV_CLASSES =
+  'rounded px-4 py-2 text-sm font-bold tracking-wide text-white hover:bg-secondary-button-bg';
+
 export function SiteHeader() {
   const { t } = useI18n();
+  const pathname = usePathname();
 
   function handleLogoClick() {
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -35,21 +44,19 @@ export function SiteHeader() {
           <Link
             href="/"
             onClick={handleLogoClick}
-            aria-current="page"
-            className="rounded border-b-2 border-accent px-4 py-2 text-sm font-bold tracking-wide text-accent [text-shadow:0_4px_4px_rgba(0,0,0,0.25),0_0_6px_#FAE287]"
+            aria-current={pathname === '/' ? 'page' : undefined}
+            className={pathname === '/' ? ACTIVE_NAV_CLASSES : INACTIVE_NAV_CLASSES}
           >
             {t('nav.about')}
           </Link>
           <Link
             href="/awards"
-            className="rounded px-4 py-2 text-sm font-bold tracking-wide text-white hover:bg-secondary-button-bg"
+            aria-current={pathname === '/awards' ? 'page' : undefined}
+            className={pathname === '/awards' ? ACTIVE_NAV_CLASSES : INACTIVE_NAV_CLASSES}
           >
             {t('nav.awards')}
           </Link>
-          <Link
-            href="/kudos"
-            className="rounded px-4 py-2 text-sm font-bold tracking-wide text-white hover:bg-secondary-button-bg"
-          >
+          <Link href="/kudos" className={INACTIVE_NAV_CLASSES}>
             {t('nav.kudos')}
           </Link>
         </nav>
