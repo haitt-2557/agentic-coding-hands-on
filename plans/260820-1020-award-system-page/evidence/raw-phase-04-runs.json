@@ -1,0 +1,17 @@
+[
+  {
+    "command": "npm run test:e2e (before test harness fixes)",
+    "exitCode": 1,
+    "summary": "74 passed, 5 failed: 4 awards-page locator defects (A1, A2, A5, A7); 1 pre-existing login-auth-redirect failure"
+  },
+  {
+    "command": "npm run test:e2e (after test harness fixes — GREEN achieved)",
+    "exitCode": 1,
+    "summary": "78 passed, 1 failed: awards-page 100% GREEN (10/10 assertions A1-A13); pre-existing login-auth-redirect unchanged"
+  },
+  {
+    "command": "Visual validation (Playwright MCP captures + interaction tests)",
+    "exitCode": 0,
+    "summary": "7 real browser captures created (1440/768/375px full + hover/focus/responsive); scrollspy verified; deep links tested (#mvp passes, #khong-ton-tai clean); no horizontal overflow; no console errors; all visual contract items match design frame"
+  }
+]

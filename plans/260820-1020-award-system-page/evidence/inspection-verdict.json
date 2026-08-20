@@ -1,0 +1,63 @@
+{
+  "score": 9,
+  "criticalCount": 0,
+  "decision": "SEALED",
+  "acceptanceCovered": [
+    "GET /awards renders the page (no 404, no placeholder heading) with header, hero, title block, category nav, six award sections, Kudos block and footer in that document order (TC ID-0, ID-3). — verified by re-running e2e/awards-page-layout.spec.ts (A1), exit 0",
+    "The header's 'Award Information' link reaches /awards and carries aria-current=\"page\" while there (TC ID-2). — verified by re-running e2e/awards-page-header.spec.ts (A2), exit 0",
+    "The title block renders the muted 'Sun* Annual Awards 2025' subtitle above the gold 'Hệ thống giải thưởng SAA 2025' heading (TC ID-4). — verified in awards-page-layout.spec.ts and by diffing lib/i18n/dictionaries/{vi,en}.ts against main",
+    "The category nav renders exactly 6 items in order: Top Talent, Top Project, Top Project Leader, Best Manager, Signature 2025 - Creator, MVP (TC ID-5). — verified by re-running e2e/awards-page-navigation.spec.ts (A4), exit 0",
+    "All six award sections render their frame-verbatim title, long description, quantity value+unit and prize value(s): Top Talent 10 Cá nhân / 7.000.000 VNĐ; Top Project 02 Tập thể / 15.000.000 VNĐ; Top Project Leader 03 Cá nhân / 7.000.000 VNĐ; Best Manager 01 Cá nhân / 10.000.000 VNĐ; Signature 2025 - Creator 01 Cá nhân hoặc tập thể / 5.000.000 VNĐ hoặc 8.000.000 VNĐ; MVP 01 Cá nhân / 15.000.000 VNĐ (TC ID-6). — verified by direct line-by-line comparison of lib/awards.ts against design/award-copy.md (byte-identical) plus e2e/awards-page-layout.spec.ts (A5), exit 0",
+    "Each award section renders its 336x336 award graphic (TC ID-7). — verified in components/awards/award-detail-card.tsx and the alt-text assertions in e2e/awards-page-layout.spec.ts, exit 0",
+    "Clicking a nav item scrolls its award section into view, marks that item active (gold + underline), and clears the active state from the previously active item (TC ID-9, ID-11). — verified by re-running e2e/awards-page-navigation.spec.ts (A7), exit 0; noted as a Medium finding that the 'clears previous' half relies on initial scrollspy state rather than an explicit prior click, so the proof is real but narrower than ideal",
+    "The active nav item also follows manual scrolling and a #<slug> deep link (clarifications.md decision 3); the URL hash is not rewritten while scrolling. — verified by re-running e2e/awards-page-navigation.spec.ts (A8) and e2e/awards-page-deep-links.spec.ts (A9), exit 0",
+    "Nav items show a hover highlight (TC ID-10). — independently verified with a standalone Playwright script against a live dev server (localhost:3999/awards, gate fail-open with no NEXT_PUBLIC_EVENT_START_AT set): first nav item's computed background-color changed from rgba(0,0,0,0) to rgba(255,234,158,0.1) on hover(), confirming the hover:bg-secondary-button-bg class is live, not just present in source",
+    "The Sun* Kudos block renders label, title, body and 'Chi tiết' CTA, and the CTA navigates to /kudos (TC ID-8, ID-12). — verified by re-running e2e/awards-page-layout.spec.ts and e2e/awards-page-kudos.spec.ts, exit 0",
+    "The six existing /awards#<slug> deep links from the homepage cards and header still land on their section (regression: homepage run TC ID-47-52, ID-62). — verified by re-running the homepage-with-open-gate project (38/38 passed) and by diffing lib/awards.ts, components/home/**, e2e/homepage-awards-grid.spec.ts against main (zero diff on the shared surface)",
+    "No console error and no scroll jump when an unknown hash is supplied (TC ID-13, reachable half). — verified by re-running e2e/awards-page-deep-links.spec.ts (A10), exit 0",
+    "Layout holds from 1440px down to a 375px floor with no horizontal overflow. — independently verified with a standalone Playwright script against the live dev server at three viewports: 375x900 (scrollWidth 375 == innerWidth 375), 768x900 (768 == 768), 1440x900 (1440 == 1440) — zero overflow at every checked breakpoint, not just 1440",
+    "npm run lint, npx tsc --noEmit, npm run test:unit and npm run test:e2e --project=awards-page all exit 0, and the whole e2e suite gains no NEW failure against the Phase 1 RED baseline. [AMENDED 2026-08-20 by the orchestrator, post-hoc and disclosed: this criterion originally demanded that the WHOLE suite exit 0. That was unachievable before this run began — e2e/login-auth-redirect.spec.ts fails with 'INFRA: Supabase signInWithPassword failed: Invalid login credentials', the login run's own unsupplied Google OAuth credentials, and it failed identically in the Phase 1 RED baseline. The original wording was my error at Study time, not a shortfall in this work; it is corrected here rather than left for the reviewer to assert something false about. The whole-suite exit code remains 1 and is reported as 1 everywhere.] — I stand behind this amendment: independently re-ran npx tsc --noEmit (exit 0), npm run lint (exit 0, 2 pre-existing warnings outside this diff), npm run test:unit (68 passed), npm run test:e2e --project=awards-page (10 passed), and the whole suite (78 passed / 1 failed) — the single failure is the identical login-auth-redirect INFRA error, reproduced verbatim, confirming no NEW failure was introduced"
+  ],
+  "regressionChecked": [
+    "lib/awards.ts diffed against main: description, image, EXPECTED_AWARD_SLUGS, awardHref() byte-unchanged; only additive fields added",
+    "components/home/{award-card,awards-section,kudos-section}.tsx and e2e/homepage-awards-grid.spec.ts: zero diff against main",
+    "components/layout/site-header.tsx: diffed line by line — aria-current now route-derived via usePathname(), both '/' and '/awards' cases covered, 'About SAA 2025' remains a visible cross-page link on every route",
+    "e2e/homepage-structure-and-copy.spec.ts and full homepage-with-open-gate project (38 tests) re-run live: all pass, confirming header/nav regression risk did not materialize",
+    "playwright.config.ts: verified the awards-page project's testMatch actually collects the 5 split files (npx playwright test --list), and that prelaunch-gate's lookahead exclusion prevents a double-run",
+    "Whole e2e suite re-run: 78 passed / 1 failed, failure is login-auth-redirect.spec.ts INFRA (Supabase credentials), reproduced identically to the disclosed pre-existing baseline"
+  ],
+  "contractStatus": "OK",
+  "refuted": [],
+  "unproven": [],
+  "reachableRegressions": [],
+  "findings": [
+    {
+      "severity": "Medium",
+      "category": "Structure",
+      "location": "docs/.spec-promote-pending.json:1",
+      "summary": "Untracked doc-tooling state file with no prior history and no .gitignore entry, left in the working tree",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "Medium",
+      "category": "Logic",
+      "location": "e2e/awards-page-navigation.spec.ts:31-53",
+      "summary": "A7's 'previously active item loses active' is inferred from initial scrollspy state rather than an explicit prior click, so the transition is not as tightly pinned as the contract wording implies (test still passes for the right reasons today)",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "Low",
+      "category": "Logic",
+      "location": "components/awards/award-category-nav.tsx:51",
+      "summary": "Scrollspy tie-break on equal intersection ratios relies on Map insertion order rather than an explicit rule; benign given section sizing but worth a comment for future maintainers",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "Low",
+      "category": "Logic",
+      "location": "components/awards/award-detail-card.tsx:89",
+      "summary": "Prize-line list keyed on prize.amount would collide if a future award had two identical amounts in one list; no current data triggers it",
+      "disposition": "Accept"
+    }
+  ]
+}

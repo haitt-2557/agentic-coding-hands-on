@@ -88,6 +88,17 @@ không cần một US "hệ thống" song song.
 advisory ở `feature-list.md`). Cả 4 đều `type: ui`, không có US nào `type: system` vì mọi
 hành vi (kể cả BL002_OAuthCallbackExchange) đều mô tả trọn vẹn được từ góc nhìn actor.
 
+**Cảnh báo gap thêm 2026-08-20 (F012_AwardSystemPage)** — KHÔNG đối chiếu ngược vào file này ở
+lượt này (quyết định có chủ đích, không phải bỏ sót). `docs/vi/features/award-system-page/technical-spec.md`
+tự đánh mã `US001_XemNoiDungTrangGiaiThuong`, `US002_DieuHuongQuaMucNavDanhMuc`,
+`US003_KhamPhaSunKudosTuTrangGiaiThuong` — các mã này CỤC BỘ trong feature-spec đó và **trùng
+số** (không trùng nội dung) với `US001_ViewHeroSection`/`US002_ViewEventCountdown`/`US003_ReadRootFurtherContent`
+global ở ngay trên. Không renumber một trong hai phía ở lượt này để tránh phá vỡ tham chiếu
+chưa xác nhận hết ở nơi khác; khuyến nghị `/tkm:rebuild-spec --features F012` cấp mã global
+mới (kế tiếp sau US023) và cập nhật `Screen → US Map` + `SCR002_Awards` bên dưới khi chạy.
+
+
+
 ---
 
 ## US001_ViewHeroSection: View Hero Section

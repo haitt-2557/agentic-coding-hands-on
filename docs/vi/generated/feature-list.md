@@ -49,6 +49,7 @@ Supabase Auth local (`/login`, `app/auth/callback/route.ts`). Feature-spec đầ
 | F009_ReturnToHomeTop | Return To Home Top | ui | TypeScript/TSX | my-app | P3 |
 | F010_PrelaunchCountdownGate | Prelaunch Countdown Gate | ui | TypeScript/TSX | my-app | P0 |
 | F011_GoogleOAuthLogin | Google OAuth Login | ui | TypeScript/TSX | my-app | P0 |
+| F012_AwardSystemPage | Award System Page | ui | TypeScript/TSX | my-app | P1 |
 
 ## Feature Details
 
@@ -411,6 +412,50 @@ liệu tại `docs/vi/features/login-supabase-auth/`.
 **Related Permissions**:
 - PERM004_LoginRouteAuthGate (`permissions-matrix.md`) — type `route-guard`, kiểm tra THẬT
   phía server, chỉ chi phối `/login`
+
+---
+
+### F012_AwardSystemPage: Award System Page — thêm 2026-08-20
+
+**Type**: ui
+**Description**: Trang nội dung `/awards` trình bày đầy đủ 6 hạng mục giải thưởng SAA 2025 —
+thay phần placeholder cũ vốn chỉ giữ chỗ 6 neo `#<slug>` cho F003_AwardDiscovery ở trang chủ.
+Gồm hero thu nhỏ (ROOT FURTHER, không đếm ngược/CTA), khối tiêu đề hai dòng, nav danh mục dính
+bên trái 6 mục có trạng thái active bám theo khối đang xem (`IntersectionObserver`), 6 khối chi
+tiết xen kẽ ảnh/nội dung (ảnh 336×336 + mô tả dài + số lượng + giá trị giải), và khối quảng bá
+Sun* Kudos dùng lại nguyên `components/home/kudos-section.tsx` của F004. Chỉ đọc — không có
+persistence, không có API, không có route guard (bảo vệ route vẫn hoãn từ lượt F011). Chi tiết
+đầy đủ: `docs/vi/features/award-system-page/technical-spec.md`.
+
+**Workspace**: my-app
+**Languages**: TypeScript, TSX
+**Components**: 5
+
+**Related Screens**:
+- SCR002_Awards: Awards — màn hình đã có trong `screen-list.md`, lượt này mới có nội dung thật
+
+**Related User Stories**:
+- US001_XemNoiDungTrangGiaiThuong: Xem nội dung trang hệ thống giải thưởng
+- US002_DieuHuongQuaMucNavDanhMuc: Điều hướng qua nav danh mục bên trái
+- US003_KhamPhaSunKudosTuTrangGiaiThuong: Khám phá Sun* Kudos từ trang giải thưởng
+
+  (mã US### cục bộ của feature-spec; hợp nhất vào `user-stories.md` ở lượt rebuild-spec kế tiếp)
+
+**Related APIs/Routes**:
+- (page) /awards — ROUTE002, đã tồn tại; lượt này thay nội dung, không đổi đường dẫn
+- 6 neo `#<slug>` trên chính route đó — hợp đồng deep-link dùng chung với F003_AwardDiscovery
+
+**Related Data Models**:
+- Không có `MODEL###` mới — `lib/awards.ts` được mở rộng thêm trường (mô tả dài, số lượng, giá
+  trị giải), là dữ liệu tĩnh trong mã nguồn chứ không phải entity có persistence
+
+**Related Background Logic**:
+- Không có — trang chỉ đọc, không có job/middleware nào thuộc feature này
+
+**Related Permissions**:
+- Không có — `/awards` công khai cho mọi actor. TC ID-1 (khách chưa đăng nhập bị đưa sang
+  đăng nhập) KHÔNG được assert ở lượt này: bảo vệ route vẫn hoãn theo quyết định của lượt
+  F011 (`plans/260820-1020-award-system-page/clarifications.md` quyết định 2)
 
 ---
 

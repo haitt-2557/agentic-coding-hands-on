@@ -369,7 +369,7 @@ bắt đầu" (`isExpired: true`), UI không phân biệt hai case này (giữ c
 | Route | File | Nội dung |
 |---|---|---|
 | `/` | `app/page.tsx` | Trang chủ Homepage SAA đầy đủ (Header, Hero+Countdown, Awards, Kudos, Widget, Footer) |
-| `/awards` | `app/awards/page.tsx` (19 dòng) | Placeholder có chủ đích — render 6 `<section id={slug}>` theo `AWARDS` (`lib/awards.ts`) làm đích hash-anchor thật; không có nội dung Awards Information đầy đủ |
+| `/awards` | `app/awards/page.tsx` (**thêm 2026-08-20**: nội dung thật, xem F012_AwardSystemPage) | Trang Hệ thống giải thưởng đầy đủ — nay compose `SiteHeader`/`SiteFooter` (trước lượt này route không render chrome), hero thu nhỏ, khối tiêu đề, nav danh mục dính bên trái (scrollspy qua `IntersectionObserver`), và 6 khối chi tiết giải thưởng (`AwardDetailCard`, ảnh 336×336 + mô tả dài + số lượng + giá trị) tại đúng 6 `<section id={slug}>` cũ theo `AWARDS` (`lib/awards.ts`) — giữ nguyên hợp đồng hash-anchor với trang chủ |
 | `/kudos` | `app/kudos/page.tsx` (10 dòng) | Placeholder có chủ đích — chỉ tiêu đề, chưa có nội dung Sun* Kudos |
 | `/profile` | `app/profile/page.tsx` (16 dòng) | Placeholder — đích của mục "Profile" trong account menu, tồn tại để không 404 (TC ID-59) |
 | `/admin` | `app/admin/page.tsx` (16 dòng) | Placeholder — đích của mục "Admin Dashboard"; comment dòng 1-4 nói rõ trang KHÔNG có access control (xem `permissions.md`) |
@@ -377,8 +377,13 @@ bắt đầu" (`isExpired: true`), UI không phân biệt hai case này (giữ c
 | `/login` | `app/login/page.tsx` | **Thêm 2026-08-19** — Server Component; `getUser()` guard redirect `/` nếu đã có phiên hợp lệ; render `LoginClient` (click → loading → `signInWithOAuth`) nếu chưa. Miễn trừ gate đếm-ngược cả 2 chiều (xem § Authentication Layer). |
 | `/auth/callback` | `app/auth/callback/route.ts` | **Thêm 2026-08-19** — Route handler THẬT đầu tiên của app (`GET`). Đổi `code` OAuth lấy session, redirect `/` hoặc `/login?error=...`. Xem § Authentication Layer. |
 
-5 route cũ (`/`, `/awards`, `/kudos`, `/profile`, `/admin`) không đổi file nguồn — chỉ đổi
-điều kiện khi nào chúng được phép render, qua `proxy.ts` ở trên.
+Khi gate này ra đời (2026-08-19), cả 5 route cũ (`/`, `/awards`, `/kudos`, `/profile`,
+`/admin`) không đổi file nguồn — chỉ đổi điều kiện khi nào chúng được phép render, qua
+`proxy.ts` ở trên. **Cập nhật 2026-08-20**: riêng `/awards` sau đó có nội dung thật thay
+placeholder (F012_AwardSystemPage, `app/awards/page.tsx` viết lại hoàn toàn cộng
+`components/awards/*` mới) — thay đổi này độc lập với `proxy.ts`/gate, không liên quan tới
+cơ chế chặn theo thời gian. 4 route còn lại (`/`, `/kudos`, `/profile`, `/admin`) vẫn giữ
+nguyên file nguồn kể từ khi gate ra đời.
 
 Hash-anchor scroll (`/awards#top-talent` từ card/CTA/nav) hoạt động nhờ
 `data-scroll-behavior="smooth"` trên thẻ `<html>` (`app/layout.tsx:33`) — Next 16 bỏ việc tự

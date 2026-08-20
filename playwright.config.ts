@@ -15,8 +15,21 @@ export default defineConfig({
   projects: [
     {
       name: 'prelaunch-gate',
-      testMatch: /^(?!.*homepage|.*invalid-env|.*prelaunch-countdown-unlocked|.*login-auth-redirect).*\.spec\.ts$/,
+      testMatch: /^(?!.*awards-page|.*homepage|.*invalid-env|.*prelaunch-countdown-unlocked|.*login-auth-redirect).*\.spec\.ts$/,
       use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:3000' },
+    },
+    {
+      name: 'awards-page',
+      // `awards-page-*` too, not just `awards-page.spec.ts` — the suite is split across
+      // awards-page-{layout,header,navigation,deep-links,kudos}.spec.ts to stay under the
+      // 200-line file rule. An anchored `/awards-page\.spec\.ts$/` silently collects NONE
+      // of them: they match no other project either (prelaunch-gate's lookahead excludes
+      // `.*awards-page`), so they would run nowhere and read as coverage that does not exist.
+      // Port 3200 is past-dated, so the launch gate is open — `/awards` is not in
+      // `ALWAYS_ALLOWED` (lib/prelaunch/gate.ts), so on port 3000 every request 307s to
+      // /prelaunch and no implementation could ever turn the suite green.
+      testMatch: /awards-page.*\.spec\.ts$/,
+      use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:3200' },
     },
     {
       name: 'homepage-with-open-gate',

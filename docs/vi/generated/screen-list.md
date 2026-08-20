@@ -27,7 +27,7 @@ còn "vacuously satisfied" nữa — đây là service call đầu tiên có map
 | Code | Name | Type | Components | Data Displayed |
 |------|------|------|------------|----------------|
 | SCR001_Home | Home | atomic | 15 | 4 |
-| SCR002_Awards | Awards | atomic | 1 | 1 |
+| SCR002_Awards | Awards | atomic | 8 | 2 |
 | SCR003_Kudos | Kudos | atomic | 1 | 0 |
 | SCR004_Profile | Profile | atomic | 2 | 0 |
 | SCR005_AdminDashboard | AdminDashboard | atomic | 2 | 0 |
@@ -43,7 +43,7 @@ còn "vacuously satisfied" nữa — đây là service call đầu tiên có map
 
 ### Description
 
-Trang chủ marketing/sự kiện SAA 2025 — `app/page.tsx`. Compose trực tiếp 7 component top-level theo thứ tự render: `SiteHeader` → `HeroKeyvisual` → `RootFurtherContent` → `AwardsSection` → `KudosSection` → `QuickActionWidget` (fixed, ngoài luồng `<main>`) → `SiteFooter`. Đây là màn hình duy nhất trong 5 route mang header/footer/nav thật — `app/layout.tsx` chỉ bọc `SessionProvider`/`LocaleProvider`, không có chrome dùng chung; 4 route còn lại tự render `<main>` trần, không có `SiteHeader`/`SiteFooter` (xem ghi chú "no chrome" ở các SCR placeholder bên dưới và ScreenFlow § Screen Transitions).
+Trang chủ marketing/sự kiện SAA 2025 — `app/page.tsx`. Compose trực tiếp 7 component top-level theo thứ tự render: `SiteHeader` → `HeroKeyvisual` → `RootFurtherContent` → `AwardsSection` → `KudosSection` → `QuickActionWidget` (fixed, ngoài luồng `<main>`) → `SiteFooter`. `app/layout.tsx` chỉ bọc `SessionProvider`/`LocaleProvider`, không có chrome dùng chung ở tầng layout — mỗi route tự quyết định có compose `SiteHeader`/`SiteFooter` hay không. **Cập nhật 2026-08-20**: SCR001 không còn là màn duy nhất mang chrome thật — SCR002_Awards nay cũng compose `SiteHeader`/`SiteFooter` (xem section riêng bên dưới). 3 route còn lại (SCR003_Kudos, SCR004_Profile, SCR005_AdminDashboard) vẫn tự render `<main>` trần, không có `SiteHeader`/`SiteFooter` (xem ghi chú "no chrome" ở các SCR placeholder bên dưới và ScreenFlow § Screen Transitions).
 
 ### Components
 
@@ -96,26 +96,45 @@ _(none — atomic; xem giải thích 2-of-3 gate + Trap 1 ở ghi chú đầu t�
 
 ### Description
 
-Route placeholder có chủ đích (comment nguồn: "content out of scope this run") — tồn tại để CTA/award-card từ Home resolve thay vì 404. Mang tiêu đề tĩnh "Award Information" + lặp `AWARDS.map` thành 6 khối `<section id={award.slug}>` (title + description), phục vụ neo hash `#<slug>` mà Home trỏ tới. Đây là loop lặp lại cùng một loại nội dung (không phải các vùng ngữ nghĩa khác nhau) — không tách REG; đối chiếu H3 (composite-screen-detection.md): các `<section>` này là instance lặp của MỘT loại khối, không phải ≥3 vùng khác nhau về mặt nghiệp vụ, nên không đạt "distinct" theo tinh thần H3/Trap 1 dù đếm thô ra 6 wrapper.
+**Cập nhật 2026-08-20 (F012_AwardSystemPage)** — không còn placeholder. `app/awards/page.tsx`
+compose `SiteHeader` → `AwardsHero` (hero thu nhỏ, không đếm ngược/CTA) → `AwardSectionTitle`
+(phụ đề mờ + tiêu đề vàng) → một hàng `AwardCategoryNav` + `AwardDetailList` (6×
+`AwardDetailCard`, xen kẽ ảnh/nội dung, ảnh 336×336) → `KudosSection` (tái dùng nguyên trạng)
+→ `SiteFooter`. Đây là màn hình THỨ HAI (sau SCR001) compose `SiteHeader`/`SiteFooter` thật —
+trước lượt này route không render chrome nào. Header "Award Information" mang trạng thái
+đang-chọn tại đây (`usePathname()`, xem SCR001 Components). 6 `<section id={award.slug}>` giữ
+đúng id cũ nên hợp đồng hash-anchor với Home không đổi. Vẫn atomic: `AwardCategoryNav` +
+`AwardDetailList` là một cặp đồng bộ hai chiều qua một `IntersectionObserver` chung (không có
+API riêng, loading state riêng, hay auth gate riêng cho từng khối) — cùng lý do 2-of-3 gate
+không đạt như SCR001 (xem ghi chú Trap 1 ở đầu tài liệu).
 
 ### Components
 
 | Component | Type | Purpose |
 |-----------|------|---------|
-| Award anchor section (×6, `AWARDS.map`) | section | Một khối `<section id={award.slug}>` mỗi hạng mục — heading + description tĩnh; `id` là đích cho hash-anchor scroll từ Home. `app/awards/page.tsx` |
+| SiteHeader | layout | Tái dùng nguyên trạng từ SCR001; "Award Information" mang trạng thái đang-chọn khi ở `/awards`. `components/layout/site-header.tsx` |
+| AwardsHero | section | Hero thu nhỏ — nền `Keyvisual_BG.png` + logo "ROOT FURTHER"; không đếm ngược/EventInfo/CTA như SCR001. `components/awards/awards-hero.tsx` |
+| AwardSectionTitle | text | Phụ đề mờ "Sun* Annual Awards 2025" + tiêu đề vàng "Hệ thống giải thưởng SAA 2025", khóa dictionary `awardsPage.*`. `components/awards/award-section-title.tsx` |
+| AwardCategoryNav | nav | Nav danh mục dính bên trái, 6 mục theo thứ tự `AWARDS`; trạng thái active bám theo section đang xem qua `IntersectionObserver` (scrollspy), click cuộn mượt tới section và không ghi lại `location.hash`. `components/awards/award-category-nav.tsx` |
+| AwardDetailList | section | Lặp `AWARDS` thành 6 `AwardDetailCard` theo đúng thứ tự mảng nguồn (không có danh sách thứ tự riêng). `components/awards/award-detail-list.tsx` |
+| AwardDetailCard (×6, qua `AwardDetailList`) | card | Một khối chi tiết giải thưởng — ảnh 336×336 (badge dùng chung + wordmark riêng) + mô tả dài + số lượng + giá trị giải; xen kẽ ảnh trái/phải theo chỉ số chẵn/lẻ; `<section id={award.slug}>` là đích hash-anchor. `components/awards/award-detail-card.tsx` |
+| KudosSection | section | Tái dùng nguyên trạng từ SCR001 — copy quảng bá Sun* Kudos + link "Chi tiết" → `/kudos`. `components/home/kudos-section.tsx` |
+| SiteFooter | layout | Tái dùng nguyên trạng từ SCR001. `components/layout/site-footer.tsx` |
 
 ### Data Displayed
 
-- Data Entity 1: Award title/description ×6 — **cùng nguồn** `AWARDS` (`lib/awards.ts`) với SCR001 (không nhân bản dữ liệu)
+- Data Entity 1: 6 hạng mục giải thưởng (title/mô tả dài/số lượng/giá trị giải) — **cùng nguồn** `AWARDS` (`lib/awards.ts`, mở rộng thêm field so với SCR001) — không nhân bản dữ liệu, `description` ngắn của SCR001 và `longDescription` của màn này cùng đọc từ một hằng số
+- Data Entity 2: Chuỗi dịch i18n cho khối tiêu đề + nhãn số lượng/giá trị giải (`awardsPage.*`, `lib/i18n/dictionaries/{vi,en}.ts`) — cùng cơ chế locale với SCR001
 
 ### Routes/URLs
 
 - `/awards`
-- `/awards#top-talent`, `/awards#top-project`, `/awards#top-project-leader`, `/awards#best-manager`, `/awards#signature-2025-creator`, `/awards#mvp` (6 anchor, nguồn `lib/awards.ts` `EXPECTED_AWARD_SLUGS`)
+- `/awards#top-talent`, `/awards#top-project`, `/awards#top-project-leader`, `/awards#best-manager`, `/awards#signature-2025-creator`, `/awards#mvp` (6 anchor, nguồn `lib/awards.ts` `EXPECTED_AWARD_SLUGS`, giữ nguyên từ trước lượt này)
 
 ### Related Screens
 
-- SCR001_Home: Home (nguồn của mọi liên kết trỏ tới màn này — nav/CTA/card/widget); **không có đường quay lại trong-app** — xem ScreenFlow § Screen Transitions
+- SCR001_Home: Home — nguồn của mọi liên kết trỏ TỚI màn này (nav/CTA/card/widget); **cập nhật 2026-08-20**: nay cũng là đích một chiều-QUA-LẠI — `SiteHeader`/`SiteFooter` thật tại đây có link nav "About"/logo về `/` và link "Kudos", nên rời màn này không còn chỉ có browser Back (xem ScreenFlow § Screen Transitions)
+- SCR003_Kudos: Kudos — **thêm 2026-08-20**: link nav "Kudos" (header/footer) + CTA "Chi tiết" của khối `KudosSection` đều điều hướng tới `/kudos`
 
 ### Regions
 
