@@ -2,7 +2,7 @@
 
 **Project**: Sun* Annual Awards 2025 (SAA 2025) — Homepage sự kiện
 **Generated**: 2026-08-18
-**Analysis Scope**: 5 screens (SCR001–SCR005) từ `screen-list.md`, route-view (web), Next.js App Router static. **Cập nhật**: mở rộng lên 7 screens — SCR006_Prelaunch (thêm 2026-08-19) và SCR007_Login (thêm 2026-08-19, lượt Login) — xem § Screen Transitions cho từng screen mới.
+**Analysis Scope**: 5 screens (SCR001–SCR005) từ `screen-list.md`, route-view (web), Next.js App Router static. **Cập nhật**: mở rộng lên 7 screens — SCR006_Prelaunch (thêm 2026-08-19) và SCR007_Login (thêm 2026-08-19, lượt Login) — xem § Screen Transitions cho từng screen mới. **Cập nhật 2026-08-20 (F012_AwardSystemPage)**: SCR002_Awards đổi từ placeholder-không-chrome thành trang thật có `SiteHeader`/`SiteFooter` — mọi cạnh nav/exit của nó dưới đây được viết lại cho khớp.
 
 **Code Format**: `SCR###_NameSlug`.
 
@@ -16,7 +16,8 @@ graph TD
     SCR001 -->|"nav Kudos / footer / hero CTA / KudosSection / widget"| SCR003["SCR003_Kudos ( /kudos )"]
     SCR001 -->|"AccountMenu Profile (role != guest)"| SCR004["SCR004_Profile ( /profile )"]
     SCR001 -->|"AccountMenu Admin Dashboard (role == admin)"| SCR005["SCR005_AdminDashboard ( /admin )"]
-    SCR002 -.->|"browser Back only — no in-app link"| SCR001
+    SCR002 -->|"thêm 2026-08-20: SiteHeader/SiteFooter logo hoặc nav 'About'"| SCR001
+    SCR002 -->|"thêm 2026-08-20: SiteHeader/SiteFooter nav 'Kudos' hoặc KudosSection 'Chi tiết'"| SCR003
     SCR003 -.->|"browser Back only — no in-app link"| SCR001
     SCR004 -.->|"browser Back only — no in-app link"| SCR001
     SCR005 -.->|"browser Back only — no in-app link"| SCR001
@@ -30,7 +31,7 @@ graph TD
     SCR007 -.->|"getUser() đã có phiên hợp lệ (PERM004) — redirect trước khi render"| SCR001
 ```
 
-**Đọc sơ đồ:** Mọi cạnh đi ra từ SCR001 là link thật (`next/link` `href`). 4 cạnh nét đứt quay về SCR001 là **giả định browser Back**, không phải link trong app — SCR002–SCR005 tự render `<main>` trần (không có `SiteHeader`/`SiteFooter`, vì layout gốc `app/layout.tsx` chỉ bọc `SessionProvider`/`LocaleProvider`, không có chrome dùng chung). Cạnh nét đứt từ SCR002–SCR005 vào SCR006 và cạnh đậm SCR006 → SCR001 là **thêm 2026-08-19**: không phải link người dùng bấm, mà là redirect do `proxy.ts` (server) hoặc `router.replace()` (client) thực hiện — xem § Guard Logic bên dưới và `docs/vi/system/architecture.md` § Request-Interception Layer. **Thêm 2026-08-19 (lượt Login)**: SCR007_Login chỉ vào được bằng URL trực tiếp — không có mục menu/link nào trong `SiteHeader`/`AccountMenu` trỏ tới `/login` (out of scope cho lượt này); cạnh SCR007 → SCR001 xảy ra theo 2 con đường khác nhau — thành công qua `/auth/callback` (round-trip Google), hoặc bị `getUser()` chặn ngay tại `/login` nếu đã có phiên. Xem chi tiết ở § Screen Transitions.
+**Đọc sơ đồ:** Mọi cạnh đi ra từ SCR001 là link thật (`next/link` `href`). **Cập nhật 2026-08-20**: SCR002 → SCR001 và SCR002 → SCR003 nay CŨNG là link thật (nét liền), không còn giả định browser Back — `SiteHeader`/`SiteFooter` (logo, nav "About"/"Kudos") và `KudosSection` "Chi tiết" đã compose thật trong `app/awards/page.tsx` (F012_AwardSystemPage). 3 cạnh nét đứt còn lại quay về SCR001 (từ SCR003/SCR004/SCR005) vẫn là **giả định browser Back**, không phải link trong app — 3 route này tự render `<main>` trần (không có `SiteHeader`/`SiteFooter`; layout gốc `app/layout.tsx` chỉ bọc `SessionProvider`/`LocaleProvider`, không có chrome dùng chung ở tầng layout). Cạnh nét đứt từ SCR002–SCR005 vào SCR006 và cạnh đậm SCR006 → SCR001 là **thêm 2026-08-19**: không phải link người dùng bấm, mà là redirect do `proxy.ts` (server) hoặc `router.replace()` (client) thực hiện — xem § Guard Logic bên dưới và `docs/vi/system/architecture.md` § Request-Interception Layer. **Thêm 2026-08-19 (lượt Login)**: SCR007_Login chỉ vào được bằng URL trực tiếp — không có mục menu/link nào trong `SiteHeader`/`AccountMenu` trỏ tới `/login` (out of scope cho lượt này); cạnh SCR007 → SCR001 xảy ra theo 2 con đường khác nhau — thành công qua `/auth/callback` (round-trip Google), hoặc bị `getUser()` chặn ngay tại `/login` nếu đã có phiên. Xem chi tiết ở § Screen Transitions.
 
 ## Feature Entry Points
 
@@ -45,7 +46,8 @@ graph TD
 | SCR001_Home | SCR003_Kudos | Click nav "Kudos", footer "Kudos" link, hero CTA, KudosSection "Chi tiết" link, hoặc QuickActionWidget "Viết Kudos" | None | |
 | SCR001_Home | SCR004_Profile | Click AccountMenu "Profile" | `role !== 'guest'` (AccountMenu ẩn hoàn toàn khi `role === 'guest'`) | |
 | SCR001_Home | SCR005_AdminDashboard | Click AccountMenu "Admin Dashboard" | `role === 'admin'` (mục menu chỉ hiện khi role này; **route `/admin` vẫn truy cập trực tiếp được với mọi role** — xem § Guard Logic) | |
-| SCR002_Awards | SCR001_Home | Browser Back | Không có link trong-app — `app/awards/page.tsx` không render header/footer | |
+| SCR002_Awards | SCR001_Home | **Cập nhật 2026-08-20**: Click logo hoặc nav "About" trong `SiteHeader`/`SiteFooter` (nay compose thật tại đây) — trước lượt F012 chỉ có browser Back | None | |
+| SCR002_Awards | SCR003_Kudos | **Thêm 2026-08-20**: Click nav "Kudos" (`SiteHeader`/`SiteFooter`) hoặc CTA "Chi tiết" của khối `KudosSection` tái dùng | None | |
 | SCR003_Kudos | SCR001_Home | Browser Back | Không có link trong-app | |
 | SCR004_Profile | SCR001_Home | Browser Back | Không có link trong-app | |
 | SCR005_AdminDashboard | SCR001_Home | Browser Back | Không có link trong-app | |
@@ -80,17 +82,20 @@ graph TD
 
 ---
 
-### SCR002_Awards (Awards)
+### SCR002_Awards (Awards) — nội dung thật thêm 2026-08-20 (F012_AwardSystemPage)
 
 **Entry Points**:
 - From SCR001_Home: nav "Awards" / hero CTA / AwardCard "Chi tiết" (mang theo hash `#<slug>` — trình duyệt tự cuộn tới `<section id={slug}>`) / widget "Về SAA"
 - Direct URL access `/awards` hoặc `/awards#<slug>`
 
 **Exit Points**:
-- To SCR001_Home: **chỉ qua browser Back** — trang không có `SiteHeader`/`SiteFooter`/link nào quay lại trong-app
+- To SCR001_Home: click logo hoặc nav "About" trong `SiteHeader`/`SiteFooter` (**thêm 2026-08-20** — trước đó chỉ có browser Back)
+- To SCR003_Kudos: click nav "Kudos" (`SiteHeader`/`SiteFooter`) hoặc CTA "Chi tiết" của khối `KudosSection` tái dùng ở cuối trang (**thêm 2026-08-20**)
+- To SCR001_Home: browser Back (vẫn khả dụng như mọi trang khác)
 
 **Decision Points**:
-- None (route tĩnh, không rẽ nhánh)
+- Mục nav danh mục nào đang active: theo dõi section nào đang chiếm phần lớn viewport qua `IntersectionObserver` (scrollspy) — click một mục cuộn mượt tới section đó và đổi active ngay; cuộn tay hoặc landing bằng `#<slug>` cũng tự đổi active, không cần click; không ghi lại `location.hash` trong lúc cuộn (`components/awards/award-category-nav.tsx`)
+- Hash không khớp slug nào (vd `#khong-ton-tai`): không có mục nav nào được coi active, không lỗi, không giật cuộn — nav chỉ khớp theo `AWARDS`, không có nhánh xử lý riêng cho hash lạ
 
 ---
 
