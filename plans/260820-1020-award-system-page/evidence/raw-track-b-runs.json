@@ -1,0 +1,22 @@
+[
+  {
+    "command": "npm run test:unit",
+    "exitCode": 1,
+    "summary": "RED (before lib/awards.ts changes): 6 new lib/awards.test.ts cases fail with real TypeError (award.longDescription/quantity/prizeLines undefined); all 62 pre-existing cases pass unchanged"
+  },
+  {
+    "command": "npm run test:unit",
+    "exitCode": 0,
+    "summary": "GREEN (after lib/awards.ts + i18n changes): 68 passed (62 pre-existing + 6 new awards-page-field cases), none removed or rewritten"
+  },
+  {
+    "command": "npx tsc --noEmit",
+    "exitCode": 0,
+    "summary": "Clean. No errors in lib/awards.ts, lib/awards.test.ts, or either dictionary; no error surfaced from components/awards/* at this hand-off point"
+  },
+  {
+    "command": "npm run lint",
+    "exitCode": 0,
+    "summary": "0 errors, 2 pre-existing warnings in e2e/login-auth-redirect.spec.ts and e2e/login-screen.spec.ts (unused imports) — outside this phase's file ownership, not introduced here"
+  }
+]
