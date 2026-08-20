@@ -1,0 +1,7 @@
+[
+  {
+    "command": "npm run test:e2e",
+    "exitCode": 1,
+    "summary": "RED: 8 awards-page spec failures (missing header, nav, sections, Kudos) + 1 unrelated login-auth failure; 70 pre-existing tests passed; 13 spec files stable"
+  }
+]

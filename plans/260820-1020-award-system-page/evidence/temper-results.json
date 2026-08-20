@@ -1,0 +1,32 @@
+{
+  "commands": [
+    {
+      "command": "npm run test:e2e -- --project=awards-page",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "awards-page project GREEN — 10/10 assertions (A1-A13) pass across the 5 split spec files; same 51 expects as the Phase 1 RED spec, none weakened",
+      "ts": "2026-08-20T10:58:00Z"
+    },
+    {
+      "command": "npm run test:unit",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "68 passed (62 pre-existing + 6 new lib/awards.test.ts cases); none removed",
+      "ts": "2026-08-20T10:58:00Z"
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "typecheck clean across Track A components and Track B data",
+      "ts": "2026-08-20T10:58:00Z"
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "0 errors (2 pre-existing warnings in e2e/login-* files, outside this run)",
+      "ts": "2026-08-20T10:58:00Z"
+    }
+  ]
+}

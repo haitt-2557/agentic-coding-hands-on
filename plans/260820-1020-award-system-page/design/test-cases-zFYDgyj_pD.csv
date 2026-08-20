@@ -1,0 +1,25 @@
+TC ID,Category,Description,Assertion,Status,Notes
+ID-0,Layout,GET /awards returns 200 with full page structure,A1,IN_SCOPE,Part of page render validation
+ID-2,Navigation,Header "Award Information" link reaches /awards with aria-current="page",A2,IN_SCOPE,Dynamic header state based on route
+ID-3,Layout,Title block renders with muted subtitle and gold heading,A1,IN_SCOPE,Typography and copy validation
+ID-4,Content,Title block text: "Sun* Annual Awards 2025" + "Hệ thống giải thưởng SAA 2025",A3,IN_SCOPE,Vietnamese copy verbatim from frame
+ID-5,Navigation,Category nav renders exactly 6 links in AWARDS order,A4,IN_SCOPE,Order: Top Talent > Top Project > Top Project Leader > Best Manager > Signature 2025 - Creator > MVP
+ID-6,Content,Each award section renders title description quantity prize values,A5,IN_SCOPE,Top Talent: 10 Cá nhân / 7.000.000 VNĐ; Signature: two lines with Hoặc; Best Manager/MVP: no note
+ID-7,Media,Each award section carries 336×336 award graphic with alt=title,A6,IN_SCOPE,Image accessibility and rendering
+ID-8,Content,Kudos block label "Phong trào ghi nhận" + title "Sun* Kudos" visible,A11,IN_SCOPE,Reused component
+ID-9,Interaction,Click nav item → section scrolls into view,A7,IN_SCOPE,ScrollIntoView behavior
+ID-10,Interaction,Nav item hover highlight visible,DEFERRED,Out of scope: CSS-only visual state (Phase 4)
+ID-11,Interaction,Clicked nav item gains gold color + underline,A7,IN_SCOPE,aria-current="location" semantic marker
+ID-12,Navigation,Kudos "Chi tiết" CTA navigates to /kudos,A11,IN_SCOPE,Internal link validation
+ID-13,Edge Case,Invalid hash (e.g. #khong-ton-tai) causes no console error no scroll jump,A10,IN_SCOPE,Graceful degradation
+ID-47,Regression,Top Talent card from homepage links to /awards#top-talent,A12,IN_SCOPE,Section id regression test
+ID-48,Regression,Top Project card from homepage links to /awards#top-project,A12,IN_SCOPE,Section id regression test
+ID-49,Regression,Top Project Leader card from homepage links to /awards#top-project-leader,A12,IN_SCOPE,Section id regression test
+ID-50,Regression,Best Manager card from homepage links to /awards#best-manager,A12,IN_SCOPE,Section id regression test
+ID-51,Regression,Signature 2025 - Creator card from homepage links to /awards#signature-2025-creator,A12,IN_SCOPE,Section id regression test
+ID-52,Regression,MVP card from homepage links to /awards#mvp,A12,IN_SCOPE,Section id regression test
+ID-62,Regression,All six /awards#<slug> deep links land on correct sections,A12,IN_SCOPE,End-to-end hash navigation
+Decision 3 - Extra,Interaction,Manual scroll (without click) updates active nav item,A8,IN_SCOPE,Scrollspy behavior (clarifications.md decision 3)
+BR-003,Constraint,URL hash is not rewritten during scroll or nav click,A7/A9,IN_SCOPE,Prevents history pollution
+BR-005,Layout,Award cards alternate image-left/content-right vs content-left/image-right,VISUAL,Out of scope: Phase 4 visual validation
+ID-1,Access,Unauthenticated visitor redirected to login,DEFERRED,Out of scope: route protection deferred (clarifications.md decision 2)

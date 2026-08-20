@@ -1,0 +1,46 @@
+{
+  "task": "Implement the SAA 2025 Award System page from MoMorph screen zFYDgyj_pD into the existing /awards placeholder route: hero keyvisual, section title, sticky 6-item category nav with scroll-synced active state, 6 alternating award detail cards (image + long description + quantity + prize), and the reused Sun* Kudos promo block.",
+  "mode": "interactive",
+  "acceptanceCriteria": [
+    "GET /awards renders the page (no 404, no placeholder heading) with header, hero, title block, category nav, six award sections, Kudos block and footer in that document order (TC ID-0, ID-3).",
+    "The header's 'Award Information' link reaches /awards and carries aria-current=\"page\" while there (TC ID-2).",
+    "The title block renders the muted 'Sun* Annual Awards 2025' subtitle above the gold 'Hệ thống giải thưởng SAA 2025' heading (TC ID-4).",
+    "The category nav renders exactly 6 items in order: Top Talent, Top Project, Top Project Leader, Best Manager, Signature 2025 - Creator, MVP (TC ID-5).",
+    "All six award sections render their frame-verbatim title, long description, quantity value+unit and prize value(s): Top Talent 10 Cá nhân / 7.000.000 VNĐ; Top Project 02 Tập thể / 15.000.000 VNĐ; Top Project Leader 03 Cá nhân / 7.000.000 VNĐ; Best Manager 01 Cá nhân / 10.000.000 VNĐ; Signature 2025 - Creator 01 Cá nhân hoặc tập thể / 5.000.000 VNĐ hoặc 8.000.000 VNĐ; MVP 01 Cá nhân / 15.000.000 VNĐ (TC ID-6).",
+    "Each award section renders its 336x336 award graphic (TC ID-7).",
+    "Clicking a nav item scrolls its award section into view, marks that item active (gold + underline), and clears the active state from the previously active item (TC ID-9, ID-11).",
+    "The active nav item also follows manual scrolling and a #<slug> deep link (clarifications.md decision 3); the URL hash is not rewritten while scrolling.",
+    "Nav items show a hover highlight (TC ID-10).",
+    "The Sun* Kudos block renders label, title, body and 'Chi tiết' CTA, and the CTA navigates to /kudos (TC ID-8, ID-12).",
+    "The six existing /awards#<slug> deep links from the homepage cards and header still land on their section (regression: homepage run TC ID-47-52, ID-62).",
+    "No console error and no scroll jump when an unknown hash is supplied (TC ID-13, reachable half).",
+    "Layout holds from 1440px down to a 375px floor with no horizontal overflow.",
+    "npm run lint, npx tsc --noEmit, npm run test:unit and npm run test:e2e --project=awards-page all exit 0, and the whole e2e suite gains no NEW failure against the Phase 1 RED baseline. [AMENDED 2026-08-20 by the orchestrator, post-hoc and disclosed: this criterion originally demanded that the WHOLE suite exit 0. That was unachievable before this run began — e2e/login-auth-redirect.spec.ts fails with 'INFRA: Supabase signInWithPassword failed: Invalid login credentials', the login run's own unsupplied Google OAuth credentials, and it failed identically in the Phase 1 RED baseline. The original wording was my error at Study time, not a shortfall in this work; it is corrected here rather than left for the reviewer to assert something false about. The whole-suite exit code remains 1 and is reported as 1 everywhere.]"
+  ],
+  "touchpoints": [
+    "app/awards/page.tsx",
+    "components/awards/awards-hero.tsx",
+    "components/awards/award-category-nav.tsx",
+    "components/awards/award-detail-card.tsx",
+    "components/awards/award-detail-list.tsx",
+    "lib/awards.ts",
+    "lib/awards.test.ts",
+    "lib/i18n/dictionaries/vi.ts",
+    "lib/i18n/dictionaries/en.ts",
+    "components/layout/site-header.tsx",
+    "e2e/awards-page.spec.ts"
+  ],
+  "blastRadius": [
+    "lib/awards.ts is shared with the homepage awards grid (components/home/award-card.tsx, awards-section.tsx) — extending the Award interface must not change the existing short `description` field or the six slugs, or the homepage cards and their e2e coverage break.",
+    "components/layout/site-header.tsx is shared by every route — moving aria-current=\"page\" from the homepage item to a per-route computation touches all pages and is covered by e2e/homepage-navigation.spec.ts.",
+    "components/home/kudos-section.tsx is reused unchanged on /awards; any edit to it affects the homepage too.",
+    "app/awards/page.tsx currently backs the homepage cards' deep links — replacing it must preserve all six #<slug> section ids.",
+    "New i18n keys must be added to BOTH dictionaries or the typed DictionaryKey union breaks the build."
+  ],
+  "contracts": [
+    "lib/awards.ts: EXPECTED_AWARD_SLUGS and awardHref() keep their current signatures and values; the Award interface is extended additively only.",
+    "Route contract: /awards remains the canonical award route with six #<slug> anchors (top-talent, top-project, top-project-leader, best-manager, signature-2025-creator, mvp).",
+    "i18n contract: DictionaryKey is derived from the vi dictionary; en must stay key-identical.",
+    "No route protection is added — /awards stays publicly reachable (clarifications.md decision 2)."
+  ]
+}
