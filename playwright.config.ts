@@ -15,7 +15,7 @@ export default defineConfig({
   projects: [
     {
       name: 'prelaunch-gate',
-      testMatch: /^(?!.*awards-page|.*homepage|.*invalid-env|.*prelaunch-countdown-unlocked|.*login-auth-redirect).*\.spec\.ts$/,
+      testMatch: /^(?!.*awards-page|.*homepage|.*invalid-env|.*prelaunch-countdown-unlocked|.*login-auth-redirect|.*kudos-board).*\.spec\.ts$/,
       use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:3000' },
     },
     {
@@ -29,6 +29,16 @@ export default defineConfig({
       // `ALWAYS_ALLOWED` (lib/prelaunch/gate.ts), so on port 3000 every request 307s to
       // /prelaunch and no implementation could ever turn the suite green.
       testMatch: /awards-page.*\.spec\.ts$/,
+      use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:3200' },
+    },
+    {
+      name: 'kudos-board',
+      // `kudos-board-*` follows the awards-page precedent: the suite is split across
+      // kudos-board-{layout,interactions,feed-interactions}.spec.ts to stay under the
+      // 200-line file rule. Port 3200 is past-dated, so the launch gate is open — `/kudos`
+      // is not in `ALWAYS_ALLOWED`, so on port 3000 every request 307s to /prelaunch
+      // and the test RED would be caused by a config redirect, not missing screen structure.
+      testMatch: /kudos-board.*\.spec\.ts$/,
       use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:3200' },
     },
     {
