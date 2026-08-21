@@ -8,6 +8,18 @@
 2026-08-19, lượt Login) mở rộng phạm vi lên 7 screen file — cùng phương pháp H1–H6 áp dụng
 cho cả hai, xem chi tiết ở mục riêng của từng SCR bên dưới.
 
+**Cập nhật phạm vi (lượt Kudos Live board, 2026-08-21)**: `/kudos` (SCR008) nâng phạm vi lên 8
+screen file. `app/kudos/page.tsx` trước đây là placeholder (đã được đếm trong SCR003_Kudos);
+SCR008 là mục cho nội dung thật của route đó — xem § SCR008 bên dưới về quan hệ với SCR003.
+**Lưu ý phân loại**: feature-spec
+(`docs/vi/features/kudos-live-board/screens/SCR008_KudosLiveBoard/spec.md`) ghi
+`Type: composite` theo nghĩa *bố cục* (7 vùng layout R1–R7 với hành vi responsive riêng). Cột
+`Type` trong tài liệu này mang nghĩa khác — nó là kết quả gate H1–H6 + Trap 1 (mỗi REG cần ≥1
+independence signal thật). Gate đó KHÔNG được chạy lại ở lượt promote này và không có mã `REG###`
+nào được cấp, nên SCR008 được ghi `atomic` cho nhất quán với 7 SCR còn lại và với
+`Composite Screens: 0` ở § Summary. Hai nhãn nói về hai trục khác nhau, không phải mâu thuẫn dữ
+liệu; một lượt `/tkm:rebuild-spec --screen-specs` chạy gate thật mới là nơi kết luận lại cột này.
+
 **Code Format**: `SCR###_NameSlug` (e.g. SCR001_Home).
 
 > **Composite-detection method note**: H1–H6 (composite-screen-detection.md, thứ tự chạy H6→H4→H5→H2→H3→H1→2-of-3 gate) đã áp dụng không điều kiện cho cả 5 screen file. Kết quả: **cả 5 đều atomic** — không có REG### nào được phát sinh. Lý do: H6 (router outlet) không khớp — không route nào có `<Outlet>`/child route; H4 (tab) và H5 (wizard) không khớp — không có UI tab/step nào; H2 (domain-module import gate) fail trên mọi screen — import của các file `page.tsx` chỉ trỏ vào `components/*`, `lib/*` (không có thư mục `features/*`/`modules/*`/`domains/*` trong repo, và `components/*` nằm trong danh sách loại trừ JS/TS của H2); H3 (semantic region wrapper) chỉ pass cho SCR001 (4 khối `<section>`: Hero, RootFurther, Awards, Kudos) nhưng 2-of-3 gate cần thêm H1 hoặc H2 cùng pass — không có, nên SCR001 vẫn atomic theo gate, dù có 4 khối `<section>` trực quan. Quan trọng hơn, Trap 1 (composite-screen-detection.md/verification-checklist) yêu cầu mỗi REG có ≥1 independence signal (API riêng, loading state riêng, scroll container riêng, auth/permission gate riêng, mutation surface riêng, validation path riêng) — hệ thống này không có backend (xác nhận bởi `system-overview.md` Decision 1), nên không khối nào trên SCR001 có tín hiệu độc lập thật sự; tách visual thôi là không đủ (Trap 1). Việc này cũng phù hợp với `[H3_RAW_DIV]`-adjacent tình huống nhưng ở đây H3 pass nhờ `<section>` tag thật (không phải raw div), chỉ là 2-of-3 gate không đạt.
@@ -33,6 +45,7 @@ còn "vacuously satisfied" nữa — đây là service call đầu tiên có map
 | SCR005_AdminDashboard | AdminDashboard | atomic | 2 | 0 |
 | SCR006_Prelaunch | Prelaunch | atomic | 4 | 1 |
 | SCR007_Login | Login | atomic | 7 | 0 |
+| SCR008_KudosLiveBoard | KudosLiveBoard | atomic | 12 | 5 |
 
 ---
 
@@ -332,10 +345,78 @@ _(none — atomic, cùng lý do các SCR khác: không có tín hiệu độc l�
 
 ---
 
+## SCR008_KudosLiveBoard: Sun* Kudos - Live board — thêm 2026-08-21
+
+**Type**: atomic (xem § Lưu ý phân loại ở đầu tài liệu — feature-spec ghi `composite` theo nghĩa bố cục)
+**Route**: ROUTE003 (`/kudos`)
+
+### Description
+
+Trang nội dung thật của route `/kudos` — `app/kudos/page.tsx`, dựng theo frame MoMorph
+`MaZUn5xHXZ`. Thay thế nội dung placeholder mà SCR003_Kudos đã ghi nhận: SCR003 là mục cho
+route-view giữ chỗ (1 component, 0 data) từ lượt 2026-08-18, SCR008 là mục cho màn hình đầy đủ
+sau lượt này — **cùng một route**, hai trạng thái nội dung khác nhau ở hai thời điểm. Đây là màn
+hình dày đặc chuyển-trạng-thái nhất trong 5 lượt gần đây (carousel, 2 dropdown lọc dùng chung 2
+khối, thả/gỡ tim, copy link + toast, tìm kiếm giới hạn 100 ký tự, feed hiện dần theo cuộn) — nên
+lượt này dùng `e2e-red-first` thay vì chỉ visual-contract. Toàn bộ dữ liệu là hằng số tĩnh trong
+`lib/kudos/`; không có API, không có persistence.
+
+### Components
+
+| Component | Type | Purpose |
+|-----------|------|---------|
+| SiteHeader | layout | Header dùng chung, tái dùng; mục "Sun* Kudos" chuyển sang derive `aria-current` từ `usePathname()`. `components/layout/site-header.tsx` |
+| KudosSubmitPill | section | Banner + ô mời gửi lời cảm ơn. Trigger-only (US009) — bấm được nhưng chưa dẫn tới đâu. `components/kudos/kudos-submit-pill.tsx` |
+| KudosFilterBar | control | 2 dropdown lọc (hashtag, phòng ban) — dùng chung, lọc đồng thời HIGHLIGHT và ALL KUDOS (DEC-001). `components/kudos/kudos-filter-bar.tsx` |
+| HighlightCarousel | section | Khối HIGHLIGHT KUDOS — 5 thẻ nhiều tim nhất, 3 hiển thị cùng lúc, next/prev disable ở hai đầu (SM-001). `components/kudos/highlight-carousel.tsx` |
+| KudosCard | card | Thẻ một lời cảm ơn — 2 biến thể (carousel / list), dùng chung cho cả 2 khối. `components/kudos/kudos-card.tsx` |
+| KudosCardActions | control | Nút tim (thả/gỡ, tự-loại-trừ kudos của chính người xem), Copy Link + toast, "Xem chi tiết" (trigger-only). `components/kudos/kudos-card-actions.tsx` |
+| SpotlightBoard | section | Word cloud ~100 tên Sunner nổi bật, tooltip. `components/kudos/spotlight-board.tsx` |
+| SpotlightSearch | control | Ô tìm kiếm tên trong SPOTLIGHT BOARD — tô sáng tên khớp, chặn nhập ở ký tự thứ 100. `components/kudos/spotlight-search.tsx` |
+| AllKudosFeed | section | Khối ALL KUDOS — feed thẻ hiện dần theo đà cuộn qua sentinel cuối feed (SM-002). `components/kudos/all-kudos-feed.tsx` |
+| KudosSidebarStats | section | Thống kê cá nhân (nhận/gửi/tim/Secret Box) — đọc danh tính từ `useSession()` đã mở rộng. `components/kudos/kudos-sidebar-stats.tsx` |
+| KudosLeaderboard | section | Bảng "10 SUNNER NHẬN QUÀ MỚI NHẤT" + nút "Mở Secret Box" (trigger-only). `components/kudos/kudos-leaderboard.tsx` |
+| SiteFooter | layout | Footer dùng chung, tái dùng nguyên trạng. `components/layout/site-footer.tsx` |
+
+### Data Displayed
+
+| Data | Source | Notes |
+|------|--------|-------|
+| KudosRecord | `lib/kudos/kudos-records.ts` (hằng số) | Nguồn duy nhất cho cả HIGHLIGHT (top-5 nhiều tim) và ALL KUDOS feed |
+| SpotlightEntry | `lib/kudos/spotlight-names.ts` (hằng số) | ~100 tên + toạ độ node gốc cho word cloud |
+| LeaderboardEntry | `lib/kudos/leaderboard.ts` (hằng số) | 5 dòng bảng xếp hạng sidebar |
+| FilterVocabulary | `lib/kudos/filters.ts` (hằng số) | Giá trị cho 2 dropdown lọc |
+| ViewerStats | `lib/kudos/viewer-stats.ts` (hằng số/derived) | 5 dòng thống kê sidebar, gắn với danh tính mock-user hiện tại |
+
+Không có `MODEL###` nào — đây là hằng số tĩnh trong mã nguồn, không phải entity có persistence
+(cùng tình trạng `lib/awards.ts` của MODEL001_Award trước đó, xem `entities.md`).
+
+### Routes/URLs
+
+- `/kudos` (ROUTE003 — đã tồn tại từ lượt homepage dưới dạng placeholder có chủ đích; lượt này
+  thay nội dung, không cấp ROUTE### mới)
+
+### Related Screens
+
+- SCR003_Kudos: Kudos — cùng route `/kudos`; mục cho trạng thái placeholder trước lượt này
+- SCR001_Home: Home — khối quảng bá Kudos (`components/home/kudos-section.tsx`, F004) dẫn tới đây
+- SCR002_Awards: Awards — khối quảng bá Kudos dùng chung cũng dẫn tới đây
+
+Bốn đích điều hướng được frame tham chiếu (dialog gửi kudos, trang chi tiết một kudos, trang hồ sơ
+Sunner, dialog Secret Box) **chưa có màn hình nào** — không có SCR### nào được cấp cho chúng ở lượt
+này; các trigger tương ứng chỉ render + focusable, không dẫn tới đâu (US009).
+
+### Regions
+
+_(none — không có mã `REG###` nào được cấp; gate H1–H6 + Trap 1 không được chạy lại ở lượt promote
+này. 7 vùng bố cục R1–R7 mô tả trong feature-spec là mô tả layout/responsive, không phải REG###.)_
+
+---
+
 ## Summary
 
-- **Total Screens**: 7 (ROUTE006 `/_not-found` loại khỏi phạm vi — auto-generated, không có source file)
-- **Composite Screens**: 0 (2-of-3 gate không đạt ở mọi screen — xem ghi chú phương pháp ở đầu tài liệu)
+- **Total Screens**: 8 (ROUTE006 `/_not-found` loại khỏi phạm vi — auto-generated, không có source file)
+- **Composite Screens**: 0 (2-of-3 gate không đạt ở mọi screen — xem ghi chú phương pháp ở đầu tài liệu; SCR008 chưa được chạy gate lại ở lượt promote, xem § Lưu ý phân loại)
 - **Total Regions**: 0
 
 ---
@@ -343,8 +424,9 @@ _(none — atomic, cùng lý do các SCR khác: không có tín hiệu độc l�
 ## Cross-Reference Validation
 
 - [x] All SCR### codes are unique
-- [x] All SCR### codes are referenced in ScreenFlow.md (xem `screen-flow.md`)
+- [x] All SCR### codes are referenced in ScreenFlow.md (xem `screen-flow.md`) — đúng cho SCR001–SCR007; SCR008 là ngoại lệ, xem dòng pending cuối danh sách
 - [x] All related screen references are valid
 - [x] All route URLs are properly formatted (đối chiếu `route-list.md` ROUTE001–ROUTE005, ROUTE007, ROUTE009)
-- [x] All SCR### codes are referenced in FeatureList.md — SCR006 → F010, SCR007 → F011 (thêm 2026-08-19); 7/7 SCR đều có ≥1 F### tham chiếu.
+- [x] All SCR### codes are referenced in FeatureList.md — SCR006 → F010, SCR007 → F011 (thêm 2026-08-19), SCR008 → F013 (thêm 2026-08-21); 8/8 SCR đều có ≥1 F### tham chiếu.
+- [ ] SCR008 chưa được tham chiếu trong `screen-flow.md` — pending: lượt promote này không sinh lại flow diagram; `/kudos` đã có mặt trong `screen-flow.md` dưới dạng đích placeholder (SCR003), cần một lượt `/tkm:rebuild-spec` cập nhật flow cho nội dung thật của SCR008
 - [x] No orphaned screen references

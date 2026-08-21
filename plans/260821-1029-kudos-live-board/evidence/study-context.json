@@ -1,0 +1,40 @@
+{
+  "task": "Implement the Sun* Kudos - Live board page at /kudos from MoMorph screen MaZUn5xHXZ (frame 2940:13431, 1440x5862), replacing the existing placeholder. Six regions: banner, submit pill + Sunner search, HIGHLIGHT KUDOS carousel with shared hashtag/department filters, static 106-node SPOTLIGHT BOARD, progressive-reveal ALL KUDOS feed, and a stats + leaderboard sidebar. Static data recombined from real frame values; no persistence.",
+  "mode": "interactive / e2e-red-first",
+  "acceptanceCriteria": [
+    "the /kudos page renders all six regions with header and footer",
+    "hashtag and department filters re-filter both the highlight carousel and the all-kudos feed",
+    "the heart toggles count and active state, and is disabled on the viewer's own kudos",
+    "copy link writes the clipboard and shows the toast Link copied",
+    "the filtered empty state shows the no-kudos message",
+    "no page-level horizontal scroll at 375, 768 or 1440"
+  ],
+  "touchpoints": [
+    "app/kudos/page.tsx",
+    "components/kudos/ (19 files)",
+    "lib/kudos/ (10 files incl. unit tests)",
+    "lib/session/session-provider.tsx",
+    "lib/i18n/dictionaries/vi.ts",
+    "lib/i18n/dictionaries/en.ts",
+    "components/layout/site-header.tsx",
+    "components/layout/site-footer.tsx",
+    "app/globals.css",
+    "public/saa/ (16 new assets)",
+    "playwright.config.ts",
+    "e2e/kudos-board-layout.spec.ts",
+    "e2e/kudos-board-interactions.spec.ts",
+    "e2e/kudos-board-feed-interactions.spec.ts"
+  ],
+  "blastRadius": [
+    "site-header.tsx and site-footer.tsx are shared chrome on every route — the current-page derivation changed and the footer's hard-coded aria-current was repaired, so homepage and awards were re-run to confirm no regression",
+    "session-provider.tsx is app-wide — gained a mock user identity; role and unreadCount left byte-unchanged",
+    "app/globals.css is app-wide — 8 colour tokens and 2 radius tokens added additively, no existing token altered",
+    "playwright.config.ts — a new kudos-board project was added and the prelaunch-gate lookahead extended, which affects which project every spec file resolves to"
+  ],
+  "contracts": [
+    "dom-contract.md — 43 frozen DOM rules the e2e locators depend on (F2 section nesting, F21/S3 filter vocabulary order, F31, F32 single tooltip, F35 explicit role=button on cloud nodes)",
+    "clarifications.md — 7 resolved decisions across two sessions, 20 recorded design defects, one withdrawn defect, and the deferred-scope list",
+    "spec F013_KudosLiveBoard — US001-US009, FR/BR/SM/DEC codes and success criteria in docs/vi/features/kudos-live-board/",
+    "BR-007 clipboard failure must be silent with no false success toast"
+  ]
+}

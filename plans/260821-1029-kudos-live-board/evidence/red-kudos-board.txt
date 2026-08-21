@@ -1,0 +1,428 @@
+
+> my-app@0.1.0 test:e2e
+> playwright test kudos-board
+
+
+Running 18 tests using 4 workers
+
+  ✘   3 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:45:9 › Kudos Feed Interactions /kudos › Heart Toggle (7a7ec63e, 63645b03) › heart button is disabled on kudos sent by the current viewer (63645b03) (485ms)
+  ✘   1 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:8:9 › Kudos Feed Interactions /kudos › Heart Toggle (7a7ec63e, 63645b03) › clicking heart toggles count increment on first click, decrement on second (7a7ec63e) (488ms)
+  ✘   4 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:72:9 › Kudos Feed Interactions /kudos › Copy Link Button (0adfd7ce) › clicking Copy Link shows toast "Link copied — ready to share!" (0adfd7ce) (489ms)
+  ✘   6 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:116:9 › Kudos Feed Interactions /kudos › Spotlight Hover Tooltip (33ca8f8a) › hovering spotlight name node shows tooltip with that name (33ca8f8a) (233ms)
+  ✘   2 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:95:9 › Kudos Feed Interactions /kudos › Spotlight Search Input (9e689933) › spotlight search input enforces 100-character ceiling (9e689933) (5.4s)
+  ✘   7 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:191:9 › Kudos Feed Interactions /kudos › Submit Pill Accessibility › submit pill input is visible, enabled and focusable (A.1 deferred) (5.2s)
+  ✘  10 [kudos-board] › e2e/kudos-board-interactions.spec.ts:48:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › prev button is disabled on slide 1 (81446f61) (5.1s)
+  ✘   5 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:140:9 › Kudos Feed Interactions /kudos › Empty States (926d92a5) › filtering to no matching kudos shows "Hiện tại chưa có Kudos nào." (926d92a5) (30.0s)
+  ✘   8 [kudos-board] › e2e/kudos-board-interactions.spec.ts:8:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › carousel next advances slide and updates indicator (81446f61) (30.0s)
+  ✘   9 [kudos-board] › e2e/kudos-board-interactions.spec.ts:27:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › carousel prev goes back one slide (81446f61) (30.0s)
+  ✘  11 [kudos-board] › e2e/kudos-board-interactions.spec.ts:57:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › next button is disabled on slide 5 (81446f61) (30.0s)
+  ✘  15 [kudos-board] › e2e/kudos-board-layout.spec.ts:8:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › renders full page structure with header, banner, all 6 sections and footer (40d4ba26) (5.1s)
+  ✘  16 [kudos-board] › e2e/kudos-board-layout.spec.ts:118:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › header nav marks /kudos with aria-current="page" (40d4ba26) (5.1s)
+  ✘  17 [kudos-board] › e2e/kudos-board-layout.spec.ts:126:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › banner is non-interactive and visible (40d4ba26) (5.1s)
+  ✘  12 [kudos-board] › e2e/kudos-board-interactions.spec.ts:79:9 › Kudos Board Carousel & Filters /kudos › Filter Dropdowns (0e56cacb, 159fed13, d01729d4) › Hashtag filter: open dropdown, select option, filter applies (0e56cacb) (30.0s)
+  ✘  13 [kudos-board] › e2e/kudos-board-interactions.spec.ts:104:9 › Kudos Board Carousel & Filters /kudos › Filter Dropdowns (0e56cacb, 159fed13, d01729d4) › Department filter: open dropdown, select option, filter applies (159fed13) (30.0s)
+  ✘  14 [kudos-board] › e2e/kudos-board-interactions.spec.ts:130:9 › Kudos Board Carousel & Filters /kudos › Filter Dropdowns (0e56cacb, 159fed13, d01729d4) › clicking hashtag inside kudos card re-filters both sections & resets carousel (d01729d4) (30.0s)
+  ✘  18 [kudos-board] › e2e/kudos-board-layout.spec.ts:138:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › placeholder text renders on load (b35d40c1, d3877e54) (30.0s)
+
+
+  1) [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:8:9 › Kudos Feed Interactions /kudos › Heart Toggle (7a7ec63e, 63645b03) › clicking heart toggles count increment on first click, decrement on second (7a7ec63e) 
+
+    Error: expect(received).toBeGreaterThan(expected)
+
+    Expected: > 0
+    Received:   0
+
+      15 |
+      16 |       // Assert at least one heart exists (required by the test case)
+    > 17 |       expect(await heartButtons.count()).toBeGreaterThan(0);
+         |                                          ^
+      18 |
+      19 |       const firstHeart = heartButtons.first();
+      20 |       const initialCountText = await firstHeart.textContent();
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/kudos-board-feed-interactions.spec.ts:17:42
+
+    Error Context: test-results/kudos-board-feed-interacti-dee81-crement-on-second-7a7ec63e--kudos-board/error-context.md
+
+  2) [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:45:9 › Kudos Feed Interactions /kudos › Heart Toggle (7a7ec63e, 63645b03) › heart button is disabled on kudos sent by the current viewer (63645b03) 
+
+    Error: expect(received).toBeGreaterThan(expected)
+
+    Expected: > 0
+    Received:   0
+
+      50 |
+      51 |       // Assert at least one card exists
+    > 52 |       expect(await kudosCards.count()).toBeGreaterThan(0);
+         |                                        ^
+      53 |
+      54 |       // clarifications.md (second pass) requires the seed set to contain at least one kudos sent
+      55 |       // BY the mock viewer and at least one sent by someone else. Both states must therefore be
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/kudos-board-feed-interactions.spec.ts:52:40
+
+    Error Context: test-results/kudos-board-feed-interacti-23149-he-current-viewer-63645b03--kudos-board/error-context.md
+
+  3) [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:72:9 › Kudos Feed Interactions /kudos › Copy Link Button (0adfd7ce) › clicking Copy Link shows toast "Link copied — ready to share!" (0adfd7ce) 
+
+    Error: expect(received).toBeGreaterThan(expected)
+
+    Expected: > 0
+    Received:   0
+
+      80 |
+      81 |       // Assert button exists (required by the test case)
+    > 82 |       expect(await copyButtons.count()).toBeGreaterThan(0);
+         |                                         ^
+      83 |
+      84 |       const firstCopyButton = copyButtons.first();
+      85 |       await firstCopyButton.click();
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/kudos-board-feed-interactions.spec.ts:82:41
+
+    Error Context: test-results/kudos-board-feed-interacti-c05da--—-ready-to-share-0adfd7ce--kudos-board/error-context.md
+
+  4) [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:95:9 › Kudos Feed Interactions /kudos › Spotlight Search Input (9e689933) › spotlight search input enforces 100-character ceiling (9e689933) 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('section:has(h2:text-is("SPOTLIGHT BOARD"))').first().locator('input[placeholder*="Tìm kiếm"]')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('section:has(h2:text-is("SPOTLIGHT BOARD"))').first().locator('input[placeholder*="Tìm kiếm"]')
+
+
+      100 |
+      101 |       // Assert input exists and has maxlength attribute
+    > 102 |       await expect(searchInput).toBeVisible();
+          |                                 ^
+      103 |       const maxlength = await searchInput.getAttribute('maxlength');
+      104 |       expect(maxlength).toBe('100');
+      105 |
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/kudos-board-feed-interactions.spec.ts:102:33
+
+    Error Context: test-results/kudos-board-feed-interacti-6ebcb-character-ceiling-9e689933--kudos-board/error-context.md
+
+  5) [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:116:9 › Kudos Feed Interactions /kudos › Spotlight Hover Tooltip (33ca8f8a) › hovering spotlight name node shows tooltip with that name (33ca8f8a) 
+
+    Error: expect(received).toBeGreaterThan(expected)
+
+    Expected: > 0
+    Received:   0
+
+      121 |
+      122 |       // Assert nodes exist
+    > 123 |       expect(await cloudNodes.count()).toBeGreaterThan(0);
+          |                                        ^
+      124 |
+      125 |       const firstNode = cloudNodes.first();
+      126 |       const nodeName = ((await firstNode.textContent()) ?? '').trim();
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/kudos-board-feed-interactions.spec.ts:123:40
+
+    Error Context: test-results/kudos-board-feed-interacti-23efd-ip-with-that-name-33ca8f8a--kudos-board/error-context.md
+
+  6) [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:140:9 › Kudos Feed Interactions /kudos › Empty States (926d92a5) › filtering to no matching kudos shows "Hiện tại chưa có Kudos nào." (926d92a5) 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('section:has(h2:text-is("HIGHLIGHT KUDOS"))').first().locator('button:has-text("Hashtag")')
+
+
+      154 |       // If it does not, the seed data breaks its own contract and this test is what catches it.
+      155 |       const hashtagButton = highlightSection.locator('button:has-text("Hashtag")');
+    > 156 |       await hashtagButton.click();
+          |                           ^
+      157 |       await expect(options.first()).toBeVisible();
+      158 |       await options.first().click();
+      159 |
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/kudos-board-feed-interactions.spec.ts:156:27
+
+    Error Context: test-results/kudos-board-feed-interacti-c21cc-chưa-có-Kudos-nào-926d92a5--kudos-board/error-context.md
+
+  7) [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:191:9 › Kudos Feed Interactions /kudos › Submit Pill Accessibility › submit pill input is visible, enabled and focusable (A.1 deferred) 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('input[placeholder*="bạn muốn gửi lời cảm ơn"]').first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('input[placeholder*="bạn muốn gửi lời cảm ơn"]').first()
+
+
+      193 |
+      194 |       const submitPill = page.locator('input[placeholder*="bạn muốn gửi lời cảm ơn"]').first();
+    > 195 |       await expect(submitPill).toBeVisible();
+          |                                ^
+      196 |       await expect(submitPill).toBeEnabled();
+      197 |
+      198 |       await submitPill.focus();
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/kudos-board-feed-interactions.spec.ts:195:32
+
+    Error Context: test-results/kudos-board-feed-interacti-e9985-and-focusable-A-1-deferred--kudos-board/error-context.md
+
+  8) [kudos-board] › e2e/kudos-board-interactions.spec.ts:8:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › carousel next advances slide and updates indicator (81446f61) 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.textContent: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('section:has(h2:text-is("HIGHLIGHT KUDOS"))').first().locator('text=/^\\d+\\/5$/')
+
+
+      13 |       const nextButton = highlightSection.locator('button[aria-label*="next"], button[aria-label*="Next"]');
+      14 |
+    > 15 |       const initialText = await indicator.textContent();
+         |                                           ^
+      16 |       expect(initialText).toMatch(/^\d+\/5$/);
+      17 |       const initialSlide = parseInt(initialText!.split('/')[0]);
+      18 |
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/kudos-board-interactions.spec.ts:15:43
+
+    Error Context: test-results/kudos-board-interactions-K-f06d8-updates-indicator-81446f61--kudos-board/error-context.md
+
+  9) [kudos-board] › e2e/kudos-board-interactions.spec.ts:27:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › carousel prev goes back one slide (81446f61) 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('section:has(h2:text-is("HIGHLIGHT KUDOS"))').first().locator('button[aria-label*="next"], button[aria-label*="Next"]')
+
+
+      34 |
+      35 |       // Advance to slide 2
+    > 36 |       await nextButton.click();
+         |                        ^
+      37 |       await page.waitForTimeout(500);
+      38 |
+      39 |       // Go back
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/kudos-board-interactions.spec.ts:36:24
+
+    Error Context: test-results/kudos-board-interactions-K-fdec8-es-back-one-slide-81446f61--kudos-board/error-context.md
+
+  10) [kudos-board] › e2e/kudos-board-interactions.spec.ts:48:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › prev button is disabled on slide 1 (81446f61) 
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator: locator('section:has(h2:text-is("HIGHLIGHT KUDOS"))').first().locator('button[aria-label*="prev"], button[aria-label*="Previous"]')
+    Expected: disabled
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeDisabled" with timeout 5000ms
+      - waiting for locator('section:has(h2:text-is("HIGHLIGHT KUDOS"))').first().locator('button[aria-label*="prev"], button[aria-label*="Previous"]')
+
+
+      52 |       const prevButton = highlightSection.locator('button[aria-label*="prev"], button[aria-label*="Previous"]');
+      53 |
+    > 54 |       await expect(prevButton).toBeDisabled();
+         |                                ^
+      55 |     });
+      56 |
+      57 |     test('next button is disabled on slide 5 (81446f61)', async ({ page }) => {
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/kudos-board-interactions.spec.ts:54:32
+
+    Error Context: test-results/kudos-board-interactions-K-83b94-sabled-on-slide-1-81446f61--kudos-board/error-context.md
+
+  11) [kudos-board] › e2e/kudos-board-interactions.spec.ts:57:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › next button is disabled on slide 5 (81446f61) 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('section:has(h2:text-is("HIGHLIGHT KUDOS"))').first().locator('button[aria-label*="next"], button[aria-label*="Next"]')
+
+
+      64 |       // Advance to slide 5
+      65 |       for (let i = 0; i < 4; i++) {
+    > 66 |         await nextButton.click();
+         |                          ^
+      67 |         await page.waitForTimeout(300);
+      68 |       }
+      69 |
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/kudos-board-interactions.spec.ts:66:26
+
+    Error Context: test-results/kudos-board-interactions-K-814dc-sabled-on-slide-5-81446f61--kudos-board/error-context.md
+
+  12) [kudos-board] › e2e/kudos-board-interactions.spec.ts:79:9 › Kudos Board Carousel & Filters /kudos › Filter Dropdowns (0e56cacb, 159fed13, d01729d4) › Hashtag filter: open dropdown, select option, filter applies (0e56cacb) 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('section:has(h2:text-is("HIGHLIGHT KUDOS"))').first().locator('button:has-text("Hashtag")')
+
+
+      89 |
+      90 |       // Open dropdown and select first option
+    > 91 |       await hashtagButton.click();
+         |                           ^
+      92 |       await page.waitForTimeout(300);
+      93 |       const firstOption = page.locator('[role="option"], [role="menuitem"]').first();
+      94 |       await firstOption.click();
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/kudos-board-interactions.spec.ts:91:27
+
+    Error Context: test-results/kudos-board-interactions-K-062d1-on-filter-applies-0e56cacb--kudos-board/error-context.md
+
+  13) [kudos-board] › e2e/kudos-board-interactions.spec.ts:104:9 › Kudos Board Carousel & Filters /kudos › Filter Dropdowns (0e56cacb, 159fed13, d01729d4) › Department filter: open dropdown, select option, filter applies (159fed13) 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('section:has(h2:text-is("HIGHLIGHT KUDOS"))').first().locator('button:has-text("Phòng ban")')
+
+
+      116 |
+      117 |       // Open dropdown and select first option
+    > 118 |       await deptButton.click();
+          |                        ^
+      119 |       await page.waitForTimeout(300);
+      120 |       const firstOption = page.locator('[role="option"], [role="menuitem"]').first();
+      121 |       await firstOption.click();
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/kudos-board-interactions.spec.ts:118:24
+
+    Error Context: test-results/kudos-board-interactions-K-fb757-on-filter-applies-159fed13--kudos-board/error-context.md
+
+  14) [kudos-board] › e2e/kudos-board-interactions.spec.ts:130:9 › Kudos Board Carousel & Filters /kudos › Filter Dropdowns (0e56cacb, 159fed13, d01729d4) › clicking hashtag inside kudos card re-filters both sections & resets carousel (d01729d4) 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('section:has(h2:text-is("HIGHLIGHT KUDOS"))').first().locator('button[aria-label*="next"], button[aria-label*="Next"]')
+
+
+      142 |         'button[aria-label*="next"], button[aria-label*="Next"]'
+      143 |       );
+    > 144 |       await nextButton.click();
+          |                        ^
+      145 |       await expect(carouselIndicator).not.toHaveText(/^1\//);
+      146 |
+      147 |       const hashtag = allKudosSection.locator('button:has-text("#")').first();
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/kudos-board-interactions.spec.ts:144:24
+
+    Error Context: test-results/kudos-board-interactions-K-f1412-s-resets-carousel-d01729d4--kudos-board/error-context.md
+
+  15) [kudos-board] › e2e/kudos-board-layout.spec.ts:8:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › renders full page structure with header, banner, all 6 sections and footer (40d4ba26) 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('header')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('header')
+
+
+      19 |       // Header exists
+      20 |       const header = page.locator('header');
+    > 21 |       await expect(header).toBeVisible();
+         |                            ^
+      22 |
+      23 |       // Banner with title and KUDOS wordmark — spec A
+      24 |       const bannerTitle = page.locator('text=Hệ thống ghi nhận và cảm ơn');
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/kudos-board-layout.spec.ts:21:28
+
+    Error Context: test-results/kudos-board-layout-Kudos-B-755c7-ctions-and-footer-40d4ba26--kudos-board/error-context.md
+
+  16) [kudos-board] › e2e/kudos-board-layout.spec.ts:118:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › header nav marks /kudos with aria-current="page" (40d4ba26) 
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator: locator('header').getByRole('link', { name: 'Sun* Kudos' })
+    Expected: "page"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toHaveAttribute" with timeout 5000ms
+      - waiting for locator('header').getByRole('link', { name: 'Sun* Kudos' })
+
+
+      121 |       // Scope to header to avoid strict-mode match with footer nav
+      122 |       const kudosNavItem = page.locator('header').getByRole('link', { name: 'Sun* Kudos' });
+    > 123 |       await expect(kudosNavItem).toHaveAttribute('aria-current', 'page');
+          |                                  ^
+      124 |     });
+      125 |
+      126 |     test('banner is non-interactive and visible (40d4ba26)', async ({ page }) => {
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/kudos-board-layout.spec.ts:123:34
+
+    Error Context: test-results/kudos-board-layout-Kudos-B-2feee-aria-current-page-40d4ba26--kudos-board/error-context.md
+
+  17) [kudos-board] › e2e/kudos-board-layout.spec.ts:126:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › banner is non-interactive and visible (40d4ba26) 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('section').first().locator('text=Hệ thống ghi nhận và cảm ơn')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('section').first().locator('text=Hệ thống ghi nhận và cảm ơn')
+
+
+      129 |       const banner = page.locator('section').first();
+      130 |       const bannerContent = banner.locator('text=Hệ thống ghi nhận và cảm ơn');
+    > 131 |       await expect(bannerContent).toBeVisible();
+          |                                   ^
+      132 |
+      133 |       // Banner title and wordmark are display-only (inputs/buttons are outside banner section)
+      134 |       const kudosWordmark = banner.locator('img[alt*="KUDOS"], img[src*="KUDOS"]');
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/kudos-board-layout.spec.ts:131:35
+
+    Error Context: test-results/kudos-board-layout-Kudos-B-82893-ctive-and-visible-40d4ba26--kudos-board/error-context.md
+
+  18) [kudos-board] › e2e/kudos-board-layout.spec.ts:138:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › placeholder text renders on load (b35d40c1, d3877e54) 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.getAttribute: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('input[placeholder*="Hôm nay"]')
+
+
+      143 |         'input[placeholder*="Hôm nay"]'
+      144 |       );
+    > 145 |       const placeholderValue = await submitPlaceholder.getAttribute('placeholder');
+          |                                                        ^
+      146 |       expect(placeholderValue).toContain('bạn muốn gửi lời cảm ơn');
+      147 |
+      148 |       // Spotlight search placeholder
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/kudos-board-layout.spec.ts:145:56
+
+    Error Context: test-results/kudos-board-layout-Kudos-B-85430--on-load-b35d40c1-d3877e54--kudos-board/error-context.md
+
+  18 failed
+    [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:8:9 › Kudos Feed Interactions /kudos › Heart Toggle (7a7ec63e, 63645b03) › clicking heart toggles count increment on first click, decrement on second (7a7ec63e) 
+    [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:45:9 › Kudos Feed Interactions /kudos › Heart Toggle (7a7ec63e, 63645b03) › heart button is disabled on kudos sent by the current viewer (63645b03) 
+    [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:72:9 › Kudos Feed Interactions /kudos › Copy Link Button (0adfd7ce) › clicking Copy Link shows toast "Link copied — ready to share!" (0adfd7ce) 
+    [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:95:9 › Kudos Feed Interactions /kudos › Spotlight Search Input (9e689933) › spotlight search input enforces 100-character ceiling (9e689933) 
+    [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:116:9 › Kudos Feed Interactions /kudos › Spotlight Hover Tooltip (33ca8f8a) › hovering spotlight name node shows tooltip with that name (33ca8f8a) 
+    [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:140:9 › Kudos Feed Interactions /kudos › Empty States (926d92a5) › filtering to no matching kudos shows "Hiện tại chưa có Kudos nào." (926d92a5) 
+    [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:191:9 › Kudos Feed Interactions /kudos › Submit Pill Accessibility › submit pill input is visible, enabled and focusable (A.1 deferred) 
+    [kudos-board] › e2e/kudos-board-interactions.spec.ts:8:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › carousel next advances slide and updates indicator (81446f61) 
+    [kudos-board] › e2e/kudos-board-interactions.spec.ts:27:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › carousel prev goes back one slide (81446f61) 
+    [kudos-board] › e2e/kudos-board-interactions.spec.ts:48:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › prev button is disabled on slide 1 (81446f61) 
+    [kudos-board] › e2e/kudos-board-interactions.spec.ts:57:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › next button is disabled on slide 5 (81446f61) 
+    [kudos-board] › e2e/kudos-board-interactions.spec.ts:79:9 › Kudos Board Carousel & Filters /kudos › Filter Dropdowns (0e56cacb, 159fed13, d01729d4) › Hashtag filter: open dropdown, select option, filter applies (0e56cacb) 
+    [kudos-board] › e2e/kudos-board-interactions.spec.ts:104:9 › Kudos Board Carousel & Filters /kudos › Filter Dropdowns (0e56cacb, 159fed13, d01729d4) › Department filter: open dropdown, select option, filter applies (159fed13) 
+    [kudos-board] › e2e/kudos-board-interactions.spec.ts:130:9 › Kudos Board Carousel & Filters /kudos › Filter Dropdowns (0e56cacb, 159fed13, d01729d4) › clicking hashtag inside kudos card re-filters both sections & resets carousel (d01729d4) 
+    [kudos-board] › e2e/kudos-board-layout.spec.ts:8:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › renders full page structure with header, banner, all 6 sections and footer (40d4ba26) 
+    [kudos-board] › e2e/kudos-board-layout.spec.ts:118:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › header nav marks /kudos with aria-current="page" (40d4ba26) 
+    [kudos-board] › e2e/kudos-board-layout.spec.ts:126:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › banner is non-interactive and visible (40d4ba26) 
+    [kudos-board] › e2e/kudos-board-layout.spec.ts:138:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › placeholder text renders on load (b35d40c1, d3877e54) 

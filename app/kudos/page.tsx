@@ -1,10 +1,20 @@
-// Placeholder `/kudos` route (clarifications.md — content out of scope this run).
-// Bare stub so header/footer/CTA/widget navigation to Sun* Kudos is real, not a 404.
+// /kudos — Sun* Kudos Live board (frame MaZUn5xHXZ). Replaces the homepage run's placeholder
+// (dom-contract.md F1) with the real server shell: SiteHeader -> <main> -> SiteFooter around
+// KudosBoard, which owns the shared filter state and the five sibling <section>s (F2/F3).
+// mm:2940:13431
+
+import { SiteHeader } from '@/components/layout/site-header';
+import { SiteFooter } from '@/components/layout/site-footer';
+import { KudosBoard } from '@/components/kudos/kudos-board';
 
 export default function KudosPage() {
   return (
-    <main className="mx-auto flex min-h-[60vh] w-full max-w-[1152px] flex-col gap-4 px-6 py-20 text-white">
-      <h1 className="text-4xl font-bold text-accent">Sun* Kudos</h1>
-    </main>
+    <div className="flex min-h-full w-full flex-col bg-background">
+      <SiteHeader />
+      <main className="flex w-full flex-col">
+        <KudosBoard />
+      </main>
+      <SiteFooter />
+    </div>
   );
 }

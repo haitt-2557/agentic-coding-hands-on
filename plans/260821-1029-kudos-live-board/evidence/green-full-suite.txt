@@ -1,0 +1,200 @@
+
+> my-app@0.1.0 test:e2e
+> playwright test
+
+[WebServer] ⚠ Warning: Next.js ignored pnpm-lock.yaml in /Users/truong.thanh.hai because it is outside the current Git repository (/Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on).
+[WebServer]  To use this directory, set `turbopack.root` in your Next.js config.
+[WebServer] 
+[WebServer] ⚠ Warning: Next.js ignored pnpm-lock.yaml in /Users/truong.thanh.hai because it is outside the current Git repository (/Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on).
+[WebServer]  To use this directory, set `turbopack.root` in your Next.js config.
+[WebServer] 
+[WebServer] ⚠ Warning: Next.js ignored pnpm-lock.yaml in /Users/truong.thanh.hai because it is outside the current Git repository (/Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on).
+[WebServer]  To use this directory, set `outputFileTracingRoot` in your Next.js config.
+[WebServer] 
+[WebServer] ⚠ Warning: Next.js ignored pnpm-lock.yaml in /Users/truong.thanh.hai because it is outside the current Git repository (/Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on).
+[WebServer]  To use this directory, set `turbopack.root` in your Next.js config.
+[WebServer] 
+[WebServer] ⚠ Warning: Next.js ignored pnpm-lock.yaml in /Users/truong.thanh.hai because it is outside the current Git repository (/Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on).
+[WebServer]  To use this directory, set `outputFileTracingRoot` in your Next.js config.
+[WebServer] 
+
+Running 97 tests using 4 workers
+
+  ✓   1 [prelaunch-gate] › e2e/login-screen.spec.ts:57:9 › Login Screen › Layout & Copy (A2–A7, A12) › displays wave key visual in hero section (A4) (987ms)
+  ✓   3 [prelaunch-gate] › e2e/login-screen.spec.ts:6:9 › Login Screen › Gate Reachability (A1) › renders without redirecting to /prelaunch on locked-gate server (997ms)
+  ✓   4 [prelaunch-gate] › e2e/login-screen.spec.ts:17:9 › Login Screen › Layout & Copy (A2–A7, A12) › displays header logo in top-left, not interactive (A2) (1.0s)
+  ✓   2 [prelaunch-gate] › e2e/login-screen.spec.ts:39:9 › Login Screen › Layout & Copy (A2–A7, A12) › displays language selector with VN flag and chevron, opens on click (A3) (1.1s)
+  ✓   5 [prelaunch-gate] › e2e/login-screen.spec.ts:66:9 › Login Screen › Layout & Copy (A2–A7, A12) › displays ROOT FURTHER image in hero (A4) (588ms)
+  ✓   6 [prelaunch-gate] › e2e/login-screen.spec.ts:73:9 › Login Screen › Layout & Copy (A2–A7, A12) › displays copy text: "Bắt đầu hành trình của bạn cùng SAA 2025." (A5) (742ms)
+[WebServer] [browser] Image with src "/saa/Login_Keyvisual.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+[WebServer] Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[WebServer] [browser] Image with src "/saa/Login_Keyvisual.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+[WebServer] Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+  ✓   7 [prelaunch-gate] › e2e/login-screen.spec.ts:82:9 › Login Screen › Layout & Copy (A2–A7, A12) › displays tagline: "Đăng nhập để khám phá!" (A5) (888ms)
+  ✓   8 [prelaunch-gate] › e2e/login-screen.spec.ts:89:9 › Login Screen › Layout & Copy (A2–A7, A12) › displays LOGIN With Google button with Google mark (A6) (830ms)
+[WebServer] [browser] Image with src "/saa/Login_Keyvisual.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+[WebServer] Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+  ✓   9 [prelaunch-gate] › e2e/login-screen.spec.ts:100:9 › Login Screen › Layout & Copy (A2–A7, A12) › displays footer copyright centered and not interactive (A7) (963ms)
+  ✓  12 [prelaunch-gate] › e2e/login-screen.spec.ts:167:9 › Login Screen › OAuth Initiation (A8, A9) › LOGIN button is disabled and shows loading indicator during auth flow (A9) (687ms)
+  ✓  11 [prelaunch-gate] › e2e/login-screen.spec.ts:134:9 › Login Screen › OAuth Initiation (A8, A9) › click LOGIN button triggers Supabase authorize request (intercepted) (A8) (769ms)
+[WebServer] [browser] Image with src "/saa/Login_Keyvisual.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+[WebServer] Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+  ✓  13 [prelaunch-gate] › e2e/login-screen.spec.ts:193:9 › Login Screen › Error Surface (A10) › error query param renders alert with Vietnamese message (A10) (261ms)
+  ✓  10 [prelaunch-gate] › e2e/login-screen.spec.ts:122:9 › Login Screen › Layout & Copy (A2–A7, A12) › page loads without uncaught errors (A12) (1.2s)
+  ✓  14 [prelaunch-gate] › e2e/prelaunch-countdown-gui.spec.ts:8:9 › Prelaunch - Countdown GUI & Values (Future Event) › GUI Structure (Title, Labels, Digits) › displays title and countdown structure (395ms)
+  ✓  15 [prelaunch-gate] › e2e/prelaunch-countdown-gui.spec.ts:21:9 › Prelaunch - Countdown GUI & Values (Future Event) › GUI Structure (Title, Labels, Digits) › digits render in 2-digit zero-padded format (362ms)
+  ✓  16 [prelaunch-gate] › e2e/prelaunch-countdown-gui.spec.ts:32:9 › Prelaunch - Countdown GUI & Values (Future Event) › Countdown Values & Ranges › displays correct values for given target date (333ms)
+  ✓  17 [prelaunch-gate] › e2e/prelaunch-countdown-gui.spec.ts:44:9 › Prelaunch - Countdown GUI & Values (Future Event) › Countdown Values & Ranges › shows 00 days when countdown < 24 hours (477ms)
+  ✓  18 [prelaunch-gate] › e2e/prelaunch-countdown-gui.spec.ts:52:9 › Prelaunch - Countdown GUI & Values (Future Event) › Countdown Values & Ranges › shows 00 digits 30 seconds before target (zero-digit state) (503ms)
+  ✓  19 [prelaunch-gate] › e2e/prelaunch-countdown-gui.spec.ts:72:9 › Prelaunch - Countdown GUI & Values (Future Event) › Auto-Update Behavior › countdown updates as time progresses (493ms)
+  ✓  20 [prelaunch-gate] › e2e/prelaunch-countdown-gui.spec.ts:86:9 › Prelaunch - Countdown GUI & Values (Future Event) › Auto-Update Behavior › countdown crosses hour boundary correctly (488ms)
+  ✓  22 [prelaunch-gate] › e2e/prelaunch-countdown-gui.spec.ts:121:9 › Prelaunch - Countdown GUI & Values (Future Event) › Hydration & Errors › page structure renders on initial load (610ms)
+  ✓  23 [prelaunch-gate] › e2e/prelaunch-countdown-unlock.spec.ts:8:9 › Prelaunch - Client-Side Unlock & Gate (Future Event) › Client-Side Unlock (router.replace when countdown reaches zero) › initiates navigation to / when countdown expires (client-side only) (611ms)
+  ✓  24 [prelaunch-gate] › e2e/prelaunch-countdown-unlock.spec.ts:41:9 › Prelaunch - Client-Side Unlock & Gate (Future Event) › Gate Lock: Locked Routes Redirect to /prelaunch › locked route /awards redirects to /prelaunch while countdown > 0 (541ms)
+  ✓  25 [prelaunch-gate] › e2e/prelaunch-countdown-unlock.spec.ts:55:9 › Prelaunch - Client-Side Unlock & Gate (Future Event) › Gate Lock: Locked Routes Redirect to /prelaunch › locked route /kudos redirects to /prelaunch while countdown > 0 (350ms)
+  ✓  26 [prelaunch-gate] › e2e/prelaunch-countdown-unlock.spec.ts:63:9 › Prelaunch - Client-Side Unlock & Gate (Future Event) › Gate Lock: Locked Routes Redirect to /prelaunch › locked route /profile redirects to /prelaunch while countdown > 0 (352ms)
+  ✓  27 [prelaunch-gate] › e2e/prelaunch-countdown-unlock.spec.ts:71:9 › Prelaunch - Client-Side Unlock & Gate (Future Event) › Gate Lock: Locked Routes Redirect to /prelaunch › homepage / redirects to /prelaunch while countdown > 0 (335ms)
+  ✓  21 [prelaunch-gate] › e2e/prelaunch-countdown-gui.spec.ts:110:9 › Prelaunch - Countdown GUI & Values (Future Event) › Hydration & Errors › page loads without console errors (1.1s)
+  ✓  28 [awards-page] › e2e/awards-page-deep-links.spec.ts:54:9 › Award System Page /awards › Deep Links & Hash Behavior (A9, A10, A12) › all six section ids exist in server HTML (A12) (225ms)
+  ✓  29 [awards-page] › e2e/awards-page-deep-links.spec.ts:34:9 › Award System Page /awards › Deep Links & Hash Behavior (A9, A10, A12) › invalid hash navigates cleanly with no console error (A10) (469ms)
+  ✓  32 [awards-page] › e2e/awards-page-kudos.spec.ts:8:9 › Award System Page /awards › Kudos Block CTA (A11) › Kudos "Chi tiết" link navigates to /kudos (262ms)
+  ✓  31 [awards-page] › e2e/awards-page-header.spec.ts:8:9 › Award System Page /awards › Header Current-Page State (A2) › Award Information link has aria-current on /awards, About SAA on / (A2) (560ms)
+  ✓  34 [awards-page] › e2e/awards-page-layout.spec.ts:91:9 › Award System Page /awards › Layout & Copy (A1, A3, A5, A6, A11, A13) › award sections render exact quantities and prizes (A5) (262ms)
+  ✓  33 [awards-page] › e2e/awards-page-layout.spec.ts:8:9 › Award System Page /awards › Layout & Copy (A1, A3, A5, A6, A11, A13) › renders full page structure with header, hero, title, nav, 6 sections, Kudos, footer (A1) (325ms)
+  ✓  35 [awards-page] › e2e/awards-page-navigation.spec.ts:8:9 › Award System Page /awards › Category Nav (A4, A7, A8) › nav renders exactly 6 items in AWARDS order (A4) (252ms)
+  ✓  30 [awards-page] › e2e/awards-page-deep-links.spec.ts:8:9 › Award System Page /awards › Deep Links & Hash Behavior (A9, A10, A12) › deep link to #mvp loads MVP in view with active nav (A9) (1.1s)
+  ✓  37 [awards-page] › e2e/awards-page-navigation.spec.ts:55:9 › Award System Page /awards › Category Nav (A4, A7, A8) › manual scroll updates nav active state without click (A8) (521ms)
+  ✓  36 [awards-page] › e2e/awards-page-navigation.spec.ts:31:9 › Award System Page /awards › Category Nav (A4, A7, A8) › clicking nav item scrolls section into view and updates active state (A7) (630ms)
+  ✓  39 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:45:9 › Kudos Feed Interactions /kudos › Heart Toggle (7a7ec63e, 63645b03) › heart button is disabled on kudos sent by the current viewer (63645b03) (183ms)
+  ✓  38 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:8:9 › Kudos Feed Interactions /kudos › Heart Toggle (7a7ec63e, 63645b03) › clicking heart toggles count increment on first click, decrement on second (7a7ec63e) (581ms)
+  ✓  41 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:116:9 › Kudos Feed Interactions /kudos › Spotlight Hover Tooltip (33ca8f8a) › hovering spotlight name node shows tooltip with that name (33ca8f8a) (335ms)
+  ✓  42 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:95:9 › Kudos Feed Interactions /kudos › Spotlight Search Input (9e689933) › spotlight search input enforces 100-character ceiling (9e689933) (371ms)
+  ✓  44 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:191:9 › Kudos Feed Interactions /kudos › Submit Pill Accessibility › submit pill input is visible, enabled and focusable (A.1 deferred) (246ms)
+  ✓  43 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:140:9 › Kudos Feed Interactions /kudos › Empty States (926d92a5) › filtering to no matching kudos shows "Hiện tại chưa có Kudos nào." (926d92a5) (619ms)
+  ✓  40 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:72:9 › Kudos Feed Interactions /kudos › Copy Link Button (0adfd7ce) › clicking Copy Link shows toast "Link copied — ready to share!" (0adfd7ce) (827ms)
+  ✓  47 [kudos-board] › e2e/kudos-board-interactions.spec.ts:48:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › prev button is disabled on slide 1 (81446f61) (281ms)
+  ✓  45 [kudos-board] › e2e/kudos-board-interactions.spec.ts:8:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › carousel next advances slide and updates indicator (81446f61) (772ms)
+  ✓  49 [kudos-board] › e2e/kudos-board-interactions.spec.ts:79:9 › Kudos Board Carousel & Filters /kudos › Filter Dropdowns (0e56cacb, 159fed13, d01729d4) › Hashtag filter: open dropdown, select option, filter applies (0e56cacb) (841ms)
+  ✓  46 [kudos-board] › e2e/kudos-board-interactions.spec.ts:27:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › carousel prev goes back one slide (81446f61) (1.4s)
+  ✓  52 [kudos-board] › e2e/kudos-board-layout.spec.ts:8:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › renders full page structure with header, banner, all 6 sections and footer (40d4ba26) (213ms)
+  ✓  50 [kudos-board] › e2e/kudos-board-interactions.spec.ts:104:9 › Kudos Board Carousel & Filters /kudos › Filter Dropdowns (0e56cacb, 159fed13, d01729d4) › Department filter: open dropdown, select option, filter applies (159fed13) (824ms)
+  ✓  51 [kudos-board] › e2e/kudos-board-interactions.spec.ts:130:9 › Kudos Board Carousel & Filters /kudos › Filter Dropdowns (0e56cacb, 159fed13, d01729d4) › clicking hashtag inside kudos card re-filters both sections & resets carousel (d01729d4) (322ms)
+  ✓  53 [kudos-board] › e2e/kudos-board-layout.spec.ts:125:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › header nav marks /kudos with aria-current="page" (40d4ba26) (213ms)
+  ✓  55 [kudos-board] › e2e/kudos-board-layout.spec.ts:145:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › placeholder text renders on load (b35d40c1, d3877e54) (213ms)
+  ✓  54 [kudos-board] › e2e/kudos-board-layout.spec.ts:133:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › banner is non-interactive and visible (40d4ba26) (226ms)
+  ✓  48 [kudos-board] › e2e/kudos-board-interactions.spec.ts:57:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › next button is disabled on slide 5 (81446f61) (1.5s)
+  ✓  57 [homepage-with-open-gate] › e2e/homepage-awards-grid.spec.ts:69:9 › Homepage SAA - Valid Environment › Award Cards & Grid (ID-15, ID-16, ID-47, ID-48, ID-49, ID-50, ID-52, ID-62) › Top Talent card title navigates to /awards#top-talent (ID-48) (419ms)
+  ✓  56 [homepage-with-open-gate] › e2e/homepage-awards-grid.spec.ts:33:9 › Homepage SAA - Valid Environment › Award Cards & Grid (ID-15, ID-16, ID-47, ID-48, ID-49, ID-50, ID-52, ID-62) › award cards display in 2-column grid on mobile (ID-16) (432ms)
+  ✓  58 [homepage-with-open-gate] › e2e/homepage-awards-grid.spec.ts:8:9 › Homepage SAA - Valid Environment › Award Cards & Grid (ID-15, ID-16, ID-47, ID-48, ID-49, ID-50, ID-52, ID-62) › award cards display in 3-column grid on desktop (ID-15) (461ms)
+  ✓  59 [homepage-with-open-gate] › e2e/homepage-awards-grid.spec.ts:53:9 › Homepage SAA - Valid Environment › Award Cards & Grid (ID-15, ID-16, ID-47, ID-48, ID-49, ID-50, ID-52, ID-62) › Top Talent card image navigates to /awards#top-talent (ID-47) (632ms)
+  ✓  60 [homepage-with-open-gate] › e2e/homepage-awards-grid.spec.ts:87:9 › Homepage SAA - Valid Environment › Award Cards & Grid (ID-15, ID-16, ID-47, ID-48, ID-49, ID-50, ID-52, ID-62) › Chi tiết link on award card navigates with hash (ID-49) (361ms)
+  ✓  62 [homepage-with-open-gate] › e2e/homepage-awards-grid.spec.ts:134:9 › Homepage SAA - Valid Environment › Award Cards & Grid (ID-15, ID-16, ID-47, ID-48, ID-49, ID-50, ID-52, ID-62) › first award card Chi tiết link lands on /awards (483ms)
+  ✓  63 [homepage-with-open-gate] › e2e/homepage-countdown.spec.ts:8:9 › Homepage SAA - Valid Environment › Countdown Timer (ID-12, ID-39, ID-40, ID-41, ID-42, ID-43, ID-56, ID-57) › displays countdown with 2-digit zero-padded values (314ms)
+  ✓  64 [homepage-with-open-gate] › e2e/homepage-countdown.spec.ts:24:9 › Homepage SAA - Valid Environment › Countdown Timer (ID-12, ID-39, ID-40, ID-41, ID-42, ID-43, ID-56, ID-57) › countdown auto-updates every minute (ID-39) (271ms)
+  ✓  66 [homepage-with-open-gate] › e2e/homepage-countdown.spec.ts:70:9 › Homepage SAA - Valid Environment › Countdown Timer (ID-12, ID-39, ID-40, ID-41, ID-42, ID-43, ID-56, ID-57) › countdown shows non-zero when event not yet started (ID-43) (287ms)
+  ✓  65 [homepage-with-open-gate] › e2e/homepage-countdown.spec.ts:43:9 › Homepage SAA - Valid Environment › Countdown Timer (ID-12, ID-39, ID-40, ID-41, ID-42, ID-43, ID-56, ID-57) › countdown transitions to zero-state when event starts (ID-41, ID-42) (325ms)
+  ✓  67 [homepage-with-open-gate] › e2e/homepage-dropdown-menus.spec.ts:8:9 › Homepage SAA - Valid Environment › Dropdown Menu Behavior (ID-24, ID-25, ID-26, ID-30, ID-31, ID-32, ID-33, ID-34, ID-35) › language button opens menu with VN/EN options (ID-24) (406ms)
+  ✓  69 [homepage-with-open-gate] › e2e/homepage-dropdown-menus.spec.ts:41:9 › Homepage SAA - Valid Environment › Dropdown Menu Behavior (ID-24, ID-25, ID-26, ID-30, ID-31, ID-32, ID-33, ID-34, ID-35) › dropdown closes when clicking outside (ID-32) (504ms)
+  ✓  61 [homepage-with-open-gate] › e2e/homepage-awards-grid.spec.ts:100:9 › Homepage SAA - Valid Environment › Award Cards & Grid (ID-15, ID-16, ID-47, ID-48, ID-49, ID-50, ID-52, ID-62) › all award cards navigate to correct /awards#<slug> (ID-50) (1.4s)
+  ✓  68 [homepage-with-open-gate] › e2e/homepage-dropdown-menus.spec.ts:19:9 › Homepage SAA - Valid Environment › Dropdown Menu Behavior (ID-24, ID-25, ID-26, ID-30, ID-31, ID-32, ID-33, ID-34, ID-35) › language switch to EN changes interface (ID-25) (587ms)
+  ✓  70 [homepage-with-open-gate] › e2e/homepage-dropdown-menus.spec.ts:57:9 › Homepage SAA - Valid Environment › Dropdown Menu Behavior (ID-24, ID-25, ID-26, ID-30, ID-31, ID-32, ID-33, ID-34, ID-35) › dropdown opens with Enter key (ID-33) (321ms)
+  ✓  71 [homepage-with-open-gate] › e2e/homepage-dropdown-menus.spec.ts:67:9 › Homepage SAA - Valid Environment › Dropdown Menu Behavior (ID-24, ID-25, ID-26, ID-30, ID-31, ID-32, ID-33, ID-34, ID-35) › dropdown opens with Space key (ID-34) (210ms)
+  ✓  72 [homepage-with-open-gate] › e2e/homepage-dropdown-menus.spec.ts:77:9 › Homepage SAA - Valid Environment › Dropdown Menu Behavior (ID-24, ID-25, ID-26, ID-30, ID-31, ID-32, ID-33, ID-34, ID-35) › dropdown closes with Escape key (ID-35) (345ms)
+  ✓  74 [homepage-with-open-gate] › e2e/homepage-navigation.spec.ts:8:9 › Homepage SAA - Valid Environment › Navigation (ID-18, ID-19, ID-20, ID-21, ID-22, ID-44, ID-45, ID-55, ID-59) › header logo navigates to homepage and scrolls top (ID-18) (324ms)
+  ✓  73 [homepage-with-open-gate] › e2e/homepage-dropdown-menus.spec.ts:92:9 › Homepage SAA - Valid Environment › Dropdown Menu Behavior (ID-24, ID-25, ID-26, ID-30, ID-31, ID-32, ID-33, ID-34, ID-35) › only VN and EN options available (ID-58) (370ms)
+  ✓  75 [homepage-with-open-gate] › e2e/homepage-navigation.spec.ts:28:9 › Homepage SAA - Valid Environment › Navigation (ID-18, ID-19, ID-20, ID-21, ID-22, ID-44, ID-45, ID-55, ID-59) › About Awards CTA button navigates to /awards (345ms)
+  ✓  77 [homepage-with-open-gate] › e2e/homepage-navigation.spec.ts:50:9 › Homepage SAA - Valid Environment › Navigation (ID-18, ID-19, ID-20, ID-21, ID-22, ID-44, ID-45, ID-55, ID-59) › Award Information header link navigates to /awards (ID-21) (669ms)
+  ✓  76 [homepage-with-open-gate] › e2e/homepage-navigation.spec.ts:39:9 › Homepage SAA - Valid Environment › Navigation (ID-18, ID-19, ID-20, ID-21, ID-22, ID-44, ID-45, ID-55, ID-59) › About Kudos CTA button navigates to /kudos (678ms)
+  ✓  78 [homepage-with-open-gate] › e2e/homepage-navigation.spec.ts:62:9 › Homepage SAA - Valid Environment › Navigation (ID-18, ID-19, ID-20, ID-21, ID-22, ID-44, ID-45, ID-55, ID-59) › Sun* Kudos header link navigates to /kudos (ID-22) (841ms)
+  ✓  80 [homepage-with-open-gate] › e2e/homepage-role-gating.spec.ts:29:9 › Homepage SAA - Valid Environment › Role Gating & Authentication (ID-1, ID-5, ID-6, ID-11, ID-27, ID-28, ID-29, ID-36, ID-37, ID-38) › authenticated user sees notification bell and account menu (275ms)
+  ✓  81 [homepage-with-open-gate] › e2e/homepage-role-gating.spec.ts:8:9 › Homepage SAA - Valid Environment › Role Gating & Authentication (ID-1, ID-5, ID-6, ID-11, ID-27, ID-28, ID-29, ID-36, ID-37, ID-38) › guest user does not see notification bell or account menu (ID-0, ID-1) (290ms)
+  ✓  79 [homepage-with-open-gate] › e2e/homepage-navigation.spec.ts:74:9 › Homepage SAA - Valid Environment › Navigation (ID-18, ID-19, ID-20, ID-21, ID-22, ID-44, ID-45, ID-55, ID-59) › no broken links on page (ID-59) (732ms)
+  ✓  82 [homepage-with-open-gate] › e2e/homepage-role-gating.spec.ts:45:9 › Homepage SAA - Valid Environment › Role Gating & Authentication (ID-1, ID-5, ID-6, ID-11, ID-27, ID-28, ID-29, ID-36, ID-37, ID-38) › admin user sees Admin Dashboard option (ID-5, ID-37) (302ms)
+  ✓  85 [homepage-with-open-gate] › e2e/homepage-role-gating.spec.ts:98:9 › Homepage SAA - Valid Environment › Role Gating & Authentication (ID-1, ID-5, ID-6, ID-11, ID-27, ID-28, ID-29, ID-36, ID-37, ID-38) › notification badge shows only when unread > 0 (ID-28) (351ms)
+  ✓  83 [homepage-with-open-gate] › e2e/homepage-role-gating.spec.ts:60:9 › Homepage SAA - Valid Environment › Role Gating & Authentication (ID-1, ID-5, ID-6, ID-11, ID-27, ID-28, ID-29, ID-36, ID-37, ID-38) › every account-menu destination resolves for admin (ID-59) (397ms)
+  ✓  84 [homepage-with-open-gate] › e2e/homepage-role-gating.spec.ts:83:9 › Homepage SAA - Valid Environment › Role Gating & Authentication (ID-1, ID-5, ID-6, ID-11, ID-27, ID-28, ID-29, ID-36, ID-37, ID-38) › regular user does not see Admin Dashboard (ID-6, ID-38) (409ms)
+  ✓  86 [homepage-with-open-gate] › e2e/homepage-role-gating.spec.ts:112:9 › Homepage SAA - Valid Environment › Role Gating & Authentication (ID-1, ID-5, ID-6, ID-11, ID-27, ID-28, ID-29, ID-36, ID-37, ID-38) › notification badge hidden when unread = 0 (ID-29) (216ms)
+  ✓  87 [homepage-with-open-gate] › e2e/homepage-role-gating.spec.ts:129:9 › Homepage SAA - Valid Environment › Role Gating & Authentication (ID-1, ID-5, ID-6, ID-11, ID-27, ID-28, ID-29, ID-36, ID-37, ID-38) › notification panel opens and shows empty state (ID-27) (343ms)
+  ✓  89 [homepage-with-open-gate] › e2e/homepage-structure-and-copy.spec.ts:67:9 › Homepage SAA - Valid Environment › Structure & Copy (ID-7, ID-8, ID-9, ID-10, ID-13, ID-17) › header logo renders with correct alt text (339ms)
+  ✓  88 [homepage-with-open-gate] › e2e/homepage-structure-and-copy.spec.ts:8:9 › Homepage SAA - Valid Environment › Structure & Copy (ID-7, ID-8, ID-9, ID-10, ID-13, ID-17) › renders complete page layout (376ms)
+  ✓  90 [homepage-with-open-gate] › e2e/homepage-structure-and-copy.spec.ts:76:9 › Homepage SAA - Valid Environment › Structure & Copy (ID-7, ID-8, ID-9, ID-10, ID-13, ID-17) › navigation link About SAA 2025 is visible (361ms)
+  ✓  91 [homepage-with-open-gate] › e2e/homepage-structure-and-copy.spec.ts:84:9 › Homepage SAA - Valid Environment › Structure & Copy (ID-7, ID-8, ID-9, ID-10, ID-13, ID-17) › language button displays VN by default (254ms)
+  ✓  92 [homepage-with-open-gate] › e2e/homepage-widget-and-kudos.spec.ts:8:9 › Homepage SAA - Valid Environment › Quick Action Widget (ID-54) › widget button opens quick action menu with two options (325ms)
+  ✓  93 [homepage-with-open-gate] › e2e/homepage-widget-and-kudos.spec.ts:28:9 › Homepage SAA - Valid Environment › Kudos Section (ID-53) › Chi tiết button in Kudos section navigates to /kudos (376ms)
+  ✓  95 [prelaunch-unlocked] › e2e/prelaunch-countdown-unlocked.spec.ts:5:9 › Prelaunch - Gate Unlocked (Past Event) › Server-Side Redirect When Gate Open › /prelaunch redirects to / when event has passed (156ms)
+  ✓  96 [prelaunch-unlocked] › e2e/prelaunch-countdown-unlocked.spec.ts:14:9 › Prelaunch - Gate Unlocked (Past Event) › Server-Side Redirect When Gate Open › locked routes remain open when gate is unlocked (107ms)
+  ✓  94 [invalid-env] › e2e/homepage-invalid-env.spec.ts:4:7 › Homepage SAA - Invalid Environment (ID-60) › invalid event datetime env falls back to zero-state without crashing (368ms)
+  ✘  97 [login-auth-redirect] › e2e/login-auth-redirect.spec.ts:6:9 › Login - Authentication Redirect (Unlocked Gate) › Access Control (A11) › authenticated user is redirected from /login to / (A11) (95ms)
+
+
+  1) [login-auth-redirect] › e2e/login-auth-redirect.spec.ts:6:9 › Login - Authentication Redirect (Unlocked Gate) › Access Control (A11) › authenticated user is redirected from /login to / (A11) 
+
+    Error: INFRA: Supabase signInWithPassword failed: Invalid login credentials
+
+       at support/supabase-session.ts:65
+
+      63 |
+      64 |   if (error) {
+    > 65 |     throw new Error(
+         |           ^
+      66 |       `INFRA: Supabase signInWithPassword failed: ${error.message}`
+      67 |     );
+      68 |   }
+        at seedSupabaseSession (/Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/support/supabase-session.ts:65:11)
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/login-auth-redirect.spec.ts:19:9
+
+    Error Context: test-results/login-auth-redirect-Login--446f6-directed-from-login-to-A11--login-auth-redirect/error-context.md
+
+  1 failed
+    [login-auth-redirect] › e2e/login-auth-redirect.spec.ts:6:9 › Login - Authentication Redirect (Unlocked Gate) › Access Control (A11) › authenticated user is redirected from /login to / (A11) 
+  96 passed (27.3s)
+  ✓  71 [homepage-with-open-gate] › e2e/homepage-dropdown-menus.spec.ts:67:9 › Homepage SAA - Valid Environment › Dropdown Menu Behavior (ID-24, ID-25, ID-26, ID-30, ID-31, ID-32, ID-33, ID-34, ID-35) › dropdown opens with Space key (ID-34) (277ms)
+  ✓  72 [homepage-with-open-gate] › e2e/homepage-dropdown-menus.spec.ts:77:9 › Homepage SAA - Valid Environment › Dropdown Menu Behavior (ID-24, ID-25, ID-26, ID-30, ID-31, ID-32, ID-33, ID-34, ID-35) › dropdown closes with Escape key (ID-35) (291ms)
+  ✓  73 [homepage-with-open-gate] › e2e/homepage-dropdown-menus.spec.ts:92:9 › Homepage SAA - Valid Environment › Dropdown Menu Behavior (ID-24, ID-25, ID-26, ID-30, ID-31, ID-32, ID-33, ID-34, ID-35) › only VN and EN options available (ID-58) (386ms)
+  ✓  74 [homepage-with-open-gate] › e2e/homepage-navigation.spec.ts:8:9 › Homepage SAA - Valid Environment › Navigation (ID-18, ID-19, ID-20, ID-21, ID-22, ID-44, ID-45, ID-55, ID-59) › header logo navigates to homepage and scrolls top (ID-18) (444ms)
+  ✓  75 [homepage-with-open-gate] › e2e/homepage-navigation.spec.ts:28:9 › Homepage SAA - Valid Environment › Navigation (ID-18, ID-19, ID-20, ID-21, ID-22, ID-44, ID-45, ID-55, ID-59) › About Awards CTA button navigates to /awards (490ms)
+  ✓  77 [homepage-with-open-gate] › e2e/homepage-navigation.spec.ts:50:9 › Homepage SAA - Valid Environment › Navigation (ID-18, ID-19, ID-20, ID-21, ID-22, ID-44, ID-45, ID-55, ID-59) › Award Information header link navigates to /awards (ID-21) (332ms)
+  ✓  76 [homepage-with-open-gate] › e2e/homepage-navigation.spec.ts:39:9 › Homepage SAA - Valid Environment › Navigation (ID-18, ID-19, ID-20, ID-21, ID-22, ID-44, ID-45, ID-55, ID-59) › About Kudos CTA button navigates to /kudos (497ms)
+  ✓  78 [homepage-with-open-gate] › e2e/homepage-navigation.spec.ts:62:9 › Homepage SAA - Valid Environment › Navigation (ID-18, ID-19, ID-20, ID-21, ID-22, ID-44, ID-45, ID-55, ID-59) › Sun* Kudos header link navigates to /kudos (ID-22) (387ms)
+  ✓  80 [homepage-with-open-gate] › e2e/homepage-role-gating.spec.ts:8:9 › Homepage SAA - Valid Environment › Role Gating & Authentication (ID-1, ID-5, ID-6, ID-11, ID-27, ID-28, ID-29, ID-36, ID-37, ID-38) › guest user does not see notification bell or account menu (ID-0, ID-1) (293ms)
+  ✓  81 [homepage-with-open-gate] › e2e/homepage-role-gating.spec.ts:29:9 › Homepage SAA - Valid Environment › Role Gating & Authentication (ID-1, ID-5, ID-6, ID-11, ID-27, ID-28, ID-29, ID-36, ID-37, ID-38) › authenticated user sees notification bell and account menu (284ms)
+  ✓  79 [homepage-with-open-gate] › e2e/homepage-navigation.spec.ts:74:9 › Homepage SAA - Valid Environment › Navigation (ID-18, ID-19, ID-20, ID-21, ID-22, ID-44, ID-45, ID-55, ID-59) › no broken links on page (ID-59) (554ms)
+  ✓  82 [homepage-with-open-gate] › e2e/homepage-role-gating.spec.ts:45:9 › Homepage SAA - Valid Environment › Role Gating & Authentication (ID-1, ID-5, ID-6, ID-11, ID-27, ID-28, ID-29, ID-36, ID-37, ID-38) › admin user sees Admin Dashboard option (ID-5, ID-37) (415ms)
+  ✓  84 [homepage-with-open-gate] › e2e/homepage-role-gating.spec.ts:83:9 › Homepage SAA - Valid Environment › Role Gating & Authentication (ID-1, ID-5, ID-6, ID-11, ID-27, ID-28, ID-29, ID-36, ID-37, ID-38) › regular user does not see Admin Dashboard (ID-6, ID-38) (387ms)
+  ✓  85 [homepage-with-open-gate] › e2e/homepage-role-gating.spec.ts:98:9 › Homepage SAA - Valid Environment › Role Gating & Authentication (ID-1, ID-5, ID-6, ID-11, ID-27, ID-28, ID-29, ID-36, ID-37, ID-38) › notification badge shows only when unread > 0 (ID-28) (347ms)
+  ✓  83 [homepage-with-open-gate] › e2e/homepage-role-gating.spec.ts:60:9 › Homepage SAA - Valid Environment › Role Gating & Authentication (ID-1, ID-5, ID-6, ID-11, ID-27, ID-28, ID-29, ID-36, ID-37, ID-38) › every account-menu destination resolves for admin (ID-59) (459ms)
+  ✓  86 [homepage-with-open-gate] › e2e/homepage-role-gating.spec.ts:112:9 › Homepage SAA - Valid Environment › Role Gating & Authentication (ID-1, ID-5, ID-6, ID-11, ID-27, ID-28, ID-29, ID-36, ID-37, ID-38) › notification badge hidden when unread = 0 (ID-29) (240ms)
+  ✓  87 [homepage-with-open-gate] › e2e/homepage-role-gating.spec.ts:129:9 › Homepage SAA - Valid Environment › Role Gating & Authentication (ID-1, ID-5, ID-6, ID-11, ID-27, ID-28, ID-29, ID-36, ID-37, ID-38) › notification panel opens and shows empty state (ID-27) (298ms)
+  ✓  89 [homepage-with-open-gate] › e2e/homepage-structure-and-copy.spec.ts:67:9 › Homepage SAA - Valid Environment › Structure & Copy (ID-7, ID-8, ID-9, ID-10, ID-13, ID-17) › header logo renders with correct alt text (276ms)
+  ✓  88 [homepage-with-open-gate] › e2e/homepage-structure-and-copy.spec.ts:8:9 › Homepage SAA - Valid Environment › Structure & Copy (ID-7, ID-8, ID-9, ID-10, ID-13, ID-17) › renders complete page layout (356ms)
+  ✓  90 [homepage-with-open-gate] › e2e/homepage-structure-and-copy.spec.ts:76:9 › Homepage SAA - Valid Environment › Structure & Copy (ID-7, ID-8, ID-9, ID-10, ID-13, ID-17) › navigation link About SAA 2025 is visible (278ms)
+  ✓  91 [homepage-with-open-gate] › e2e/homepage-structure-and-copy.spec.ts:84:9 › Homepage SAA - Valid Environment › Structure & Copy (ID-7, ID-8, ID-9, ID-10, ID-13, ID-17) › language button displays VN by default (202ms)
+  ✓  92 [homepage-with-open-gate] › e2e/homepage-widget-and-kudos.spec.ts:8:9 › Homepage SAA - Valid Environment › Quick Action Widget (ID-54) › widget button opens quick action menu with two options (298ms)
+  ✓  93 [homepage-with-open-gate] › e2e/homepage-widget-and-kudos.spec.ts:28:9 › Homepage SAA - Valid Environment › Kudos Section (ID-53) › Chi tiết button in Kudos section navigates to /kudos (376ms)
+  ✓  95 [prelaunch-unlocked] › e2e/prelaunch-countdown-unlocked.spec.ts:5:9 › Prelaunch - Gate Unlocked (Past Event) › Server-Side Redirect When Gate Open › /prelaunch redirects to / when event has passed (181ms)
+  ✓  96 [prelaunch-unlocked] › e2e/prelaunch-countdown-unlocked.spec.ts:14:9 › Prelaunch - Gate Unlocked (Past Event) › Server-Side Redirect When Gate Open › locked routes remain open when gate is unlocked (136ms)
+  ✓  94 [invalid-env] › e2e/homepage-invalid-env.spec.ts:4:7 › Homepage SAA - Invalid Environment (ID-60) › invalid event datetime env falls back to zero-state without crashing (387ms)
+  ✘  97 [login-auth-redirect] › e2e/login-auth-redirect.spec.ts:6:9 › Login - Authentication Redirect (Unlocked Gate) › Access Control (A11) › authenticated user is redirected from /login to / (A11) (86ms)
+
+
+  1) [login-auth-redirect] › e2e/login-auth-redirect.spec.ts:6:9 › Login - Authentication Redirect (Unlocked Gate) › Access Control (A11) › authenticated user is redirected from /login to / (A11) 
+
+    Error: INFRA: Supabase signInWithPassword failed: Invalid login credentials
+
+       at support/supabase-session.ts:65
+
+      63 |
+      64 |   if (error) {
+    > 65 |     throw new Error(
+         |           ^
+      66 |       `INFRA: Supabase signInWithPassword failed: ${error.message}`
+      67 |     );
+      68 |   }
+        at seedSupabaseSession (/Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/support/supabase-session.ts:65:11)
+        at /Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on/e2e/login-auth-redirect.spec.ts:19:9
+
+    Error Context: test-results/login-auth-redirect-Login--446f6-directed-from-login-to-A11--login-auth-redirect/error-context.md
+
+  1 failed
+    [login-auth-redirect] › e2e/login-auth-redirect.spec.ts:6:9 › Login - Authentication Redirect (Unlocked Gate) › Access Control (A11) › authenticated user is redirected from /login to / (A11) 
+  96 passed (25.9s)

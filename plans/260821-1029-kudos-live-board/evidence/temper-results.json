@@ -1,0 +1,25 @@
+{
+  "commands": [
+    {
+      "command": "npm run test:e2e -- kudos-board",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "18 passed (14.3s) — kudos-board project on port 3200; raw output captured in green-kudos-board.txt. Covers TC 40d4ba26, b35d40c1, d3877e54, 81446f61, 0e56cacb, 159fed13, d01729d4, 7a7ec63e, 63645b03, 0adfd7ce, 9e689933, 33ca8f8a, 926d92a5.",
+      "ts": "2026-08-21T10:54:00Z"
+    },
+    {
+      "command": "npm run test:unit",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "93 passed (679ms) — includes the 8 seed-data constraint assertions (S1-S8), the leaderboard empty-state branch for TC d662780b which is not reachable end-to-end, and the star-tier boundary cases at 9/10/19/20/49/50.",
+      "ts": "2026-08-21T14:27:36Z"
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Clean across the whole tree after the final clipboard-absence guard and min-h-[749px] changes.",
+      "ts": "2026-08-21T14:27:34Z"
+    }
+  ]
+}

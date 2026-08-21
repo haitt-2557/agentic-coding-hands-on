@@ -3,8 +3,9 @@
 // R1 Header (mms_A1_Header) — sticky top nav. FR-009/FR-010: logo scrolls to top of `/`,
 // nav links go to `/awards` / `/kudos`. FR-002: the current-page indicator now derives from
 // the route via `usePathname()` — "About SAA 2025" is active on `/`, "Award Information" is
-// active on `/awards` (clarifications.md "header nav current-page state moves"); both stay
-// visible cross-page links regardless of which one is current.
+// active on `/awards`, "Sun* Kudos" is active on `/kudos` (clarifications.md "header AND
+// footer current-page state move"; dom-contract.md F8); all three stay visible cross-page
+// links regardless of which one is current.
 // mm:I2167:9091;178:1033;178:1030
 
 import Image from 'next/image';
@@ -56,7 +57,11 @@ export function SiteHeader() {
           >
             {t('nav.awards')}
           </Link>
-          <Link href="/kudos" className={INACTIVE_NAV_CLASSES}>
+          <Link
+            href="/kudos"
+            aria-current={pathname === '/kudos' ? 'page' : undefined}
+            className={pathname === '/kudos' ? ACTIVE_NAV_CLASSES : INACTIVE_NAV_CLASSES}
+          >
             {t('nav.kudos')}
           </Link>
         </nav>

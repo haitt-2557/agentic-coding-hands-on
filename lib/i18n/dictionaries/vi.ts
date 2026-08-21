@@ -5,6 +5,14 @@
 // presentational components (`components/home/root-further-content.tsx`,
 // `components/home/kudos-section.tsx`) and are intentionally not duplicated here —
 // see the Phase 3 implementer report for the reasoning.
+//
+// `kudosPage.*` (Phase 3, /kudos screen) — same short-chrome scope. The kudos card message
+// bodies, the three BR-005 star tooltips and the sidebar stat labels are frame-mandated data
+// tied to a specific business rule or record shape, so they live as literal strings in
+// `lib/kudos/*.ts` next to the rule/record they belong to, not here (avoids a second source of
+// truth for the same frozen string). This screen has no English frame, so `en.ts` mirrors these
+// values verbatim rather than inventing a translation, matching this file's existing precedent
+// for proper-noun-like chrome (e.g. `nav.kudos`).
 export const vi = {
   'nav.about': 'About SAA 2025',
   'nav.awards': 'Award Information',
@@ -45,6 +53,21 @@ export const vi = {
   'login.tagline': 'Đăng nhập để khám phá!',
   'login.button': 'LOGIN With Google',
   'login.error': 'Đăng nhập không thành công. Vui lòng thử lại.',
+  'kudosPage.bannerTitle': 'Hệ thống ghi nhận và cảm ơn',
+  'kudosPage.submitPillPlaceholder': ' Hôm nay, bạn muốn gửi lời cảm ơn và ghi nhận đến ai?   ',
+  'kudosPage.sunnerSearchPlaceholder': 'Tìm kiếm profile Sunner',
+  'kudosPage.sectionSubtitle': 'Sun* Annual Awards 2025',
+  'kudosPage.highlightHeading': 'HIGHLIGHT KUDOS',
+  'kudosPage.spotlightHeading': 'SPOTLIGHT BOARD',
+  'kudosPage.allKudosHeading': 'ALL KUDOS',
+  'kudosPage.filterHashtagLabel': 'Hashtag',
+  'kudosPage.filterDepartmentLabel': 'Phòng ban',
+  'kudosPage.spotlightSearchPlaceholder': 'Tìm kiếm ',
+  'kudosPage.emptyState': 'Hiện tại chưa có Kudos nào.',
+  'kudosPage.copyLinkButton': 'Copy Link',
+  'kudosPage.copyLinkToast': 'Link copied — ready to share!',
+  'kudosPage.viewDetailButton': 'Xem chi tiết',
+  'kudosPage.secretBoxButton': 'Mở Secret Box',
 } as const;
 
 export type DictionaryKey = keyof typeof vi;

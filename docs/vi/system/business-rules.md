@@ -113,3 +113,27 @@ lớn hơn 0; bằng 0 thì huy hiệu ẩn hoàn toàn, chỉ còn lại biểu
 danh sách thông báo khi mở ra hiện cùng một nội dung "chưa có thông báo nào" cho mọi
 trường hợp — hệ thống hiện tại chưa có nguồn dữ liệu thông báo thật đứng sau con số này.
 **Source artifact:** [Entities — SessionState](./data-model.md)
+
+---
+
+### Mỗi người chỉ thả được một tim cho một lời cảm ơn, không thả được cho lời cảm ơn của chính mình (thêm 2026-08-21)
+
+**Applies when:** Người dùng xem một thẻ Kudos trên trang Sun* Kudos - Live board (`/kudos`) và
+bấm nút tim.
+**Says:** Mỗi người xem chỉ thả được đúng một tim cho một lời cảm ơn — bấm lại lần hai sẽ gỡ tim
+đó ra, không cộng dồn thêm. Với lời cảm ơn do chính người xem đó gửi, nút tim luôn ở trạng thái
+khoá — không ai tự vinh danh được chính mình. Đây là quy tắc dữ liệu tĩnh phía trình duyệt, không
+đồng bộ giữa nhiều tab hay nhiều thiết bị của cùng một người.
+**Source artifact:** [Technical Spec — F013_KudosLiveBoard § BR-001/BR-002](../features/kudos-live-board/technical-spec.md)
+
+---
+
+### Số hoa thị bên cạnh tên tăng theo mốc Kudos đã nhận được (thêm 2026-08-21)
+
+**Applies when:** Người xem nhìn vào tên người gửi hoặc người nhận trên một thẻ Kudos ở trang
+Sun* Kudos - Live board.
+**Says:** Một Sunner nhận đủ 10 Kudos được gắn 1 hoa thị, đủ 20 Kudos được 2 hoa thị, đủ 50 Kudos
+được 3 hoa thị — dưới 10 Kudos thì chưa có hoa thị nào. Hover vào hoa thị hiện đúng một câu ghi
+nhận cố định theo mốc đó. Đây là một ngưỡng tra bảng đơn giản trên số Kudos đã nhận, không phải
+một huy hiệu do quản trị viên gán tay.
+**Source artifact:** [Technical Spec — F013_KudosLiveBoard § BR-005](../features/kudos-live-board/technical-spec.md)

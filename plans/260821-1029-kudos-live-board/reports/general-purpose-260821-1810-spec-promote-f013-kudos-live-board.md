@@ -1,0 +1,137 @@
+# SDD Promote — F013_KudosLiveBoard
+
+**Date**: 2026-08-21 · **Run**: SINGLE promote, NEW feature · **HEAD**: `644c1044`
+
+Promoted `plans/260821-1029-kudos-live-board/spec/kudos-live-board/` into `docs/vi/` and
+registered it. Recipe: `$HOME/.claude/skills/rebuild-spec/references/spec-state-registration.md`
+(§ Promote P0–P5, Steps 0–9, § Promote — SYSTEM-DOC).
+
+## Codes allocated
+
+| Code | Verified against | Note |
+|---|---|---|
+| `F013` | `feature-list.md` held F001–F012 exactly, contiguous | next free; contiguity re-checked after merge (F001–F013, no gaps, no dupes) |
+| `SCR008` | `screen-list.md` held `## SCR001`–`## SCR007` | dir `SCR008_KudosLiveBoard`; slug parses to `KudosLiveBoard` under the planner's heading regex |
+| `ROUTE003` | reused, **not** allocated | `/kudos` already existed as a deliberate placeholder |
+
+No `PERM###` / `MODEL###` / `BL###` allocated. Every `TBD (draft)` in the promoted docs stays
+`TBD (draft)` — nothing fabricated.
+
+## Files created
+
+- `docs/.spec-promote-pending.json` — sentinel, written **before** any copy. `run_type: new`,
+  `fcode: F013`, `slug: kudos-live-board`, `screens: ["SCR008_KudosLiveBoard"]`,
+  `system_docs: ["docs/vi/system/permissions.md"]`, `ts: 2026-08-21T13:36:33Z`. **Left in place.**
+- `docs/vi/features/kudos-live-board/{technical-spec,business-context,screens,edge-cases}.md`
+- `docs/vi/features/kudos-live-board/screens/SCR008_KudosLiveBoard/spec.md`
+
+`.scaffold-complete` was not copied (plan-local scaffold marker, not part of the 4-file set).
+
+## Files modified
+
+| File | Change |
+|---|---|
+| `docs/vi/features/kudos-live-board/technical-spec.md` | frontmatter only: `status: draft` → `implemented`, added `fcode: F013` between `authored_by` and `created`. Body byte-identical, `lang: vi` preserved. |
+| `docs/vi/system/permissions.md` | **merged** (not overwritten) — see below |
+| `docs/vi/generated/feature-list.md` | F013 hierarchy row + Feature Details section + Summary counts + 2 cross-ref lines |
+| `docs/vi/generated/screen-list.md` | SCR008 index row + full `## SCR008` section + scope note + Summary + cross-ref lines |
+| `docs/vi/generated/route-list.md` | ROUTE003 row: owner `F004` → `F004, F013`, description no longer says "placeholder" |
+| `docs/vi/.rebuild-state.json` | `doc_shas` ×4 refreshed, `screen_spec_shas["SCR008_KudosLiveBoard"]` added, `last_feature_spec_run_sha` → HEAD |
+| `plans/260821-1029-kudos-live-board/plan.md` | `spec_draft:` → `spec: docs/vi/features/kudos-live-board/` |
+
+No file under `app/`, `components/`, `lib/`, `e2e/`, `public/` was touched. Those show modified in
+`git status` from the implementation phases, not from this promote.
+
+## SYSTEM-DOC: permissions.md was MERGED, not overwritten
+
+The draft states outright that it does **not** replace the shipped file — it is an addendum
+describing only this run's delta. Overwriting would have destroyed the top-level warning, the
+`guest`/`user`/`admin` roles table, the Curated View, the PERM001–PERM003 enforce table, the
+Access Boundaries narrative, and the prelaunch-gate + PERM004 Special Conditions. So the draft's
+five sections were folded into the existing document as `**Cập nhật (lượt Kudos Live board,
+2026-08-21)**` blocks — the same pattern the 2026-08-19 Login run used.
+
+Verified post-merge: PERM001–PERM004 all still present, all five original `##` sections intact,
+both `TBD (draft)` markers verbatim. 180 lines.
+
+**Instructed step made inapplicable:** "flip `status: draft` → `implemented`". Because this was a
+merge, the draft's frontmatter block was never copied — only body content was. All four
+`docs/vi/system/*.md` files carry **no frontmatter at all** (project convention; these are core
+generated docs the reconcile pass regenerates). I did not introduce a frontmatter block into a
+file that has never had one. There is consequently no `status` field to flip.
+
+## Generated inventories — updated vs. deliberately skipped
+
+**Updated** (4): `feature-list.md`, `screen-list.md`, `route-list.md` (+ `.rebuild-state.json`).
+
+**Deliberately skipped, with reason:**
+
+| Inventory | Why no change |
+|---|---|
+| `entities.md` | No `MODEL###`. `lib/kudos/` is static in-source constants, no persistence — same standing as `lib/awards.ts` under MODEL001. |
+| `api-map.md` | No API route, no network call. Data is client-side constants. |
+| `behavior-logic.md` | No `BL###` — read-only page, no job/middleware. |
+| `permissions-matrix.md` | No `PERM###` allocated. The one candidate (heart self-exclusion) is `TBD (draft)`; writing a row into the canonical matrix would mean inventing an entry. The narrative note lives in `system/permissions.md` instead. |
+| `user-stories.md` | The 9 US are **feature-local** codes in `technical-spec.md`, not merged into the global inventory — identical handling to F012's local US001–US003. `Total User Stories` correctly stays 23. |
+| `screen-flow.md` | Flow diagrams are mermaid graphs regenerated by the core pass; editing them is outside registration. Recorded as an explicit **unchecked pending line** in `screen-list.md` cross-refs rather than silently claimed. |
+
+## Recipe steps inapplicable to this repo
+
+- **Step 0 reservation / Step 2 canonical entry / Step 9 check #1** — `docs/_canonical-fcodes.json`
+  does not exist and never has (confirmed by `find docs -name '_canonical-fcodes.json'` → empty).
+  **The reservation step had no file to write to.** `feature-list.md` was used as the sole
+  allocation authority, as instructed. The parallel-session collision guard the reservation
+  provides is therefore absent for this repo.
+- **Step 3 `_source-to-fcode.json`** — left at `{"index": {}}`. Empty is explicitly valid (RT-C5)
+  and is the repo-wide state for all 13 features. `fcode_index_sha` is already
+  `sha256("{}")` = `44136fa3…`, so it needed no recompute.
+- **Step 2 `.pending` marker** — skipped. Its purpose is excluding a partially-written dir from
+  validators; registration completed in one pass, so creating and immediately deleting a
+  zero-byte file is a no-op.
+
+## Verification (all green)
+
+- `docs/vi/features/kudos-live-board/` = 4 files + nested `screens/SCR008_KudosLiveBoard/spec.md`
+- `technical-spec.md` reads `status: implemented` + `fcode: F013`
+- `plan.md` reads `spec:`, not `spec_draft:`
+- Sentinel still exists
+- F contiguity F001–F013: PASS · F013 in hierarchy exactly once · `## SCR008` exactly once ·
+  `screen_spec_shas` SCR008 exactly once
+- `SCR008` section sha `ace9d3f9…` recomputed with the planner's own
+  `_parse_screen_sections`/`_hash_screen_sections` semantics → matches recorded value
+- `SCR002_Awards` sha unchanged (insertion after SCR007 did not disturb its section body)
+- Line ceiling: feature-list 567, screen-list 433, permissions 180, route-list 82,
+  technical-spec 746, screen spec 121 — all under 800
+
+## Unresolved questions / concerns
+
+1. **Frontmatter divergence from the F012 sibling.** I followed the explicit instruction
+   (`status: implemented`, `fcode: F013`). The closest sibling
+   `docs/vi/features/award-system-page/` instead uses `status: promoted`,
+   `fcode: F012_AwardSystemPage` (**slug form**), plus a `promoted_from:` line — and carries that
+   frontmatter on **all five** files, not just `technical-spec.md`. So F013 now differs from F012
+   in status vocabulary, fcode form, and coverage. Worth a decision: normalize F013 to the F012
+   shape, or accept the recipe-conformant form as the new standard.
+2. **`Type: composite` vs `atomic` for SCR008.** The feature spec labels the screen `composite`
+   with 7 layout regions R1–R7. `screen-list.md`'s `Type` column means something different — it is
+   the H1–H6 + Trap 1 gate result, and a composite entry there requires `REG###` codes. I could
+   not run that gate or allocate `REG###`, so SCR008 is recorded `atomic` (keeping
+   `Composite Screens: 0` / `Total Regions: 0` coherent) with an explicit note in both the scope
+   section and the SCR008 `### Regions` block explaining that the two labels describe different
+   axes. A real `--screen-specs` pass should settle this column.
+3. **Pre-existing `doc_shas` drift, left alone.** `api-map.md`, `behavior-logic.md`,
+   `business-rules.md`, `system-overview.md`, `data-model.md` (→ `generated/entities.md`) all have
+   stale recorded shas from before this run (the 08-19/08-20 runs edited files without refreshing).
+   I refreshed **only** the four files this promote modified; silently refreshing the rest would
+   erase drift evidence the core pass relies on.
+4. **`Total Features` was already wrong.** It read 11 while 12 rows existed — F012 was added
+   2026-08-20 without updating Summary. Corrected to 13 (and Screens 7 → 8), with the correction
+   documented inline.
+5. **`Workspace: my-app` is stale.** `my-app/` does not exist; the app lives at the repo root
+   (`app/`, `components/`, `lib/`). All 12 existing rows say `my-app`, so I kept the column uniform
+   rather than break it for one row — but the value is inherited, not verified. Now affects 13
+   rows and wants a sweep.
+6. **`screen_spec_shas` key form.** The repo keys by slug (`SCR002_Awards`), matching the explicit
+   instruction, so I used `SCR008_KudosLiveBoard`. The planner script keys by **bare** code
+   (`SCR002`), so neither key would match its lookup. Pre-existing convention mismatch, not
+   introduced here, but it means the incremental planner will treat both screens as new.
