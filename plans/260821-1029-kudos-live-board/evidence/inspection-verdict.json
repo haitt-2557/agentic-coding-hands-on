@@ -1,0 +1,66 @@
+{
+  "criticalCount": 0,
+  "decision": "SEALED",
+  "contractStatus": "PASS",
+  "acceptanceCovered": [
+    "the /kudos page renders all six regions with header and footer — proven by e2e/kudos-board-layout.spec.ts:8, which asserts header, banner title, wordmark, submit pill, Sunner search, the HIGHLIGHT/SPOTLIGHT/ALL KUDOS sections, the sidebar's five stat labels, the leaderboard heading and the footer, plus a toHaveURL guard that the page is /kudos and not a gate redirect",
+    "hashtag and department filters re-filter both the highlight carousel and the all-kudos feed — proven by e2e/kudos-board-interactions.spec.ts:79 and :116, each selecting option index 1 (not 0, which the reveal batch makes unfalsifiable), asserting every visible card contains the selected value, that the unfiltered feed held a card lacking it, and that clearing restores those cards; cross-section behaviour proven at :151 (TC d01729d4) with the carousel advanced off page 1 first",
+    "the heart toggles count and active state, and is disabled on the viewer's own kudos — proven by e2e/kudos-board-feed-interactions.spec.ts:8 (increment then decrement, with aria-pressed asserted true then false) and :45 (at least one disabled heart AND at least one enabled heart must coexist, so the disabled state proves something)",
+    "copy link writes the clipboard and shows the toast Link copied — proven by e2e/kudos-board-feed-interactions.spec.ts:72 with clipboard permissions granted, asserting the exact toast string",
+    "the filtered empty state shows the no-kudos message — proven by e2e/kudos-board-feed-interactions.spec.ts:140, which walks every department option against a pinned hashtag until a zero-match combination is found and fails explicitly if none exists",
+    "no page-level horizontal scroll at 375, 768 or 1440 — measured scrollWidth == clientWidth at all three widths after the width and min-height fixes; captures in kudos-mobile-375px.png, kudos-tablet-768px.png, kudos-desktop-1440px.png"
+  ],
+  "regressionChecked": [
+    "full e2e suite re-run: 96/97 — the sole failure is a pre-existing login-auth-redirect Supabase seeding issue, red before this work began and untouched by it",
+    "awards page 7/7 and homepage 28/28 green after the shared site-header.tsx and site-footer.tsx current-page changes",
+    "prelaunch 30/30 green after adding the kudos-board project and extending the prelaunch-gate lookahead in playwright.config.ts",
+    "unit suite 93/93 — no regression from the session-provider identity extension or the i18n additions",
+    "1440 layout re-captured and confirmed unchanged after the carousel's transform was rewritten from JS pixel constants to CSS custom properties",
+    "Phase 4 audited every remaining fixed height in the card kit for reflowable content after the min-h fix and found no further instance"
+  ],
+  "refuted": [],
+  "unproven": [],
+  "reachableRegressions": [],
+  "riskGate": {
+    "touchesSensitiveArea": false,
+    "signoffRequired": false,
+    "humanSignedOff": false
+  },
+  "findings": [
+    {
+      "severity": "high",
+      "category": "correctness",
+      "location": "components/kudos/kudos-card-actions.tsx:43-51",
+      "summary": "navigator.clipboard optional-chained, so when the API is absent entirely (insecure origin, embedded webview) await undefined resolved and the success toast fired for a link that was never copied. BR-007 covered denial but not absence. Fixed at seal time: absence now returns early with no toast.",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "high",
+      "category": "contract-violation",
+      "location": "components/kudos/spotlight-name-cloud.tsx:1",
+      "summary": "star-tier-tooltip.tsx and spotlight-name-cloud.tsx each own a role=tooltip with no cross-component coordination, so hovering one and then keyboard-focusing the other leaves two in the DOM, violating dom-contract F32. Not exercised by the suite, which only tests isolated hover. Deferred: the fix needs tooltip-active state lifted to page level, which is not worth destabilising a verified suite at seal.",
+      "disposition": "Defer"
+    },
+    {
+      "severity": "medium",
+      "category": "test-coverage",
+      "location": "plans/260821-1029-kudos-live-board/dom-contract.md:1",
+      "summary": "Filtering to CECV10 can surface two zero-attachment records in the ALL KUDOS feed, a narrow dom-contract F31 gap. Cosmetic, no assertion depends on it.",
+      "disposition": "Defer"
+    },
+    {
+      "severity": "medium",
+      "category": "dead-code",
+      "location": "lib/i18n/dictionaries/vi.ts:1",
+      "summary": "Four kudosPage.* i18n keys were added but the components use hardcoded literals in those positions. Either wire them up or remove them.",
+      "disposition": "Defer"
+    },
+    {
+      "severity": "low",
+      "category": "consistency",
+      "location": "components/kudos/kudos-board.tsx:1",
+      "summary": "Two equally-correct patterns are used for resetting state on filter change; one dead fallback expression and one intentionally-unused prop also remain. No behavioural effect.",
+      "disposition": "Defer"
+    }
+  ]
+}

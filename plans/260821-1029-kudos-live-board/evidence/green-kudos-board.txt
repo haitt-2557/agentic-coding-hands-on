@@ -1,0 +1,43 @@
+
+> my-app@0.1.0 test:e2e
+> playwright test kudos-board
+
+[WebServer] ⚠ Warning: Next.js ignored pnpm-lock.yaml in /Users/truong.thanh.hai because it is outside the current Git repository (/Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on).
+[WebServer]  To use this directory, set `turbopack.root` in your Next.js config.
+[WebServer] 
+[WebServer] ⚠ Warning: Next.js ignored pnpm-lock.yaml in /Users/truong.thanh.hai because it is outside the current Git repository (/Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on).
+[WebServer]  To use this directory, set `turbopack.root` in your Next.js config.
+[WebServer] 
+[WebServer] ⚠ Warning: Next.js ignored pnpm-lock.yaml in /Users/truong.thanh.hai because it is outside the current Git repository (/Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on).
+[WebServer]  To use this directory, set `outputFileTracingRoot` in your Next.js config.
+[WebServer] 
+[WebServer] ⚠ Warning: Next.js ignored pnpm-lock.yaml in /Users/truong.thanh.hai because it is outside the current Git repository (/Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on).
+[WebServer]  To use this directory, set `turbopack.root` in your Next.js config.
+[WebServer] 
+[WebServer] ⚠ Warning: Next.js ignored pnpm-lock.yaml in /Users/truong.thanh.hai because it is outside the current Git repository (/Users/truong.thanh.hai/Desktop/Hai Work/Hai Study AIDD/agentic-coding-hands-on).
+[WebServer]  To use this directory, set `outputFileTracingRoot` in your Next.js config.
+[WebServer] 
+
+Running 18 tests using 4 workers
+
+  ✓   1 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:45:9 › Kudos Feed Interactions /kudos › Heart Toggle (7a7ec63e, 63645b03) › heart button is disabled on kudos sent by the current viewer (63645b03) (822ms)
+  ✓   3 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:95:9 › Kudos Feed Interactions /kudos › Spotlight Search Input (9e689933) › spotlight search input enforces 100-character ceiling (9e689933) (847ms)
+  ✓   5 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:116:9 › Kudos Feed Interactions /kudos › Spotlight Hover Tooltip (33ca8f8a) › hovering spotlight name node shows tooltip with that name (33ca8f8a) (260ms)
+  ✓   2 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:72:9 › Kudos Feed Interactions /kudos › Copy Link Button (0adfd7ce) › clicking Copy Link shows toast "Link copied — ready to share!" (0adfd7ce) (1.2s)
+  ✓   4 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:8:9 › Kudos Feed Interactions /kudos › Heart Toggle (7a7ec63e, 63645b03) › clicking heart toggles count increment on first click, decrement on second (7a7ec63e) (1.2s)
+  ✓   7 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:191:9 › Kudos Feed Interactions /kudos › Submit Pill Accessibility › submit pill input is visible, enabled and focusable (A.1 deferred) (198ms)
+  ✓   6 [kudos-board] › e2e/kudos-board-feed-interactions.spec.ts:140:9 › Kudos Feed Interactions /kudos › Empty States (926d92a5) › filtering to no matching kudos shows "Hiện tại chưa có Kudos nào." (926d92a5) (489ms)
+  ✓  10 [kudos-board] › e2e/kudos-board-interactions.spec.ts:48:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › prev button is disabled on slide 1 (81446f61) (286ms)
+  ✓  12 [kudos-board] › e2e/kudos-board-interactions.spec.ts:79:9 › Kudos Board Carousel & Filters /kudos › Filter Dropdowns (0e56cacb, 159fed13, d01729d4) › Hashtag filter: open dropdown, select option, filter applies (0e56cacb) (304ms)
+  ✓   8 [kudos-board] › e2e/kudos-board-interactions.spec.ts:8:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › carousel next advances slide and updates indicator (81446f61) (773ms)
+  ✓  13 [kudos-board] › e2e/kudos-board-interactions.spec.ts:116:9 › Kudos Board Carousel & Filters /kudos › Filter Dropdowns (0e56cacb, 159fed13, d01729d4) › Department filter: open dropdown, select option, filter applies (159fed13) (390ms)
+  ✓  14 [kudos-board] › e2e/kudos-board-interactions.spec.ts:151:9 › Kudos Board Carousel & Filters /kudos › Filter Dropdowns (0e56cacb, 159fed13, d01729d4) › clicking hashtag inside kudos card re-filters both sections & resets carousel (d01729d4) (332ms)
+  ✓  16 [kudos-board] › e2e/kudos-board-layout.spec.ts:125:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › header nav marks /kudos with aria-current="page" (40d4ba26) (163ms)
+  ✓  15 [kudos-board] › e2e/kudos-board-layout.spec.ts:8:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › renders full page structure with header, banner, all 6 sections and footer (40d4ba26) (214ms)
+  ✓   9 [kudos-board] › e2e/kudos-board-interactions.spec.ts:27:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › carousel prev goes back one slide (81446f61) (1.4s)
+  ✓  17 [kudos-board] › e2e/kudos-board-layout.spec.ts:133:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › banner is non-interactive and visible (40d4ba26) (156ms)
+  ✓  18 [kudos-board] › e2e/kudos-board-layout.spec.ts:145:9 › Kudos Board Page /kudos › Layout & Structure (A1, A3, A5, B1, B7, C1, D1, 40d4ba26) › placeholder text renders on load (b35d40c1, d3877e54) (164ms)
+  ✓  11 [kudos-board] › e2e/kudos-board-interactions.spec.ts:57:9 › Kudos Board Carousel & Filters /kudos › Carousel Navigation (81446f61) › next button is disabled on slide 5 (81446f61) (1.6s)
+
+  18 passed (14.3s)
+exit=0
