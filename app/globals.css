@@ -25,6 +25,16 @@
   --divider: #2e3940;
   --badge-danger: #d4271d;
   --secondary-button-bg: rgba(255, 234, 158, 0.1);
+
+  /* Sun* Kudos — Live board (frame 2940:13431) — new tokens, see design/kudos-content.md §8 */
+  --kudos-card-ground: #fff8e1;
+  --kudos-message-tint: rgba(255, 234, 158, 0.4);
+  --kudos-sidebar-bg: #00070c;
+  --muted-text: #999999;
+  --kudos-wordmark: #dbd1c1;
+  --spotlight-highlight: #f17676;
+  --new-hero-ground: #fff3c6;
+  --avatar-fallback: #eeeeee;
 }
 
 @theme inline {
@@ -38,6 +48,16 @@
   --color-divider: var(--divider);
   --color-badge-danger: var(--badge-danger);
   --color-secondary-button-bg: var(--secondary-button-bg);
+  --color-kudos-card-ground: var(--kudos-card-ground);
+  --color-kudos-message-tint: var(--kudos-message-tint);
+  --color-kudos-sidebar-bg: var(--kudos-sidebar-bg);
+  --color-muted-text: var(--muted-text);
+  --color-kudos-wordmark: var(--kudos-wordmark);
+  --color-spotlight-highlight: var(--spotlight-highlight);
+  --color-new-hero-ground: var(--new-hero-ground);
+  --color-avatar-fallback: var(--avatar-fallback);
+  --radius-badge: 48px;
+  --radius-pill: 68px;
   --font-sans: var(--font-montserrat);
   --font-alt: var(--font-montserrat-alternates);
   --font-digital: 'Digital Numbers', ui-monospace, 'SF Mono', 'Courier New', monospace;
