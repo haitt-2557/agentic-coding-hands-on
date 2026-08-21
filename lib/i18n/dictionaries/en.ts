@@ -41,4 +41,21 @@ export const en: Record<DictionaryKey, string> = {
   'login.tagline': 'Log in to explore!',
   'login.button': 'LOGIN With Google',
   'login.error': 'Login failed. Please try again.',
+  // No English frame exists for /kudos (clarifications.md) — mirrored verbatim, same as
+  // `nav.kudos` above, rather than inventing a translation of frame-mandated copy.
+  'kudosPage.bannerTitle': 'Hệ thống ghi nhận và cảm ơn',
+  'kudosPage.submitPillPlaceholder': ' Hôm nay, bạn muốn gửi lời cảm ơn và ghi nhận đến ai?   ',
+  'kudosPage.sunnerSearchPlaceholder': 'Tìm kiếm profile Sunner',
+  'kudosPage.sectionSubtitle': 'Sun* Annual Awards 2025',
+  'kudosPage.highlightHeading': 'HIGHLIGHT KUDOS',
+  'kudosPage.spotlightHeading': 'SPOTLIGHT BOARD',
+  'kudosPage.allKudosHeading': 'ALL KUDOS',
+  'kudosPage.filterHashtagLabel': 'Hashtag',
+  'kudosPage.filterDepartmentLabel': 'Phòng ban',
+  'kudosPage.spotlightSearchPlaceholder': 'Tìm kiếm ',
+  'kudosPage.emptyState': 'Hiện tại chưa có Kudos nào.',
+  'kudosPage.copyLinkButton': 'Copy Link',
+  'kudosPage.copyLinkToast': 'Link copied — ready to share!',
+  'kudosPage.viewDetailButton': 'Xem chi tiết',
+  'kudosPage.secretBoxButton': 'Mở Secret Box',
 };
