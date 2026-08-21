@@ -33,6 +33,12 @@ có redirect người xem đi hay không. Nó **không** quyết định `role`,
 dưới. Đọc tiếp phần dưới với giả định "chưa có phân quyền thật" vẫn đúng cho mọi thứ ngoại
 trừ ngoại lệ một-trang này — chi tiết ở § Special Conditions cuối tài liệu.
 
+**Cập nhật (lượt Kudos Live board, 2026-08-21) — kết luận trên không đổi.** Lượt này mở rộng
+mock session thêm một danh tính người xem (mã định danh + tên hiển thị), nhưng phần mở rộng đó
+**làm rõ thêm cùng một sự thật** chứ không thêm gì được xác thực phía máy chủ: nó vẫn đọc/ghi
+qua đúng cơ chế `localStorage` → `NEXT_PUBLIC_*` → mặc định cứng đã có, nên bất kỳ ai cũng tự
+đổi được danh tính này từ DevTools của chính họ, không có bước xác thực nào đứng giữa.
+
 ## Authorization System Type
 
 **System Type**: `other` — Không có hệ thống authorization thật nào tồn tại. Có một khái
@@ -52,6 +58,13 @@ không đủ điều kiện xếp vào `rbac` (hay bất kỳ loại nào trong 
 Seed do người dùng cuối tự đặt trên trình duyệt của chính họ (vd
 `localStorage.setItem('saa.mock-role', 'admin')` trong DevTools) — không có bước xác thực
 nào diễn ra giữa chừng.
+
+**Cập nhật (lượt Kudos Live board, 2026-08-21)**: loại authorization vẫn là `other`, không đổi.
+`lib/session/session-provider.tsx` (trước đây chỉ mang `role` và `unreadCount`) được mở rộng
+thêm hai field: một mã định danh và một tên hiển thị cho "người xem hiện tại". Đây **không** phải
+một hệ thống định danh mới và **không** thêm role thứ tư — nó chỉ thêm dữ liệu vào đúng khái niệm
+"vai trò/mock" đã mô tả ở bảng trên, qua đúng cơ chế seed đã có, và mang nguyên SECURITY NOTE ở
+đầu file đó. Lý do cần danh tính này nằm ở § Điểm enforce bên dưới.
 
 ## Curated View
 
@@ -86,6 +99,28 @@ Chi tiết đầy đủ từng mã (permission rules, related routes/screens/mod
 session thay vì auth thật — và điều kiện để thay nó bằng auth thật — nằm ở
 [ADR-001](../../decisions/ADR-001-mock-session-and-hand-rolled-i18n.md).
 
+**Cập nhật (lượt Kudos Live board, 2026-08-21) — một affordance UI, chưa được cấp mã.** Trang
+Sun* Kudos - Live board (`/kudos`) cần biết "bạn" là ai để (1) vô hiệu nút tim trên chính lời
+cảm ơn bạn đã gửi, và (2) hiển thị đúng số liệu ở khu vực thống kê cá nhân ("Số Kudos bạn nhận
+được", "Số Kudos bạn đã gửi", …). Không có danh tính nào để so sánh thì hai chỗ đó không có gì
+để "loại trừ chính mình" hay "thuộc về ai" — đó là lý do mock session được mở rộng ở trên.
+
+Đây là **một affordance UI trên dữ liệu tĩnh, không phải một điểm gate mới theo nghĩa PERM###**:
+nó không quyết định người dùng có xem được trang hay không (`/kudos` vẫn công khai), không đọc
+`role`, và không thêm ranh giới truy cập nào — nó chỉ quyết định MỘT nút cụ thể trên MỖI thẻ có
+bấm được hay không, dựa trên so sánh dữ liệu tĩnh (`kudos.senderId === viewer.id`), tương tự cách
+3 mã trên chỉ ẩn/hiện icon trên header.
+
+| Mã `PERM###` | Điểm enforce dự kiến | Loại | Ghi chú |
+|---|---|---|---|
+| TBD (draft) — chưa được cấp | `components/kudos/kudos-card-actions.tsx:34,71` — `isOwnKudos = record.senderId === viewerId`, `disabled={isOwnKudos}` (đã viết, xác nhận trong lượt này) | screen-permission | Vô hiệu nút tim trên chính lời cảm ơn người xem đã gửi; không phải role-based, không đọc `role` |
+
+Không có PERM### thứ hai phát sinh từ feature này — mọi tương tác khác trên trang (lọc, cuộn,
+tìm kiếm, sao chép link, bốn trigger đích-hoãn) không phụ thuộc vào danh tính hay vai trò của
+người xem. Mã trên chưa được cấp trong
+[permissions-matrix.md](./permissions-matrix.md); nó giữ nguyên trạng `TBD (draft)` cho tới khi
+một lượt rebuild-spec cấp mã thật — không có mã nào được bịa ra ở đây.
+
 ## Access Boundaries
 
 Không có ranh giới truy cập thật nào giữa `guest`, `user`, và `admin` — cả ba đều xem
@@ -95,6 +130,11 @@ họ tới các trang đó — không phải những gì họ *được phép l�
 hữu tài nguyên" (ownership) trong hệ thống — không có tài nguyên nào (bài viết, đơn hàng,
 hồ sơ dữ liệu…) để phân biệt ai là chủ. Trang Profile và Admin Dashboard hiện đều là
 trang giữ chỗ tĩnh, chưa có nội dung hay dữ liệu cá nhân nào để bảo vệ.
+
+**Cập nhật (lượt Kudos Live board, 2026-08-21)**: không đổi. Route `/kudos` mở công khai, không
+có ranh giới truy cập nào giữa `guest`/`user`/`admin` khi xem trang này. Danh tính mock-user mới
+**không** tạo ra khái niệm "chủ sở hữu tài nguyên" (ownership) nào — nó chỉ là một chuỗi so sánh
+trên client, do chính người dùng đặt được từ DevTools.
 
 ## Special Conditions
 
@@ -120,6 +160,17 @@ ghi nhận là `PERM004_LoginRouteAuthGate`, type `route-guard` (loại đầu t
 [permissions-matrix.md](./permissions-matrix.md). Nó chỉ chi phối MỘT route (`/login`) và
 không đọc/ghi `role` — không mở rộng ra bất kỳ route nào khác, không thay đổi kết luận
 "không có phân quyền thật theo vai trò" ở đầu tài liệu này.
+
+**Cập nhật (lượt Kudos Live board, 2026-08-21)**: mock session
+(`lib/session/session-provider.tsx`) được mở rộng thêm danh tính người xem (mã định danh + tên
+hiển thị) để phục vụ đúng hai chỗ trên trang `/kudos` nêu ở § Điểm enforce. Cơ chế seed
+(`localStorage` → `NEXT_PUBLIC_*` → mặc định cứng) và SECURITY NOTE giữ nguyên, không đổi bản
+chất — vẫn không có bước xác thực nào, vẫn không phải một access boundary. Route `/kudos` không
+được gate mới ở lượt này; gate đếm-ngược trước sự kiện (nếu còn hiệu lực) và mọi special
+condition khác ở trên vẫn áp dụng như cũ, không bị thay đổi bởi cập nhật này. Lý do kiến trúc vì
+sao chọn mở rộng mock session thay vì gắn với Supabase user thật: đây là một ứng dụng thêm của
+cùng quyết định trong [ADR-001](../../decisions/ADR-001-mock-session-and-hand-rolled-i18n.md),
+không phải một quyết định kiến trúc mới cần ADR riêng.
 
 Ngoài điều kiện trên, không có điều kiện đặc biệt nào khác theo IP hay môi trường triển
 khai. Chuyển đổi ngôn ngữ (Việt/Anh) trên thanh điều hướng chỉ đổi văn bản hiển thị, không

@@ -4,18 +4,18 @@
     "behavior-logic.md": "b590ddfdf9b873eb26d2366c3adec7f4709b73830a8df940f83595a2ca0b3ed8",
     "business-rules.md": "433b4a861096cb439794f9747d44d4d7808aca1a83c1ec77f9e67727e1c8cdbd",
     "data-model.md": "17d696e8129a46f2fb79944c3cef71d297b183bfc781c7fa5019d84239d72799",
-    "feature-list.md": "8868149fb4ef530e7d839c2055fe18f733c079cc5d5393f0aa16bc74b5c25171",
-    "permissions.md": "e24408e19d9a6c070e84dc256982eb2879cd62a54025b1327c8cb5a3f7191ddd",
-    "route-list.md": "b46a14cd4ca3170413a769c48ddb7571fcfee04e3714fadb7a8a62baa67ef4a8",
+    "feature-list.md": "ae5fa627abb414489e37958ab6c8b1d9ac0ee6635edbe715d57a15844a462c57",
+    "permissions.md": "1462572dbb143b53d23d7051980b0eee963e8f029d666706d0eaac684a17929e",
+    "route-list.md": "aa86e18265f6841eb68a4c7824279ed3018fdbcdb620711c2e54059854a628ec",
     "screen-flow.md": "893113268a50a0c1a48436ad79ab51e0192ec80637ab49c1571e91b6ebbb541e",
-    "screen-list.md": "c39d984e457ed99c5b1738485e9d89fa8fbb54b5a64e91097125eae921ee62b6",
+    "screen-list.md": "56fff1a29cc0c35af1b174bc22c9e13dba889c380d41b199146093a487592234",
     "system-overview.md": "a08acdf057e3fd45fde97395618a5c78bbd723bec233d68283caeded3bc862f9",
     "user-stories.md": "efd85e3909882add624618c0f6d32163207588765380134f7d410e090947c6f3"
   },
   "fcode_index_sha": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
   "last_api_contracts_run_sha": "",
   "last_design_intent_run_sha": "",
-  "last_feature_spec_run_sha": "",
+  "last_feature_spec_run_sha": "644c1044c121c2b538e4e1a55acf79bbc772b758",
   "last_flows_run_sha": "",
   "last_glossary_run_sha": "",
   "last_jobs_run_sha": "",
@@ -26,7 +26,8 @@
   "rebuilt_at": "2026-08-18T08:38:06Z",
   "schema_version": "21.0.0",
   "screen_spec_shas": {
-    "SCR002_Awards": "c6c7add2da8b1d7f19b22e65f5dfb68cc7de0e17d8a587198f453ceefb33c075"
+    "SCR002_Awards": "c6c7add2da8b1d7f19b22e65f5dfb68cc7de0e17d8a587198f453ceefb33c075",
+    "SCR008_KudosLiveBoard": "ace9d3f9852e3aff6039a1bc68986ed4acfb1f04f89dc7c2692f9e624fe7653e"
   },
   "translations": {}
 }

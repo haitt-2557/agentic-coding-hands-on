@@ -50,6 +50,7 @@ Supabase Auth local (`/login`, `app/auth/callback/route.ts`). Feature-spec đầ
 | F010_PrelaunchCountdownGate | Prelaunch Countdown Gate | ui | TypeScript/TSX | my-app | P0 |
 | F011_GoogleOAuthLogin | Google OAuth Login | ui | TypeScript/TSX | my-app | P0 |
 | F012_AwardSystemPage | Award System Page | ui | TypeScript/TSX | my-app | P1 |
+| F013_KudosLiveBoard | Kudos Live Board | ui | TypeScript/TSX | my-app | P1 |
 
 ## Feature Details
 
@@ -459,16 +460,81 @@ persistence, không có API, không có route guard (bảo vệ route vẫn hoã
 
 ---
 
+### F013_KudosLiveBoard: Kudos Live Board — thêm 2026-08-21
+
+**Type**: ui
+**Description**: Trang nội dung `/kudos` — điền nội dung thật vào placeholder cũ (`app/kudos/page.tsx`)
+vốn chỉ giữ chỗ cho link Kudos ở header/footer và khối quảng bá F004_KudosPromotion. Gồm banner + pill
+mời gửi kudos, khối HIGHLIGHT KUDOS (carousel 5 thẻ nhiều tim nhất, 3 hiển thị cùng lúc, 2 dropdown
+lọc), khối SPOTLIGHT BOARD (word cloud ~100 tên + tìm kiếm), khối ALL KUDOS (feed thẻ hiện dần theo
+đà cuộn), và sidebar thống kê cá nhân + bảng xếp hạng. Toàn bộ dữ liệu là module tĩnh mới `lib/kudos/`
+(tách nhiều file theo giới hạn 200 dòng, cùng tiền lệ `lib/awards.ts`) — không có bảng CSDL, không có
+API route, không có persistence. Bốn đích điều hướng frame tham chiếu nhưng chưa có frame riêng (gửi
+kudos, chi tiết kudos, hồ sơ Sunner, Secret Box) dừng ở mức trigger render + focusable, không xây
+đích. Chi tiết đầy đủ: `docs/vi/features/kudos-live-board/technical-spec.md`.
+
+**Workspace**: my-app
+**Languages**: TypeScript, TSX
+**Components**: 10 (mới, dưới `components/kudos/`; chưa tính `SiteHeader`/`SiteFooter` tái dùng)
+
+**Related Screens**:
+- SCR008_KudosLiveBoard: Sun* Kudos - Live board — màn hình mới, thêm 2026-08-21 (`screen-list.md`)
+
+**Related User Stories**:
+- US001_XemVaLocHighlightKudos: Xem và lọc HIGHLIGHT KUDOS
+- US002_DieuHuongCarouselHighlightKudos: Điều hướng carousel HIGHLIGHT KUDOS
+- US003_XemVaCuonAllKudos: Xem và cuộn ALL KUDOS
+- US004_ThaTimKudos: Thả tim (like) một kudos
+- US005_SaoChepLinkKudos: Sao chép link một kudos
+- US006_LocTheoHashtagPhongBan: Lọc HIGHLIGHT và ALL KUDOS theo Hashtag/Phòng ban
+- US007_XemVaTimKiemSpotlightBoard: Xem và tìm kiếm SPOTLIGHT BOARD
+- US008_XemThongKeCaNhanVaBangXepHang: Xem thống kê cá nhân và bảng xếp hạng ở sidebar
+- US009_TruyCapCacDichChuaXayDung: Truy cập các đích điều hướng chưa được xây
+
+  (mã US### cục bộ của feature-spec; hợp nhất vào `user-stories.md` ở lượt rebuild-spec kế tiếp)
+
+**Related APIs/Routes**:
+- (page) /kudos — ROUTE003, đã tồn tại dưới dạng placeholder có chủ đích; lượt này thay nội dung,
+  không đổi đường dẫn và không cấp ROUTE### mới
+
+**Related Data Models**:
+- Không có `MODEL###` mới — `lib/kudos/` là dữ liệu tĩnh trong mã nguồn (KudosRecord, SpotlightEntry,
+  LeaderboardEntry, FilterVocabulary, ViewerStats), không phải entity có persistence. Xem
+  `## Key Entities` trong technical-spec để biết hình dạng từng hằng số
+
+**Related Background Logic**:
+- Không có — trang chỉ đọc, không có job/middleware nào thuộc feature này
+
+**Related Permissions**:
+- Không có `PERM###` mới được cấp. `/kudos` công khai cho mọi actor. Feature mở rộng mock session
+  (`lib/session/session-provider.tsx`) thêm danh tính người xem để vô hiệu nút tim trên chính kudos
+  người xem đã gửi — đây là affordance UI trên dữ liệu tĩnh, không phải điểm gate theo vai trò, và
+  giữ trạng thái `TBD (draft)` trong `permissions-matrix.md` cho tới khi được cấp mã thật. Bảo vệ
+  route vẫn hoãn theo quyết định của lượt F011
+
+---
+
 ## Summary
 
-- **Total Features**: 11
-- **Total Screens**: 7
+- **Total Features**: 13
+- **Total Screens**: 8
 - **Total User Stories**: 23
 - **Total Routes**: 8 (ROUTE001–ROUTE005, ROUTE007–ROUTE009; ROUTE006 `/_not-found` loại khỏi mapping — tự sinh bởi Next.js, không có source file, cùng phạm vi loại trừ đã áp dụng ở `screen-list.md`)
 - **Total Data Models**: 1 (MODEL001_Award)
 - **Total Background Logic**: 2 (BL001_PrelaunchLaunchGate, BL002_OAuthCallbackExchange)
 - **Total Permissions**: 4
 - **Languages Detected**: TypeScript, TSX (Next.js App Router)
+
+**Ghi chú (lượt Kudos Live board, 2026-08-21)**: `Total Features` được sửa 11 → 13 và
+`Total Screens` 7 → 8. Con số cũ (11) đã lệch từ trước lượt này — `F012_AwardSystemPage` được
+thêm ở lượt 2026-08-20 nhưng phần Summary không được cập nhật cùng; lượt này đếm lại đúng theo
+bảng Feature Hierarchy (13 dòng) và `screen-list.md` (8 mục `## SCR###`). Các con số còn lại
+không đổi và đó là đúng: `F013_KudosLiveBoard` dùng lại `ROUTE003` (`/kudos`, placeholder có chủ
+đích từ lượt homepage) nên không có route mới; không có `MODEL###` mới (dữ liệu tĩnh trong
+`lib/kudos/`, không có persistence); không có `BL###` mới (trang chỉ đọc); không có `PERM###` mới
+được cấp. `Total User Stories` giữ ở 23 vì 9 US của feature này là mã **cục bộ** trong
+`docs/vi/features/kudos-live-board/technical-spec.md`, chưa được hợp nhất vào `user-stories.md` —
+cùng tình trạng với US cục bộ của `F012_AwardSystemPage`.
 
 **Ghi chú (lượt Login, 2026-08-19)**: `F011_GoogleOAuthLogin` được thêm bằng cách đối chiếu
 ngược trực tiếp từ source đã shipped (`app/login/`, `app/auth/callback/`, `lib/supabase/`),
@@ -487,8 +553,8 @@ thiểu (route/screen/US/BL/PERM), không thay thế một lượt feature-spec 
 - [x] All behavior logic references are valid (BL001 → F010, BL002 → F011)
 - [x] All permission references are valid (PERM### trong permissions-matrix.md, đủ cả PERM001–004)
 - [x] Every US has a parent feature (F###) — 23/23 US mapped, không US nào orphan
-- [x] Every screen has a parent feature (F###) — SCR001 (F001–F009), SCR002 (F003), SCR003 (F004), SCR004 (F007), SCR005 (F007), SCR006 (F010), SCR007 (F011)
-- [x] Every route maps to a feature (F###) — ROUTE001–ROUTE005, ROUTE007–ROUTE009 đều có ≥1 feature owner; ROUTE006 ngoài phạm vi (không có source file)
+- [x] Every screen has a parent feature (F###) — SCR001 (F001–F009), SCR002 (F003, F012), SCR003 (F004), SCR004 (F007), SCR005 (F007), SCR006 (F010), SCR007 (F011), SCR008 (F013)
+- [x] Every route maps to a feature (F###) — ROUTE001–ROUTE005, ROUTE007–ROUTE009 đều có ≥1 feature owner (ROUTE003 `/kudos`: F004 quảng bá + F013 nội dung trang, thêm 2026-08-21); ROUTE006 ngoài phạm vi (không có source file)
 - [x] Every data model maps to a feature (F###) — MODEL001 → F003
 - [x] Every background logic maps to a feature (F###) — BL001 → F010, BL002 → F011
 
