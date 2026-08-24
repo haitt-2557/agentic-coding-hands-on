@@ -68,16 +68,16 @@ This is the only phase permitted to touch `e2e/**`. It still may not touch
 
 ## Todo List
 
-- [ ] Seeded name list obtained from phase-02; `'Trang'` verified unique
-- [ ] C3 applied at all 6 call sites
-- [ ] C1: 4 validation tests rewritten to blur-triggered, each carrying the citation comment
-- [ ] C1: one test still asserts `Gửi` remains `disabled` while fields are missing
-- [ ] C2: widget trigger clicked before locating the menuitem
-- [ ] C4: hashtag test has real assertions (or is deleted); skip-guards removed
-- [ ] C5: unused `Browser` import removed from all 6 files
-- [ ] Suite re-run: still RED, and red for the right reason
-- [ ] `red-evidence.json` re-recorded and its guard claim corrected
-- [ ] No `playwright.config.ts` edit; orphan check clean
+- [x] Seeded name list obtained from phase-02; `'Trang'` verified unique
+- [x] C3 applied at all 6 call sites
+- [x] C1: 4 validation tests rewritten to blur-triggered, each carrying the citation comment
+- [x] C1: one test still asserts `Gửi` remains `disabled` while fields are missing
+- [x] C2: widget trigger clicked before locating the menuitem
+- [x] C4: hashtag test has real assertions (or is deleted); skip-guards removed
+- [x] C5: unused `Browser` import removed from all 6 files
+- [x] Suite re-run: still RED, and red for the right reason
+- [x] `red-evidence.json` re-recorded and its guard claim corrected
+- [x] No `playwright.config.ts` edit; orphan check clean
 
 ## Success Criteria
 

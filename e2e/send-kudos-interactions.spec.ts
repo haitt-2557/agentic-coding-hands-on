@@ -1,5 +1,14 @@
 import { test, expect } from '@playwright/test';
 import { seedSupabaseSession } from './support/supabase-session';
+import {
+  fillRecipient,
+  fillTitle,
+  fillMessage,
+  selectFirstHashtag,
+} from './support/send-kudos-form';
+
+// image-attachments.tsx:48 — Vietnamese format error message to exclude route announcer
+const IMAGE_FORMAT_ERROR_VI = 'Chỉ chấp nhận định dạng .jpg hoặc .png';
 
 test.describe('Send Kudos Form Interactions (ID-8–10, ID-15–24, ID-25–26, ID-34–40, ID-41–44)', () => {
   test('recipient autocomplete filters as you type and selection fills field (ID-8, ID-10, ID-25, ID-26)', async ({
@@ -110,19 +119,19 @@ test.describe('Send Kudos Form Interactions (ID-8–10, ID-15–24, ID-25–26, 
       const deleteBtn2 = page.locator('button').filter({ hasText: '×' }).first();
       await deleteBtn2.click();
 
-      // Test 3: Upload rejected .pdf — error should appear
+      // Test 3: Upload rejected .pdf — error should appear (filter by text to avoid route announcer collision)
       await fileInput.setInputFiles('./e2e/fixtures/test-file.pdf');
-      const pdfError = page.locator('[role="alert"]');
+      const pdfError = page.locator('[role="alert"]').filter({ hasText: IMAGE_FORMAT_ERROR_VI });
       await expect(pdfError).toBeVisible();
 
       // Test 4: Upload rejected .mp4 — error should appear
       await fileInput.setInputFiles('./e2e/fixtures/test-file.mp4');
-      const mp4Error = page.locator('[role="alert"]');
+      const mp4Error = page.locator('[role="alert"]').filter({ hasText: IMAGE_FORMAT_ERROR_VI });
       await expect(mp4Error).toBeVisible();
 
       // Test 5: Upload rejected .txt — error should appear
       await fileInput.setInputFiles('./e2e/fixtures/test-file.txt');
-      const txtError = page.locator('[role="alert"]');
+      const txtError = page.locator('[role="alert"]').filter({ hasText: IMAGE_FORMAT_ERROR_VI });
       await expect(txtError).toBeVisible();
     } finally {
       await context.close();

@@ -21,11 +21,15 @@ export function FormFooter({ canSubmit, isSubmitting, onCancel, onSubmit }: Form
   return (
     // mm:I1612:5057;520:9905
     <div className="flex w-full max-w-[672px] items-start gap-6">
-      {/* mm:I1612:5057;520:9906 */}
+      {/* mm:I1612:5057;520:9906 — `text-white` was correct while this button sat directly on
+          the dark page background; now that the whole form is a cream card (kudos-send-form.tsx),
+          `bg-secondary-button-bg`'s 10%-opacity fill reads as near-white, so white text on it is
+          the same contrast defect the labels had, just on this button. `text-background` matches
+          every other dark-on-cream label/value already rendered inside this same card. */}
       <button
         type="button"
         onClick={onCancel}
-        className="self-stretch rounded border border-border-accent bg-secondary-button-bg px-10 py-4 text-base leading-6 font-bold tracking-[0.15px] text-white"
+        className="self-stretch rounded border border-border-accent bg-secondary-button-bg px-10 py-4 text-base leading-6 font-bold tracking-[0.15px] text-background"
       >
         {t('sendKudos.cancelButton')}
       </button>

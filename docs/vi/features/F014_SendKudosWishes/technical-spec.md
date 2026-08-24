@@ -32,7 +32,14 @@ quyết định 1, `clarifications.md`), rồi chuyển hướng `/kudos` kèm t
 trạng thái thật: validate theo trường, toggle hashtag, thêm/gỡ ảnh, reveal nickname, và redirect
 có điều kiện theo phiên đăng nhập.
 
-**Chưa có một dòng mã nào được viết cho tính năng này** — bản nháp này đi trước implementation.
+**Tính năng đã triển khai** (`status: implemented`) — xem `## Source Code References` để biết mã
+nguồn as-built. Ghi chú trung thực về trạng thái kiểm chứng: unit 127/127, e2e 121/121 ở lượt chạy
+cuối, mutation test 5/5, RLS đã chứng minh từ chối `sender_id` giả mạo. Tuy vậy verdict inspection
+là **`REWORK`, không phải sealed**, và evidence gate CHẶN: tiêu chí ID-0 (`GET /kudos/send` render
+được form) thi thoảng thất bại vì khe hở `iat` giữa GoTrue và PostgREST. Đây là lỗi đã biết, đã
+được người dùng chấp nhận tường minh khi quyết định giao hàng — xem `clarifications.md` § "Decision
+on the residual 500 — recorded explicitly (2026-08-24)". Đừng mô tả tính năng này là đã kiểm chứng
+đầy đủ.
 
 ## Polymorphic Behavior
 
@@ -616,21 +623,61 @@ thực trạng: chưa có gì được build.
 
 ## Source Code References
 
-Chưa có mã nguồn nào được viết cho tính năng này — đây là bản nháp trước khi triển khai
-(`status: draft`). Bề mặt dự kiến (không phải trích dẫn code đã tồn tại):
+Tính năng đã được triển khai (`status: implemented`). Dưới đây là **mã nguồn as-built**, không
+còn là bề mặt dự kiến. Mọi file đều dưới ngưỡng 200 dòng theo `.claude/rules/development-rules.md`.
 
-- Route: `app/kudos/send/page.tsx` (mới)
-- Components: `components/kudos/send/*` (mới — recipient field, title field, message editor +
-  toolbar, hashtag picker, image attachments, anonymous toggle, form shell)
-- Logic: `lib/kudos/send/*` (mới — validation, submit)
-- Migrations: `supabase/migrations/*` (mới — `profiles`, `hashtags`, `kudos`, `kudos_hashtags`,
-  `kudos_images`, RLS, storage bucket)
-- Seed: `supabase/seed.sql` (bổ sung — 8 hashtag + profiles từ tên trong `lib/kudos/`, idempotent)
-- Sửa: `components/kudos/kudos-action-bar.tsx` (pill → link tới `/kudos/send`, gỡ
-  `aria-haspopup="dialog"`), `components/layout/quick-action-widget.tsx` (mục "Viết Kudos" trỏ
-  `/kudos/send` thay vì `/kudos`)
+**Route và wiring**
+- `app/kudos/send/page.tsx` — server shell: gọi `requireSupabaseUser()` trước tiên, rồi đọc song
+  song `listProfiles()`/`listHashtags()`
+- `components/kudos/kudos-send-page-client.tsx` — nửa client của luồng thành công: đặt cờ
+  `sessionStorage` rồi `router.push('/kudos')` (KHÔNG dùng `redirect()` phía server — assertion
+  `toHaveURL(/\/kudos$/)` được neo nên không cho phép query param)
+- `components/kudos/kudos-sent-toast.tsx` — đọc-và-xoá cờ, tái dùng `KudosToast` có sẵn
+- `app/kudos/page.tsx` — mount `<KudosSentToast />`
 
-Xem `## User Stories` ở trên để biết bề mặt dự kiến chi tiết theo từng US.
+**Components (10 file, `components/kudos/send/`)**
+`kudos-send-form.tsx` (form root, đồng thời là thẻ nền kem `#FFF8E1` 752px/40px/24px theo node
+`1612:5057`), `recipient-field.tsx`, `title-field.tsx`, `message-editor.tsx`, `message-toolbar.tsx`,
+`hashtag-picker.tsx`, `image-attachments.tsx`, `anonymous-toggle.tsx`, `form-footer.tsx`,
+`field-error-text.tsx`
+
+**Logic (`lib/kudos/send/`)**
+- `types.ts` — `KudosSendFormProps`, `KudosDraft`, `SubmitKudosResult`, …
+- `validation.ts` — `canSubmit`, `validateField`, `validateDraft`, `isAcceptedImage`,
+  `isValidImageCount`, `dedupeHashtagIds`, `filterProfiles` + các hằng số ngưỡng
+- `markdown.ts` — `applyMarkdown` cho 6 nút toolbar
+- `auth-gate.ts` — `requireSupabaseUser()`
+- `queries.ts` — `listProfiles()`, `listHashtags()` (bọc qua `withRetry`)
+- `retry.ts` — `withRetry` (3 lần, backoff 100/200/400ms) cho khe hở `iat` của GoTrue/PostgREST
+- `submit-kudos.ts` — Server Action đầu tiên của repo
+- `storage.ts` — upload ảnh lên bucket riêng tư
+- Test: `validation.test.ts`, `markdown.test.ts`, `retry.test.ts`
+
+**Migrations và seed**
+- `supabase/migrations/20260824031123_kudos_send_tables.sql` — `profiles`, `hashtags`, `kudos`,
+  `kudos_hashtags`, `kudos_images` + RLS + GRANT tường minh cho `authenticated` (cấu hình Supabase
+  này không tự expose bảng mới, nên chỉ RLS là chưa đủ)
+- `supabase/migrations/20260824031159_kudos_images_bucket.sql` — bucket riêng tư `kudos-images` +
+  policy theo tiền tố uid
+- `supabase/seed.sql` — bổ sung idempotent: 8 hashtag (giữ nguyên lỗi chính tả `#High-perorming`
+  của thiết kế) + 7 profile từ tên thật trong `lib/kudos/`
+
+**File đã sửa**
+- `components/kudos/kudos-action-bar.tsx` — thêm overlay `<Link href="/kudos/send">` đứng TRƯỚC
+  input `readOnly` trong thứ tự DOM (input phải giữ nguyên: 3 spec đã ship focus nó và đọc
+  placeholder); gỡ `aria-haspopup="dialog"`
+- `components/layout/quick-action-widget.tsx` — "Viết Kudos" trỏ `/kudos/send`
+- `lib/i18n/dictionaries/{vi,en}.ts` — copy cho toàn bộ màn hình
+
+**Test E2E**: `e2e/send-kudos-{access,layout,validation,interactions,submit,submission}.spec.ts`,
+helper `e2e/support/send-kudos-form.ts`, fixture `e2e/fixtures/`, project `send-kudos` trong
+`playwright.config.ts` (cổng 3200 — cổng 3000 có gate prelaunch đóng).
+
+**Trạng thái kiểm chứng**: unit 127/127; e2e toàn bộ project 121/121 ở lượt chạy cuối; mutation
+test 5/5 bắt đúng test tương ứng; RLS đã chứng minh từ chối `sender_id` giả mạo (`42501`).
+**Còn một lỗi đã biết và được chấp nhận**: ID-0 (`GET /kudos/send`) thi thoảng trả 500 do khe hở
+`iat`. Verdict inspection là `REWORK`, KHÔNG phải sealed — xem `clarifications.md` § "Decision on
+the residual 500".
 
 ## Unresolved Questions
 
@@ -681,6 +728,6 @@ app/kudos/send/page.tsx (Server, auth gate)
 
 | Event/Endpoint | Table | Columns | Operation | Value Derivation | Source |
 |-----------------|-------|---------|-----------|-------------------|--------|
-| Submit form hợp lệ | `kudos` | sender_id, recipient_id, title, message, is_anonymous, nickname | INSERT | `sender_id` từ `auth.uid()` phía server; các cột còn lại từ form state đã validate | planned — chưa có file nào để trích |
-| Submit form hợp lệ | `kudos_hashtags` | kudos_id, hashtag_id | INSERT (1–5 dòng) | `kudos_id` của dòng vừa tạo; `hashtag_id` cho mỗi hashtag đã chọn | planned — chưa có file nào để trích |
-| Submit form hợp lệ, có ảnh | `kudos_images` | kudos_id, storage_path, original_filename | INSERT (0–5 dòng) | `storage_path` là kết quả trả về từ upload Supabase Storage | planned — chưa có file nào để trích |
+| Submit form hợp lệ | `kudos` | sender_id, recipient_id, title, message, is_anonymous, nickname | INSERT | `sender_id` từ `auth.uid()` phía server; các cột còn lại từ form state đã validate | `lib/kudos/send/submit-kudos.ts` |
+| Submit form hợp lệ | `kudos_hashtags` | kudos_id, hashtag_id | INSERT (1–5 dòng) | `kudos_id` của dòng vừa tạo; `hashtag_id` cho mỗi hashtag đã chọn | `lib/kudos/send/submit-kudos.ts` |
+| Submit form hợp lệ, có ảnh | `kudos_images` | kudos_id, storage_path, original_filename | INSERT (0–5 dòng) | `storage_path` là kết quả trả về từ upload Supabase Storage | `lib/kudos/send/submit-kudos.ts` |

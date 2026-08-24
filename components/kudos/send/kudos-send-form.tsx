@@ -107,12 +107,19 @@ export function KudosSendForm({ profiles, hashtags, onSubmit }: KudosSendFormPro
   }
 
   return (
+    // mm:1612:5057 ("Viết KUDO") — the card IS the form root. Verified via MCP get_node:
+    // width 752px, padding 40px, borderRadius 24px, gap 32px, flex column, backgroundColor
+    // rgba(255,248,225,1) (#FFF8E1). The 40px padding on both sides of a 752px card leaves
+    // exactly 672px of content width, which is why every field wrapper below already uses
+    // `max-w-[672px]` — that number was always the card's inner content width, it just had no
+    // card around it. `bg-kudos-card-ground` (app/globals.css) is already #fff8e1, so no new
+    // token is needed. `gap-6`→`gap-8` corrects 24px→32px to match the frame's own gap.
     <form
       onSubmit={(event) => {
         event.preventDefault();
         void handleSubmit();
       }}
-      className="flex w-full max-w-[672px] flex-col items-start gap-6 py-10"
+      className="flex w-full max-w-[752px] flex-col items-start gap-8 rounded-3xl bg-kudos-card-ground p-10"
     >
       {/* mm:I1612:5057;520:9870 */}
       <h1 className="text-2xl leading-8 font-bold text-background">{t('sendKudos.pageTitle')}</h1>

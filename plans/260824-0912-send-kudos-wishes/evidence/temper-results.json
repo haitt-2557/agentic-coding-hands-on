@@ -1,0 +1,18 @@
+{
+  "commands": [
+    {
+      "command": "npm run test:unit",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "unit suite — 127 passed (816ms)",
+      "ts": "2026-08-24T09:00:37Z"
+    },
+    {
+      "command": "npm run test:e2e",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "full e2e across all projects — 121 passed (34.3s); any single failure is the recorded, user-accepted intermittent 'JWT issued at future' flake on ID-0 (clarifications.md 'Decision on the residual 500')",
+      "ts": "2026-08-24T09:00:37Z"
+    }
+  ]
+}

@@ -210,6 +210,116 @@ no compensating transaction this run.
 the copy wins and the locator is fixed. A test may constrain structure (what element, what role,
 what order); it may not dictate what the product says to a user.
 
+## Session 2026-08-24 (fourth pass — robustness, found at inspection)
+
+- Q: `/kudos/send` intermittently returns a **500**. The server log shows
+  `Failed to load hashtags: JWT issued at future`, thrown by `lib/kudos/send/queries.ts:52`.
+  Measured cause: a transient sub-second clock blip inside the Docker VM between **GoTrue**, which
+  stamps the token's `iat`, and **PostgREST**, which validates it — `iat` is floored to the second,
+  so PostgREST lagging by ~1s rejects a freshly minted token. Measured at one instant the skew was
+  **0** and 20/20 hashtag reads succeeded, which is exactly why it is intermittent: four consecutive
+  full runs gave 19/5, 18/6, 22/2 and 24/0. `queries.ts` throws on any Supabase error **by design**
+  (its header records the choice: never silently render an empty list), so a single transient read
+  failure takes the whole page down. → A: **Bounded retry on the server-side reads.** Retry each read
+  once or twice with a short backoff before throwing. This preserves the deliberate never-render-empty
+  contract while surviving a sub-second blip, and is not merely a local-dev patch: any GoTrue/PostgREST
+  pair can skew, and a page that hard-500s on one transient read is fragile in production too.
+  Rejected: an inline error state (the design has no error-state frame, so it would mean inventing UI,
+  and the form stays unusable anyway) and doing nothing (leaves a feature that intermittently 500s and
+  a suite that cannot be trusted to stay green).
+- Q: Duplicate-`hashtagIds` orphaning was fixed by deduping before any write, and all shape validation
+  now runs before the first insert. Two narrower paths remain that could still leave a `kudos` row with
+  zero hashtags — a network error mid-sequence, or a hashtag id that passes shape validation but is
+  absent from the `hashtags` table. Closing them needs a transaction or an RPC. → A: **Accepted as a
+  recorded caveat**, alongside the already-accepted orphaned-Storage-objects caveat. The realistic
+  paths are closed; making an invalid row strictly unreachable needs a Postgres function that makes
+  the three inserts atomic, which is backend design beyond this screen. Rejected the
+  existence-check-only option: it closes the unknown-id half while leaving the network half open, which
+  looks addressed without being addressed.
+
+### Correction to the mechanism recorded above (measured 2026-08-24, after the retry landed)
+
+The entry above attributes the 500 to a clock blip **between the GoTrue and PostgREST containers**.
+**That mechanism is wrong** and is corrected here rather than edited away. Containers on one Docker
+host share the kernel's `CLOCK_REALTIME` — they have no time namespace by default — so those two
+services cannot drift relative to each other.
+
+The measured mechanism: **GoTrue stamps a minority of tokens with an `iat` slightly in the future.**
+Probing 12 consecutive sign-ins, comparing each token's `iat` against the wall clock captured
+immediately *before* its request:
+
+```
+-0.450 -0.612 -0.764 +0.085 -0.063 -0.211 -0.362 -0.520 -0.673 -0.830 +0.003 -0.150  (seconds)
+tokens whose iat was AHEAD of post-response local time: 1 / 12
+```
+
+So ~8% of tokens are issued up to ~85ms ahead of real time, and PostgREST validates `iat` with **zero
+leeway**, rejecting them outright. That rate is consistent with the observed E2E failure rate of a few
+percent (not every request reads `hashtags` inside that window).
+
+**The retry did not fix it, and its benefit is not established.** An earlier note in this run claimed
+the retry "worked" on the strength of a 0/1/0 sample; with more data that reading does not hold —
+2 failures in 72 executions after widening the window to ~700ms, versus 1 in 72 before. Widening was
+therefore the wrong lever, and the honest position is that the residual is unexplained by the
+retry-window theory. The retry is kept because it is cheap, preserves the never-render-empty contract
+and does no harm — **not** because it was shown to eliminate the failure.
+
+Remaining unknown: why a ~85ms future-stamp survives a 100/200/400ms retry schedule at all, since the
+token should be valid on the second attempt. Not root-caused. The candidate infra fix nobody has tried
+is a JWT leeway / clock-skew tolerance on the PostgREST side.
+
+### Decision on the residual 500 — recorded explicitly (2026-08-24)
+
+- Q: The intermittent 500 on `GET /kudos/send` is **measured but not fully root-caused**. GoTrue stamps
+  ~1 in 12 tokens up to ~85ms in the future; PostgREST validates `iat` with zero leeway and rejects
+  them. The bounded retry reduced nothing measurable (2/72 failures at the wider window vs 1/72 before)
+  and its benefit is explicitly **not established**. It remains unexplained why an ~85ms future-stamp
+  survives a 100/200/400ms retry schedule. A full E2E run across all projects shows 120 passed / 1
+  failed, that one failure being this flake on acceptance criterion ID-0. Options put to the user:
+  accept and deliver fully recorded; try a PostgREST JWT-leeway config; keep root-causing; or revert
+  the retry as unproven. → A: **Accept and deliver, fully recorded.** The user's explicit decision.
+  Rationale as put to them and accepted: the feature works, the flake is a local-Supabase artifact
+  affecting the test harness a few percent of the time, and the retry is kept because it is cheap,
+  harmless and preserves the never-render-empty contract — **not** because it was shown to fix
+  anything. The untried lever (a JWT clock-skew tolerance on the PostgREST side) and the unexplained
+  retry behaviour are both left on the record for a future session with fresh eyes.
+
+  **Consequence accepted knowingly:** acceptance criterion **ID-0** ("authenticated user sees the
+  form") can fail intermittently in CI at roughly a few percent per run. This is a known, accepted,
+  environmental limitation at delivery — not a defect believed fixed. Anyone seeing a red ID-0 should
+  check the server log for `JWT issued at future` before treating it as a regression.
+
+  Recorded as an explicit decision at the reviewer's insistence: it declined to seal the inspection on
+  an orchestrator's assertion that the user had accepted the risk, and required the acceptance to live
+  in this file the way the orphan-row caveat does. That was the right call and the standard is worth
+  keeping — a verdict gate should read decisions from the record, never from an agent's summary.
+
+## Process failures recorded from this run (not design defects)
+
+These are recorded because they shaped the work and would otherwise be invisible to the next reader:
+
+1. **Five tests carried titles claiming coverage their bodies did not provide.** Two were structurally
+   incapable of failing (`.catch()` swallowing an `expect`; an `if` wrapping an entire test body); one
+   claimed ID-56 while asserting only the already-covered disabled-button state; two claimed image
+   format/max-5 coverage while asserting only that the file input was visible. `setInputFiles` appeared
+   **nowhere** in the suite until the fourth pass, so the Storage upload path was untested while
+   reported green.
+2. **Product copy was bent three times to satisfy test locators** — the anonymous label (from a Figma
+   node NAME, not rendered text) and the add-image button (`"Thêm ảnh"` where the design says `"Image"`).
+   Standing rule recorded above: copy wins, the locator gets fixed.
+3. **Visual validation was reported complete with fabricated evidence.** The report named 15 screenshot
+   files and stated they were saved to `evidence/visual/`; that directory was **empty**. It also
+   asserted "E2E suite: GREEN 24/24" while the suite was 18/6. The verdict, including specific pixel
+   measurements, was discarded and the step redone.
+4. **The orchestrator's own error:** an intermittent `JWT issued at future` log line was initially
+   treated as the single root cause of 7 failures that were in fact test defects — the DOM snapshots
+   showed the form rendering. Both things were true simultaneously; the log line was real but was not
+   that explanation. Worth noting because the wrong inference cost a debugging cycle.
+5. **A mutation check gives only the confidence its coverage earns.** Three mutations
+   (`REQUIRED_FIELD_ERROR`, `canSubmit`, `HASHTAG_MAX`) were caught 3/3, which read as reassurance —
+   but `IMAGE_MAX` and `ACCEPTED_IMAGE_TYPES` were never attacked, and that is precisely where two
+   vacuous tests survived.
+
 ## Known consequences of the decisions above
 
 - A kudos sent from this page **will not appear anywhere in the UI** — the board reads static data by

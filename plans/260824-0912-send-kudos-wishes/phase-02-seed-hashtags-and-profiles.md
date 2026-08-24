@@ -75,12 +75,12 @@ and `CECV10` spellings exist there intentionally; copy per record, do not normal
 
 ## Todo List
 
-- [ ] 7 distinct profiles transcribed verbatim (trailing space + capitalization intact)
-- [ ] 8 hashtags inserted, `#High-perorming` misspelling preserved
-- [ ] Comment records the source frame/file and the deliberate misspelling
-- [ ] `on conflict do nothing` on both blocks
-- [ ] `supabase db reset` clean twice
-- [ ] Login fixture user (`e2e-login@example.com`) still present after reset
+- [x] 7 distinct profiles transcribed verbatim (trailing space + capitalization intact)
+- [x] 8 hashtags inserted, `#High-perorming` misspelling preserved
+- [x] Comment records the source frame/file and the deliberate misspelling
+- [x] `on conflict do nothing` on both blocks
+- [x] `supabase db reset` clean twice
+- [x] Login fixture user (`e2e-login@example.com`) still present after reset
 
 ## Success Criteria
 

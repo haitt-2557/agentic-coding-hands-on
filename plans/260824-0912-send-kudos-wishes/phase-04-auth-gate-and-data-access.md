@@ -89,13 +89,13 @@ wrap it in a `try/catch` that swallows it. Say so in the file header.
 
 ## Todo List
 
-- [ ] Next 16 `page.md` + `proxy.md` read before writing code
-- [ ] `requireSupabaseUser()` uses `getUser()`; grep confirms no `getSession()` added
-- [ ] `redirect('/login')` on absent user, before any data is read
-- [ ] `listProfiles()` / `listHashtags()` map to the phase-03 contract types
-- [ ] Query errors throw with the table name; no silent `[]`
-- [ ] No `ALWAYS_ALLOWED` / `proxy.ts` / `gate.ts` edit
-- [ ] typecheck + lint + `next build` clean
+- [x] Next 16 `page.md` + `proxy.md` read before writing code
+- [x] `requireSupabaseUser()` uses `getUser()`; grep confirms no `getSession()` added
+- [x] `redirect('/login')` on absent user, before any data is read
+- [x] `listProfiles()` / `listHashtags()` map to the phase-03 contract types
+- [x] Query errors throw with the table name; no silent `[]`
+- [x] No `ALWAYS_ALLOWED` / `proxy.ts` / `gate.ts` edit
+- [x] typecheck + lint + `next build` clean
 
 ## Success Criteria
 

@@ -1,7 +1,7 @@
 ---
 title: "Gửi lời chúc Kudos — /kudos/send"
 description: "New /kudos/send form page: first real application tables, first server-side auth gate, first Server Action."
-status: pending
+status: delivered
 priority: P1
 effort: 13h
 branch: main
@@ -9,6 +9,7 @@ tags: [momorph, kudos, supabase, migration, rls, storage, auth-gate, e2e-red-fir
 created: 2026-08-24
 work_type: feature
 spec: docs/vi/features/F014_SendKudosWishes/
+verdict: REWORK
 ---
 
 # Gửi lời chúc Kudos (`/kudos/send`)
@@ -23,15 +24,15 @@ hashtags [`p9zO-c4a4x`](https://momorph.ai/files/9ypp4enmFmdK3YAFJLIu6C/screens/
 
 | # | Phase | Track | Status | Effort | Depends on |
 |---|-------|-------|--------|--------|-----------|
-| 01 | [First migration — tables, RLS, Storage bucket](phase-01-first-migration-tables-rls-storage.md) | B | pending | 1.5h | — |
-| 02 | [Seed hashtags and profiles](phase-02-seed-hashtags-and-profiles.md) | B | pending | 0.5h | 01 |
-| 03 | [Shared contract and validation rules](phase-03-shared-contract-and-validation-rules.md) | B | pending | 1h | — |
-| 04 | [Auth gate and data access](phase-04-auth-gate-and-data-access.md) | B | pending | 1h | 01, 03 |
-| 05 | [Submit server action and Storage upload](phase-05-submit-server-action-and-storage-upload.md) | B | pending | 1.5h | 01, 03, 04 |
-| 06 | [Track A — presentational form UI](phase-06-track-a-presentational-form-ui.md) | **A** | pending | 4h | 03 |
-| 07 | [RED suite corrections](phase-07-red-suite-corrections.md) | tester | pending | 1h | 02 |
-| 08 | [Integration — page, wiring, entry points](phase-08-integration-page-wiring-entry-points.md) | int | pending | 1.5h | 05, 06 |
-| 09 | [GREEN verification and regression](phase-09-green-verification-and-regression.md) | tester | pending | 1h | 07, 08 |
+| 01 | [First migration — tables, RLS, Storage bucket](phase-01-first-migration-tables-rls-storage.md) | B | complete | 1.5h | — |
+| 02 | [Seed hashtags and profiles](phase-02-seed-hashtags-and-profiles.md) | B | complete | 0.5h | 01 |
+| 03 | [Shared contract and validation rules](phase-03-shared-contract-and-validation-rules.md) | B | complete | 1h | — |
+| 04 | [Auth gate and data access](phase-04-auth-gate-and-data-access.md) | B | complete | 1h | 01, 03 |
+| 05 | [Submit server action and Storage upload](phase-05-submit-server-action-and-storage-upload.md) | B | complete | 1.5h | 01, 03, 04 |
+| 06 | [Track A — presentational form UI](phase-06-track-a-presentational-form-ui.md) | **A** | complete | 4h | 03 |
+| 07 | [RED suite corrections](phase-07-red-suite-corrections.md) | tester | complete | 1h | 02 |
+| 08 | [Integration — page, wiring, entry points](phase-08-integration-page-wiring-entry-points.md) | int | complete | 1.5h | 05, 06 |
+| 09 | [GREEN verification and regression](phase-09-green-verification-and-regression.md) | tester | complete | 1h | 07, 08 |
 
 ## Dependency shape
 

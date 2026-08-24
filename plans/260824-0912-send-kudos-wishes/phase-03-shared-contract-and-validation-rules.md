@@ -124,13 +124,13 @@ Semantics that are not negotiable:
 
 ## Todo List
 
-- [ ] `types.ts` matches the contract above verbatim
-- [ ] `canSubmit` covers the nickname-when-anonymous case
-- [ ] `validateField` returns the exact string `Không được để trống`
-- [ ] `filterProfiles` trims and matches case-insensitively
-- [ ] All 6 markdown transforms implemented per ALG-001
-- [ ] Unit tests green; typecheck clean; every file <200 lines
-- [ ] No React / Supabase / Next import in either module
+- [x] `types.ts` matches the contract above verbatim
+- [x] `canSubmit` covers the nickname-when-anonymous case
+- [x] `validateField` returns the exact string `Không được để trống`
+- [x] `filterProfiles` trims and matches case-insensitively
+- [x] All 6 markdown transforms implemented per ALG-001
+- [x] Unit tests green; typecheck clean; every file <200 lines
+- [x] No React / Supabase / Next import in either module
 
 ## Success Criteria
 

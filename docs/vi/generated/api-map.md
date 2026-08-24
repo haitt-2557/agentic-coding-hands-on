@@ -34,6 +34,14 @@ trong API Map dưới đây.
 |--------|------|---------------|------|
 | GET | /auth/callback | BL002_OAuthCallbackExchange (`behavior-logic.md`) | Không xác thực (route tự nó KHÔNG yêu cầu phiên có sẵn — nó là nơi phiên được TẠO RA); bảo vệ open-redirect bằng `getSiteUrl()`, không dùng `request.nextUrl.origin` (xem `docs/vi/system/architecture.md` § Authentication Layer) |
 
+## Cập nhật (lượt Send Kudos Wishes, 2026-08-24) — đã xét và loại
+
+`submitKudos` (`lib/kudos/send/submit-kudos.ts`) là **Server Action** đầu tiên của repo, gọi
+trực tiếp từ `KudosSendPageClient` — không có Method+Path độc lập kiểu REST để liệt kê ở đây
+(bảng "API Routes" trong tài liệu này chỉ dành cho route handler `app/api/**/route.ts` hoặc
+tương đương có endpoint công khai). Không thêm hàng nào cho nó; xem `route-list.md` § Backend
+Routes để biết ghi chú đầy đủ về việc không cấp `ROUTE###`.
+
 ## Ghi chú
 
 - 8 route frontend (`/`, `/prelaunch`, `/awards`, `/kudos`, `/profile`, `/admin`, `/login`,

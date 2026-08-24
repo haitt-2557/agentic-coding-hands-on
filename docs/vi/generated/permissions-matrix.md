@@ -225,9 +225,52 @@ toàn tách biệt).
 
 ---
 
+## Pending: guard mới trên `/kudos/send` — F014_SendKudosWishes (2026-08-24, chưa cấp mã PERM###)
+
+**Type dự kiến**: `route-guard` (cùng loại PERM004, khác chiều)
+**Enforced At**: server (`lib/kudos/send/auth-gate.ts`, `requireSupabaseUser()`, gọi từ
+`app/kudos/send/page.tsx` trước bất kỳ đọc dữ liệu nào)
+
+### Description
+
+Guard THẬT thứ hai của app, và guard ĐẦU TIÊN gate theo chiều "CHƯA đăng nhập → đá đi" — ngược
+với PERM004 ("ĐÃ đăng nhập → đá đi" trên `/login`). Dùng `getUser()`, không dùng `getSession()`
+— cùng kỷ luật với PERM004 (comment nguồn `auth-gate.ts` dòng 7-10 nhắc lại lý do: cookie là
+input không đáng tin trên server). Identity chỉ đến từ `auth.uid()` của phiên Supabase thật;
+mock `role`/`userId` (`lib/session/session-provider.tsx`) không được đọc.
+
+### Permission Rules
+
+| Trạng thái phiên Supabase | Allow xem `/kudos/send` | Test case |
+|---|---|---|
+| Chưa có / hết hạn | ✗ — `redirect('/login')` trước khi render | ID-1 |
+| Có, hợp lệ (`getUser()` trả về user) | ✓ — render form đầy đủ | ID-0 (intermittently 500 — xem cảnh báo dưới, KHÔNG phải hành vi PERM sai) |
+
+### Related Routes
+
+- (page) `/kudos/send` — route duy nhất bị gate này chi phối
+- (page) `/login` — đích redirect khi chặn
+
+### Related Modules
+
+- `lib/kudos/send/auth-gate.ts`
+- `app/kudos/send/page.tsx`
+
+### RLS đi kèm — không phải PERM### riêng
+
+`kudos_insert_own`/`kudos_select_own` (migration
+`supabase/migrations/20260824031123_kudos_send_tables.sql`) ép `sender_id = auth.uid()` ở tầng
+DB — đây là kiểm soát dữ liệu (data-permission tại tầng Postgres RLS), không phải một mục
+`PERM###` màn hình/route riêng theo phạm vi tài liệu này; ghi lại ở đây để không bị đọc thành
+route guard là biện pháp bảo vệ duy nhất.
+
+Cấp mã `PERM###` thật: khuyến nghị `/tkm:rebuild-spec --features F014`.
+
+---
+
 ## Summary
 
-- **Total Permission Items**: 4
+- **Total Permission Items**: 4 — **+1 pending** (guard `/kudos/send`, F014, § Pending ở trên; chưa cấp mã nên không cộng vào 4)
 - **By Type**: route-guard: 1, screen-permission: 3, action-permission: 0, data-permission: 0, role-based: 0, resource-ownership: 0, field-permission: 0, api-scope: 0, feature-flag: 0, experiment: 0, env-gate: 0, locale-gate: 0
 
 **Ghi chú về locale-gate**: `lib/i18n/locale-provider.tsx` chọn dictionary theo
