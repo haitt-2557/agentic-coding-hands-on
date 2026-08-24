@@ -1,0 +1,47 @@
+{
+  "task": "Implement the Send Kudos wishes page (MoMorph screen JsTvi8KVQA, \"Gửi lời chúc Kudos\") at /kudos/send, persisting submissions to the local Supabase project.",
+  "mode": "interactive",
+  "acceptanceCriteria": [
+    "GET /kudos/send renders the form when a real Supabase session is present (TC ID-0).",
+    "GET /kudos/send redirects an unauthenticated visitor to /login (TC ID-1).",
+    "Field order matches the frame: Người nhận, Danh hiệu, message editor, Hashtag, Image, anonymous checkbox, Nickname ẩn danh, footer (TC ID-3).",
+    "Recipient is an autocomplete over seeded profiles; placeholder \"Tìm kiếm\"; input is trimmed before filtering (TC ID-8, ID-10, ID-25, ID-26).",
+    "Gửi is disabled until Người nhận, Danh hiệu, message and >=1 hashtag are all filled (TC ID-48, ID-49).",
+    "Submitting with a required field empty shows a red border and \"Không được để trống\" and does not submit (TC ID-7, ID-11, ID-14, ID-50 … ID-56).",
+    "Hashtags are picked from the 8 seeded values by toggle, max 5, unselected rows disable at 5, chips removable (TC ID-15 … ID-17, ID-34 … ID-36).",
+    "Message editor: the 6 toolbar buttons wrap the selection in markdown; character counter enforces a hard 1000 cap.",
+    "Images: .jpg/.png accepted, .pdf/.mp4/.txt rejected with a format error, max 5, add button hides at 5 and returns on removal (TC ID-18 … ID-24, ID-37 … ID-40, ID-55).",
+    "Anonymous checkbox defaults unchecked; checking it reveals the required Nickname ẩn danh field, unchecking hides it (TC ID-6, ID-41 … ID-44).",
+    "Hủy discards everything and returns to /kudos without writing (TC ID-45).",
+    "A valid submit writes one row to the kudos table with sender from auth.uid(), uploads any images to Supabase Storage, then redirects to /kudos with a success toast (TC ID-46, ID-47).",
+    "RLS prevents a client from writing a kudos row attributed to another user."
+  ],
+  "touchpoints": [
+    "app/kudos/send/page.tsx (new route)",
+    "components/kudos/send/* (new form components)",
+    "lib/kudos/send/* (new validation + submit logic)",
+    "supabase/migrations/* (new: profiles, hashtags, kudos tables + RLS + storage bucket)",
+    "supabase/seed.sql (seed profiles + 8 hashtags)",
+    "components/kudos/kudos-action-bar.tsx (submit pill becomes a link; remove aria-haspopup=dialog)",
+    "components/layout/quick-action-widget.tsx (Viết Kudos href /kudos -> /kudos/send)",
+    "lib/i18n/dictionaries/{vi,en}.ts (new copy keys)",
+    "playwright.config.ts (new send-kudos project at port 3200 + prelaunch-gate lookahead)",
+    "e2e/send-kudos-*.spec.ts (new durable screen suite)"
+  ],
+  "blastRadius": [
+    "First application tables in the repo — every prior screen runs on static lib/ modules.",
+    "First route with a real server-side auth gate; coexists with the still-mocked role in lib/session/session-provider.tsx.",
+    "kudos-action-bar.tsx: the shipped aria-haspopup=dialog contract is superseded; e2e/kudos-board-*.spec.ts may assert it.",
+    "quick-action-widget.tsx: homepage e2e specs assert its href values.",
+    "playwright.config.ts is shared by every existing suite — a bad testMatch edit silently orphans other specs.",
+    "supabase/seed.sql is consumed by the login e2e fixture; additions must stay idempotent."
+  ],
+  "contracts": [
+    "MoMorph spec frame ihQ26W78P2 (26 items, all completed) is the authoritative behaviour source; JsTvi8KVQA itself has none.",
+    "MoMorph frame p9zO-c4a4x fixes the hashtag vocabulary and its toggle/disable rules.",
+    "57 test cases ID-0 … ID-56 from ihQ26W78P2 are the assertion source.",
+    "plans/260824-0912-send-kudos-wishes/clarifications.md is authoritative for the 8 resolved decisions and must not be re-litigated.",
+    "Next.js 16.3.1 — AGENTS.md requires reading node_modules/next/dist/docs/ before writing route/proxy code.",
+    "Files stay under 200 lines per .claude/rules/development-rules.md."
+  ]
+}

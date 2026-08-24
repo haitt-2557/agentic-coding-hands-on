@@ -1,0 +1,13 @@
+{
+  "fcode": "F014",
+  "run_type": "new",
+  "plan_dir": "plans/260824-0912-send-kudos-wishes",
+  "slug": "F014_SendKudosWishes",
+  "from": "plans/260824-0912-send-kudos-wishes/spec/send-kudos-wishes/",
+  "screens": [],
+  "ts": "2026-08-24T03:04:18Z",
+  "system_docs": [
+    "docs/vi/system/architecture.md",
+    "docs/vi/system/permissions.md"
+  ]
+}

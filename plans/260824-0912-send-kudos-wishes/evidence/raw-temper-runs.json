@@ -1,0 +1,7 @@
+[
+  {
+    "command": "npm run test:e2e -- --project=send-kudos",
+    "exitCode": 1,
+    "summary": "Phase-07 suite corrections applied: 24 tests (17 passed, 7 failed on 404 page). Fixes: C1 blur-triggered validation, C2 widget trigger click, C3 recipient 'Trang', C4 hashtag assertions, D9 checkbox role-locator, C5 cleanup. Still RED as expected."
+  }
+]

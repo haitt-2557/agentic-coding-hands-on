@@ -6,6 +6,7 @@
 import { SiteHeader } from '@/components/layout/site-header';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { KudosBoard } from '@/components/kudos/kudos-board';
+import { KudosSentToast } from '@/components/kudos/kudos-sent-toast';
 
 export default function KudosPage() {
   return (
@@ -15,6 +16,8 @@ export default function KudosPage() {
         <KudosBoard />
       </main>
       <SiteFooter />
+      {/* F014 E5 — renders nothing unless a send-kudos success flag was just set */}
+      <KudosSentToast />
     </div>
   );
 }

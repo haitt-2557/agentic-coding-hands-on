@@ -1,0 +1,15 @@
+{
+  "redTestFiles": [
+    "e2e/send-kudos-access.spec.ts",
+    "e2e/send-kudos-layout.spec.ts",
+    "e2e/send-kudos-validation.spec.ts",
+    "e2e/send-kudos-interactions.spec.ts",
+    "e2e/send-kudos-submit.spec.ts",
+    "e2e/send-kudos-submission.spec.ts"
+  ],
+  "redCommand": "npm run test:e2e -- --project=send-kudos",
+  "redExitCode": 1,
+  "redFailure": "24 tests: 17 passed, 7 failed. Failures assertion-caused on 404 page. Phase-07 corrections applied: C1 (blur-triggered validation replacing disabled-button clicks, Clarifications decision 2), C2 (widget trigger clicked before menuitem access), C3 (recipient name 'Trang' from seeded profiles), C4 (hashtag test assertions), D9 (checkbox locator by role/accessible-name, not text substring, Clarifications decision 3), C5 (removed Browser import).",
+  "redAssertionCaused": true,
+  "orphanCheck": "before: 97 tests in 25 files; after: 120 tests in 26 files (23 new send-kudos tests in 6 spec files + 1 shared helper = 7 send-kudos source files total; no orphans; all existing specs remain collected by their original projects)"
+}
