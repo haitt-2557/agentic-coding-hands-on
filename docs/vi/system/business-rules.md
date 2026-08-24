@@ -137,36 +137,3 @@ Sun* Kudos - Live board.
 nhận cố định theo mốc đó. Đây là một ngưỡng tra bảng đơn giản trên số Kudos đã nhận, không phải
 một huy hiệu do quản trị viên gán tay.
 **Source artifact:** [Technical Spec — F013_KudosLiveBoard § BR-005](../features/kudos-live-board/technical-spec.md)
-
----
-
-### Chỉ Sunner đã đăng nhập thật mới mở được form Gửi lời chúc Kudos (thêm 2026-08-24)
-
-**Applies when:** Một actor mở `/kudos/send`.
-**Says:** Hệ thống kiểm tra thật ở phía máy chủ trước khi hiện bất kỳ trường nào của form —
-chưa đăng nhập bằng phiên Supabase hợp lệ thì bị đưa thẳng sang màn đăng nhập, không thấy form.
-Đây là guard thật thứ hai của hệ thống (sau màn đăng nhập), và là guard đầu tiên chặn theo
-chiều "chưa đăng nhập thì không cho vào" thay vì "đã đăng nhập thì không cho xem lại".
-**Source artifact:** [Technical Spec — F014_SendKudosWishes § BR-001](../features/F014_SendKudosWishes/technical-spec.md)
-
----
-
-### Nút Gửi bị khoá cho tới khi mọi trường bắt buộc hợp lệ (thêm 2026-08-24)
-
-**Applies when:** Người dùng đang soạn lời chúc Kudos ở `/kudos/send`.
-**Says:** Nút Gửi không bấm được cho tới khi Người nhận, Danh hiệu, nội dung, và ít nhất một
-Hashtag (tối đa năm) đều đã điền hợp lệ; nếu bật gửi ẩn danh thì Nickname cũng trở thành bắt
-buộc. Rời khỏi một trường bắt buộc còn trống sẽ hiện ngay dòng báo "Không được để trống" thay vì
-đợi tới lúc bấm Gửi. Bấm Hủy luôn được phép, ở bất kỳ lúc nào, và không lưu lại gì.
-**Source artifact:** [Technical Spec — F014_SendKudosWishes § BR-004/BR-006/BR-007/BR-008](../features/F014_SendKudosWishes/technical-spec.md)
-
----
-
-### Một lời chúc Kudos vừa gửi chưa xuất hiện trên bảng Kudos công khai (thêm 2026-08-24)
-
-**Applies when:** Một Sunner gửi thành công một lời chúc từ `/kudos/send`.
-**Says:** Hệ thống lưu lại đầy đủ lời chúc đó, nhưng trang Sun* Kudos - Live board (`/kudos`)
-hiện vẫn hiển thị một bộ dữ liệu mẫu cố định, chưa đọc những lời chúc mới được gửi. Đây là giới
-hạn có chủ đích của lượt này, không phải lỗi — việc hiển thị lời chúc thật trên bảng công khai
-sẽ là một phần việc riêng sau này.
-**Source artifact:** [Architecture — Delta: Gửi lời chúc Kudos § 2](./architecture.md)

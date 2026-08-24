@@ -208,23 +208,11 @@ thật THỨ HAI, và là route ĐẦU TIÊN gate theo chiều ngược: chưa �
 | Trạng thái phiên Supabase | Hành vi tại `/kudos/send` | Test case |
 |---|---|---|
 | Không có / hết hạn | Redirect `/login` — không render form | ID-1 |
-| Có, hợp lệ (`getUser()` trả về user) | Render form đầy đủ | ID-0 (xem cảnh báo độ tin cậy bên dưới) |
+| Có, hợp lệ (`getUser()` trả về user) | Render form đầy đủ | ID-0 |
 
 Cùng kỷ luật đã dùng cho `PERM004`: dùng `getUser()` (round-trip xác minh thật với Supabase
 Auth qua `lib/supabase/server.ts`), KHÔNG dùng `getSession()` (chỉ đọc cookie tại chỗ, không
 xác minh lại — cookie là input không đáng tin trên server).
-
-**Cập nhật khi reconcile (2026-08-24, as-built)**: hàm thật là `requireSupabaseUser()`
-(`lib/kudos/send/auth-gate.ts`), gọi từ `app/kudos/send/page.tsx` trước mọi đọc dữ liệu —
-cùng pattern `getUser()`/`redirect()` mô tả ở trên, không lệch.
-
-**Cảnh báo độ tin cậy đã biết (ID-0)**: `GET /kudos/send` intermittently trả về 500 sau khi
-guard này pass — log `Failed to load hashtags: JWT issued at future` tại
-`lib/kudos/send/queries.ts:52`, đo được ở tần suất vài phần trăm mỗi lần chạy (GoTrue đôi khi
-stamp `iat` sớm hơn đồng hồ thật vài chục ms; PostgREST validate không có leeway). Đây là lỗi ở
-bước ĐỌC dữ liệu SAU guard, không phải guard này sai — nhưng nó khiến ID-0 có thể đỏ ngẫu
-nhiên. Người dùng đã chấp nhận rủi ro này một cách tường minh; xem `clarifications.md` §
-"Decision on the residual 500". Verdict inspection: **REWORK**, chưa sealed.
 
 Mã `PERM###` thật cho gate này: **TBD (draft)** — chưa được cấp, cấp ở bước reconcile. Loại
 dự kiến: `route-guard` (giống `PERM004`, khác 3 mã `screen-permission` PERM001–003).
@@ -241,31 +229,23 @@ Ba bảng mới (`profiles`, `hashtags`, `kudos`) đều cần RLS vì Supabase 
 data trực tiếp tới client (`schemas = ["public", "graphql_public"]` trong
 `supabase/config.toml`). Nguyên tắc cốt lõi, lấy từ clarifications.md quyết định 3:
 
-- **Cột `sender_id` của bảng `kudos` PHẢI được set từ `auth.uid()` phía server/DB, không bao
-  giờ nhận trực tiếp từ payload client.** Một client gửi request `INSERT` mang `sender_id` là
+- **Cột `sender` của bảng `kudos` PHẢI được set từ `auth.uid()` phía server/DB, không bao
+  giờ nhận trực tiếp từ payload client.** Một client gửi request `INSERT` mang `sender` là
   ID của người khác phải bị RLS chặn — đây là điều kiện "RLS prevents a client from writing
   a kudos row attributed to another user" trong acceptance criteria của tính năng
   (`evidence/study-context.json`).
-- **Cập nhật khi reconcile (2026-08-24, as-built)** — chính sách đã quyết định, không còn TBD:
-  - `kudos`: `kudos_insert_own` (`with check (sender_id = auth.uid())`) +
-    `kudos_select_own` (`using (sender_id = auth.uid())`) — chỉ-owner cho cả ghi lẫn đọc.
-    Chọn owner-read (không phải public-read) vì `/kudos/send` chỉ cần đọc lại CHÍNH bản ghi
-    nó vừa tạo, và board `/kudos` không đọc bảng này (§ Architecture delta, mục 2).
-  - `profiles`/`hashtags`: `for select to authenticated using (true)` trên cả hai — đọc công
-    khai cho mọi `authenticated`, không có write policy nào (ghi chỉ qua `seed.sql`).
-  - `kudos_hashtags`/`kudos_images` (bảng nối): policy insert/select đều re-check bảng `kudos`
-    cha thuộc về `auth.uid()` qua `exists (select 1 from kudos k where k.id = ... and
-    k.sender_id = auth.uid())` — không có cột ownership riêng trên chính bảng nối.
-  - `grant select/insert` cho role `authenticated` được cấp tường minh trên cả 5 bảng (migration
-    `20260824031123_kudos_send_tables.sql`) — `config.toml` không bật
-    `auto_expose_new_tables`, nên thiếu `grant` sẽ fail "permission denied" bất kể RLS đúng
-    hay sai, dễ bị đọc nhầm là RLS hoạt động nếu không kiểm tra riêng.
-  - Bucket `kudos-images`: 2 policy trên `storage.objects` — insert/select đều yêu cầu
-    `(storage.foldername(name))[1] = auth.uid()::text`, tức mỗi user chỉ đụng được thư mục
-    của chính mình trong bucket.
+- Read policy cho `kudos`: TBD (draft) — chưa quyết định public-read hay chỉ-owner-read,
+  vì `/kudos/send` chỉ cần đọc lại CHÍNH bản ghi vừa tạo (§ Architecture delta, mục 2), chưa
+  có yêu cầu đọc bảng này từ nơi khác ở lượt này.
+- Read policy cho `profiles`/`hashtags`: cả hai cần đọc công khai (hoặc ít nhất cho mọi
+  `authenticated` user) để dropdown người nhận/hashtag hoạt động — chi tiết chính sách cụ
+  thể (row-level hay bảng-level) là TBD (draft), quyết định ở bước implement.
+- **Storage bucket cho ảnh kudos cũng cần policy riêng**, không chỉ RLS trên bảng: ai được
+  `INSERT` (upload) — dự kiến giới hạn `authenticated` — và ai được `SELECT` (xem lại ảnh đã
+  upload). Tên bucket và policy cụ thể: TBD (draft).
 
 Không có mã `PERM###` nào được bịa cho các policy trên; toàn bộ giữ `TBD (draft)` cho tới khi
-reconcile cấp mã (chỉ mã `PERM###`/`MODEL###` còn treo — nội dung policy đã chốt như trên).
+migration thật tồn tại và reconcile cấp mã.
 
 ## 3. Cảnh báo đứng vững — vẫn không unify hai hệ thống danh tính
 

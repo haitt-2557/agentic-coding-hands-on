@@ -131,13 +131,6 @@ cron lib, không webhook receiver ở bất kỳ đâu.
 
 ---
 
-**Cập nhật (lượt Send Kudos Wishes, 2026-08-24) — đã xét và loại**: `submitKudos`
-(`lib/kudos/send/submit-kudos.ts`, Server Action) là request-response đồng bộ chạy trong vòng
-đời một lần submit form — không khớp bất kỳ category nào trong 10 category chuẩn (không phải
-`scheduled-job`/`queue-worker`/observer nền, không chạy ngoài request đang phục vụ actor). Cùng
-lý do `setInterval` UI-tick bị loại ở mục Near-miss trên: chạy đồng bộ trong request của người
-dùng, không phải background logic. Không cấp `BL###` mới.
-
 ## Summary
 
 - **Total Behavior Logic Items**: 2

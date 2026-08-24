@@ -94,16 +94,16 @@ client <-- { ok:true, kudosId } -- then sessionStorage flag + router.push('/kudo
 
 ## Todo List
 
-- [x] Next 16 Server Action docs read first
-- [x] `'use server'` present; no `redirect()` and no query-string anywhere in this file (E5)
-- [x] `sender_id` sourced from `requireSupabaseUser()` only; absent from `SubmitKudosInput`
-- [x] Server-side re-validation via phase-03 functions (not a reimplementation)
-- [x] Image type + 5 MiB cap enforced server-side
-- [x] Upload path's first segment is the uid, matching phase-01's storage policy
-- [x] `nickname` nulled when not anonymous
-- [x] 1 `kudos` + 1..5 `kudos_hashtags` + 0..5 `kudos_images` rows per success
-- [x] Forged-`sender_id` insert proven rejected
-- [x] typecheck + lint + `next build` clean
+- [ ] Next 16 Server Action docs read first
+- [ ] `'use server'` present; no `redirect()` and no query-string anywhere in this file (E5)
+- [ ] `sender_id` sourced from `requireSupabaseUser()` only; absent from `SubmitKudosInput`
+- [ ] Server-side re-validation via phase-03 functions (not a reimplementation)
+- [ ] Image type + 5 MiB cap enforced server-side
+- [ ] Upload path's first segment is the uid, matching phase-01's storage policy
+- [ ] `nickname` nulled when not anonymous
+- [ ] 1 `kudos` + 1..5 `kudos_hashtags` + 0..5 `kudos_images` rows per success
+- [ ] Forged-`sender_id` insert proven rejected
+- [ ] typecheck + lint + `next build` clean
 
 ## Success Criteria
 

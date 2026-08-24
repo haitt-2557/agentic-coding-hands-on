@@ -75,16 +75,16 @@ behaviour/DB → `implementer` (phases 01–05, 08); test defect → `tester` (p
 
 ## Todo List
 
-- [x] Supabase up; seed verified (8 hashtags, 7 profiles)
-- [x] Unit tests green; `npx next build` green
-- [x] `--project=send-kudos` GREEN, exit 0, real counts recorded
-- [x] Every previously-unfailable test confirmed assertive before counting it
-- [x] `--project=kudos-board` green (E1–E3, E5)
-- [x] `--project=homepage-with-open-gate` green (E4)
-- [x] Full `npm run test:e2e` green; collection matches the 120/26 baseline
-- [x] psql: one row per submit, correct `sender_id`; forged sender rejected
-- [x] Visual validation done against frame `JsTvi8KVQA`
-- [x] Report written with verbatim exit codes and per-criterion status
+- [ ] Supabase up; seed verified (8 hashtags, 7 profiles)
+- [ ] Unit tests green; `npx next build` green
+- [ ] `--project=send-kudos` GREEN, exit 0, real counts recorded
+- [ ] Every previously-unfailable test confirmed assertive before counting it
+- [ ] `--project=kudos-board` green (E1–E3, E5)
+- [ ] `--project=homepage-with-open-gate` green (E4)
+- [ ] Full `npm run test:e2e` green; collection matches the 120/26 baseline
+- [ ] psql: one row per submit, correct `sender_id`; forged sender rejected
+- [ ] Visual validation done against frame `JsTvi8KVQA`
+- [ ] Report written with verbatim exit codes and per-criterion status
 
 ## Success Criteria
 

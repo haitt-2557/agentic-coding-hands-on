@@ -109,15 +109,15 @@ Entry-point edits:
 
 ## Todo List
 
-- [x] Next 16 `page.md` read first
-- [x] `app/kudos/send/page.tsx`: gate before reads, thin shell, no `KudosActionBar`
-- [x] Success path lives in the new client wrapper — `components/kudos/send/**` untouched
-- [x] Success path uses sessionStorage + `router.push('/kudos')`; no query param anywhere
-- [x] `kudos-sent-toast.tsx` removes the flag on read; renders null without it
-- [x] Pill: anchor added **before** the input; `aria-haspopup="dialog"` removed; placeholder byte-identical; still focusable and enabled
-- [x] Widget: href repointed, still exactly two menuitems in the original order
-- [x] typecheck + lint + `next build` clean
-- [x] `--project=kudos-board` and `--project=homepage-with-open-gate` re-run green
+- [ ] Next 16 `page.md` read first
+- [ ] `app/kudos/send/page.tsx`: gate before reads, thin shell, no `KudosActionBar`
+- [ ] Success path lives in the new client wrapper — `components/kudos/send/**` untouched
+- [ ] Success path uses sessionStorage + `router.push('/kudos')`; no query param anywhere
+- [ ] `kudos-sent-toast.tsx` removes the flag on read; renders null without it
+- [ ] Pill: anchor added **before** the input; `aria-haspopup="dialog"` removed; placeholder byte-identical; still focusable and enabled
+- [ ] Widget: href repointed, still exactly two menuitems in the original order
+- [ ] typecheck + lint + `next build` clean
+- [ ] `--project=kudos-board` and `--project=homepage-with-open-gate` re-run green
 
 ## Success Criteria
 

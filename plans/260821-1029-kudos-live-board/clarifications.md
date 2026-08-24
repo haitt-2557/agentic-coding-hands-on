@@ -260,6 +260,22 @@ Confirmed against the design data, not guessed. Carried into the implementer rep
   plain `number`, rendered through `formatHeartCount` with the `.` separator, and at least one record
   exceeds 1000 so the formatting is genuinely exercised. No design departure was needed.
 
+### Added during bug fix (2026-08-24)
+
+21. **Four of the 106 word-cloud names sit outside the board's own bordered box in the design data
+    itself.** `SpotlightNode.relY` for four nodes — `2995:15993` (555), `2995:15968` (561),
+    `2995:15983` (578), `2995:15988` (593) — exceeds `BOARD_HEIGHT` (548,
+    `lib/kudos/spotlight-names.ts:133-136`). Figma never surfaces this because the board's three
+    background artwork layers overhang the border (`Root further mo rong 1` is 1819×583 against a
+    1157×548 board — the same layers recorded as unfetchable in defect #20), so nothing in the
+    design tool itself reveals the escape; it only became visible once this build shipped without
+    those layers. Fixed at the render layer with an inner `overflow-hidden` clip
+    (`components/kudos/spotlight-name-cloud.tsx`) rather than by inventing a taller `BOARD_HEIGHT`
+    the design does not provide — the visible consequence is that 4 of 106 names are now clipped
+    from view rather than painted below the box. Needs a design ruling: either the four nodes move
+    inside the board, or `BOARD_HEIGHT` grows to include them. Regression covered by
+    `e2e/kudos-board-layout.spec.ts` ("no spotlight name paints outside the board").
+
 ## Unresolved Questions
 
 1. **Route protection remains deferred** (login run's Next Steps). TC `71b3ef43` stays unasserted until

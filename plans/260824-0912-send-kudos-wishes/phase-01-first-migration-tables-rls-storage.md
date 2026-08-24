@@ -88,14 +88,14 @@ kudos_images   (id uuid pk default gen_random_uuid(),
 
 ## Todo List
 
-- [x] Local Supabase confirmed running
-- [x] `kudos_send_tables` migration written (5 tables, FKs, defaults)
-- [x] RLS enabled on all 5 tables; every policy named and role-scoped
-- [x] `kudos.insert` policy proven to force `sender_id = auth.uid()`
-- [x] `kudos_images_bucket` migration written (private bucket + 2 object policies)
-- [x] `supabase db reset` applies both migrations cleanly
-- [x] Login e2e fixture user survives the reset
-- [x] Both SQL files under 200 lines
+- [ ] Local Supabase confirmed running
+- [ ] `kudos_send_tables` migration written (5 tables, FKs, defaults)
+- [ ] RLS enabled on all 5 tables; every policy named and role-scoped
+- [ ] `kudos.insert` policy proven to force `sender_id = auth.uid()`
+- [ ] `kudos_images_bucket` migration written (private bucket + 2 object policies)
+- [ ] `supabase db reset` applies both migrations cleanly
+- [ ] Login e2e fixture user survives the reset
+- [ ] Both SQL files under 200 lines
 
 ## Success Criteria
 

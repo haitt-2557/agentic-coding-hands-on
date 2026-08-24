@@ -14,17 +14,6 @@ Trạng thái đăng nhập (`role`: `guest|user|admin`) và locale (`vi|en`) đ
 
 `/profile`, `/admin` là các route placeholder có chủ đích theo brief của dự án, không phải tính năng dang dở. **Cập nhật 2026-08-20**: `/awards` không còn thuộc nhóm này — trang Hệ thống giải thưởng đầy đủ đã thay thế placeholder cũ (`F012_AwardSystemPage`, xem [`docs/vi/features/award-system-page/`](../features/award-system-page/technical-spec.md)): hero thu nhỏ, khối tiêu đề, nav danh mục dính bên trái, 6 khối chi tiết giải thưởng, và nay cũng compose `SiteHeader`/`SiteFooter` như trang chủ. **Cập nhật 2026-08-21**: `/kudos` cũng không còn thuộc nhóm placeholder — trang Sun* Kudos - Live board đầy đủ đã thay thế placeholder cũ (`F013_KudosLiveBoard`, xem [`docs/vi/features/kudos-live-board/`](../features/kudos-live-board/technical-spec.md)): banner, HIGHLIGHT KUDOS, SPOTLIGHT BOARD, ALL KUDOS, sidebar thống kê — dữ liệu tĩnh trong `lib/kudos/`, không có API/CSDL mới. Chỉ còn `/profile` và `/admin` là placeholder có chủ đích.
 
-**Cập nhật 2026-08-24 (F014_SendKudosWishes)**: route MỚI `/kudos/send` (chưa cấp mã ROUTE###,
-xem [`route-list.md`](../generated/route-list.md) § Pending) là mốc kép của toàn hệ thống — LẦN
-ĐẦU app tự viết migration Postgres (bảng `profiles`/`hashtags`/`kudos` + 2 bảng nối, xem
-[`entities.md`](../generated/entities.md) § Pending) và guard THẬT thứ hai ở phía server, lần
-đầu gate theo chiều "chưa đăng nhập → đá đi" (ngược `PERM004`). `/kudos` (board) vẫn 100% đọc
-`lib/kudos/` tĩnh — một kudos gửi từ trang mới KHÔNG xuất hiện trên board, một seam có chủ đích
-(xem [`architecture.md`](architecture.md) § Delta). Tính năng này còn một khiếm khuyết đã biết,
-người dùng chấp nhận tường minh: `GET /kudos/send` intermittently 500 ở vài phần trăm mỗi lần
-chạy (`JWT issued at future`) — verdict inspection REWORK, chưa sealed. Xem đầy đủ ở
-`plans/260824-0912-send-kudos-wishes/clarifications.md`.
-
 For architecture diagrams and tech stack details, see [architecture.md](architecture.md).
 
 ## Key Design Decisions
@@ -66,31 +55,10 @@ refresh Supabase bị rơi mất nếu gate trả về response khác — đư�
 `updateSupabaseSession()` trả về cookie đã ghi để `proxy.ts` tự copy lên response cuối cùng;
 xem [architecture.md](architecture.md) § Authentication Layer để biết chi tiết đầy đủ.
 
-### Decision 4: Bảng persistence do app tự sở hữu — write-only, không rewire mặt đọc hiện có (thêm 2026-08-24)
-
-**Context**: `/kudos/send` (F014_SendKudosWishes) cần lưu thật một lời chúc Kudos — nhưng
-`/kudos` (F013) đã có toàn bộ mặt đọc (highlight, spotlight, leaderboard, feed) chạy trên
-static module `lib/kudos/`, và rewire hết các mặt đó sang CSDL là một khối việc riêng.
-
-**Decision**: Tạo 3 bảng mới (`profiles`, `hashtags`, `kudos`) + 2 bảng nối + 1 bucket Storage
-riêng cho `/kudos/send`. Đây là đường GHI DUY NHẤT vào các bảng này; `/kudos` KHÔNG được rewire
-sang đọc chúng ở lượt này — hệ quả trực tiếp, đã biết trước: một kudos gửi từ trang mới sẽ
-KHÔNG xuất hiện trên board. Đồng thời, `/kudos/send` được đặt sau guard `getUser()` thật — guard
-THỨ HAI của toàn hệ thống, và lần đầu gate theo chiều "chưa đăng nhập → đá đi" (`PERM004` gate
-theo chiều ngược lại).
-
-**Rationale**: Rewire mặt đọc của `/kudos` là một quyết định phạm vi lớn hơn nhiều (ranking,
-lọc, phân trang trên dữ liệu thật thay vì hằng số) và không được yêu cầu ở lượt này (YAGNI) —
-tách nó ra giữ tính năng này nhỏ, kiểm chứng được, và không rủi ro làm vỡ `/kudos` đang chạy
-tốt. Sender của mỗi hàng `kudos` LUÔN suy từ `auth.uid()` (RLS `with check`), không bao giờ
-nhận từ input client — mock `role`/`userId` của `session-provider.tsx` không được đọc ở đường
-ghi này. Chi tiết đầy đủ: [architecture.md](architecture.md) § Delta,
-[permissions.md](permissions.md) § Delta.
-
 ## Security Overview
 
 - **Authentication**: **Cập nhật (lượt Login, 2026-08-19)** — nay CÓ một luồng đăng nhập thật: Google OAuth qua Supabase Auth (GoTrue) local, tại `/login`. Trước lượt này: không có.
-- **Authorization**: Không có ở phía server cho `role`; chỉ có UI-only role gating từ mock phía client (xem Decision 2), không phải một ranh giới bảo mật. **Cập nhật (lượt Login, 2026-08-19)**: có đúng MỘT route-guard thật (`PERM004_LoginRouteAuthGate`, `getUser()` phía server) — nhưng nó chỉ chi phối `/login`, không mở rộng thành authorization cho route nào khác; kết luận "không có authorization theo vai trò" không đổi. **Cập nhật (lượt Send Kudos Wishes, 2026-08-24)**: có route-guard thật THỨ HAI trên `/kudos/send` (chưa cấp `PERM###`, xem `permissions-matrix.md` § Pending) cộng RLS thật trên 3 bảng mới (`sender_id = auth.uid()` bắt buộc) — vẫn chỉ 2 route có guard, kết luận "không có authorization theo vai trò cho toàn site" không đổi.
+- **Authorization**: Không có ở phía server cho `role`; chỉ có UI-only role gating từ mock phía client (xem Decision 2), không phải một ranh giới bảo mật. **Cập nhật (lượt Login, 2026-08-19)**: có đúng MỘT route-guard thật (`PERM004_LoginRouteAuthGate`, `getUser()` phía server) — nhưng nó chỉ chi phối `/login`, không mở rộng thành authorization cho route nào khác; kết luận "không có authorization theo vai trò" không đổi.
 - **Data Encryption**: Không áp dụng cho phần còn lại của app — không lưu trữ dữ liệu riêng, không có secret cho các route cũ; `.env.example` chỉ khai báo các key `NEXT_PUBLIC_*` vốn đã hiển thị công khai phía client. **Cập nhật (lượt Login, 2026-08-19)**: nay có secret thật server-only (`SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID`/`_SECRET`, không prefix `NEXT_PUBLIC_`, đặt ở root `.env`, không commit) — do Supabase CLI đọc, không phải Next.js runtime.
 - **API Security**: **Cập nhật (lượt Login, 2026-08-19)** — `app/auth/callback/route.ts` là route handler thật đầu tiên trong repo (trước đó: không áp dụng, đúng như dòng gốc). Route này không xác thực (nó là nơi phiên được TẠO ra) nhưng có một biện pháp bảo vệ cụ thể: mọi redirect dựng từ `getSiteUrl()` (config tĩnh), không bao giờ từ `request.nextUrl.origin` (tránh open-redirect qua header `Host` giả mạo — phát hiện security review mức High). Xem [architecture.md](architecture.md) § Authentication Layer.
 

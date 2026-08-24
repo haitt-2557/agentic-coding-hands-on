@@ -177,40 +177,10 @@ Không có entity thứ hai nên không có mục Validation Rules bổ sung.
 
 ---
 
-## Pending: bảng do app tự viết — F014_SendKudosWishes (2026-08-24, chưa cấp mã MODEL###)
-
-`plans/260824-0912-send-kudos-wishes/` là lượt ĐẦU TIÊN app tự viết migration Postgres —
-trước đó bảng duy nhất trong hệ thống (`auth.users`) thuộc Supabase Auth, không do app định
-nghĩa (xem § Supabase Session ở trên). 5 đối tượng dưới đây **tồn tại thật**, đã build và chạy
-được (`supabase/migrations/20260824031123_kudos_send_tables.sql`,
-`20260824031159_kudos_images_bucket.sql`) — nhưng KHÔNG có `MODEL###` nào được cấp ở lượt
-promote này (surgical-edit không tự đánh số mã mới, xem `docs-canonical-mapping.md`). Ghi lại
-bằng `TBD (draft)` để "Total Entities: 1" bên dưới không bị đọc thành "chỉ có đúng 1 bảng".
-
-| Đối tượng | Loại | PK / FK | Mã |
-|---|---|---|---|
-| `profiles` | Bảng, seed sẵn | PK `id text` | TBD (draft) |
-| `hashtags` | Bảng, seed sẵn (8 giá trị cố định) | PK `id text` | TBD (draft) |
-| `kudos` | Bảng | PK `id uuid`; FK `sender_id → auth.users.id`, `recipient_id → profiles.id` | TBD (draft) |
-| `kudos_hashtags` | Bảng nối | PK ghép `(kudos_id, hashtag_id)`; FK → `kudos.id`, `hashtags.id` | TBD (draft) |
-| `kudos_images` | Bảng | PK `id uuid`; FK `kudos_id → kudos.id` | TBD (draft) |
-| Bucket `kudos-images` | Supabase Storage, **private** | path quy ước `{auth.uid()}/{filename}` | TBD (draft) |
-
-**Khác biệt cốt lõi so với `MODEL001_Award`**: `kudos.sender_id` BẮT BUỘC bằng `auth.uid()` —
-ép bởi RLS `with check (sender_id = auth.uid())` trên chính bảng, không nhận từ input client
-(đối chiếu trực tiếp migration). Ràng buộc min-1/max-5 hashtag và tối đa 5 ảnh nằm ở tầng ứng
-dụng (`lib/kudos/send/validation.ts`), không phải constraint/trigger DB. `/kudos` (board,
-F013) KHÔNG đọc 5 đối tượng này — board vẫn 100% đọc `lib/kudos/` tĩnh; một kudos gửi từ
-`/kudos/send` sẽ KHÔNG xuất hiện trên board (quyết định 1, `clarifications.md` của F014).
-
-Cấp mã `MODEL###` thật cho 5 đối tượng trên: khuyến nghị `/tkm:rebuild-spec --features F014`.
-
----
-
 ## Summary
 
-- **Total Entities**: 1 (`MODEL001_Award`) — **chưa gồm 5 đối tượng của F014 ở § Pending trên**, đang giữ `TBD (draft)`
-- **Total Relationships**: 0 (không tính FK của 5 bảng `TBD (draft)` ở trên — chưa có mã để vẽ ERD)
+- **Total Entities**: 1 (`MODEL001_Award`)
+- **Total Relationships**: 0
 - **Non-Entity Data Shapes documented**: 4 (`SessionState`, `CountdownResult`, `I18nState`/`Locale`, `Supabase Session` — thêm 2026-08-19)
 - **Total Discriminator Fields (DISC-###)**: 2 (`role`, `locale`) — cả hai nằm trong Non-Entity Data Shapes; không entity nào có discriminator. `isExpired`/`isInvalid` và Supabase `user` presence là boolean condition → không phải DISC.
-- **Persistence tier**: Không có server-side storage do app tự định nghĩa; **thêm 2026-08-19** — Postgres nội bộ của Supabase local (`auth.users`, app không viết migration) là persistence tier ĐẦU TIÊN app không tự sở hữu. **Thêm 2026-08-24** — `profiles`/`hashtags`/`kudos`/`kudos_hashtags`/`kudos_images` + bucket `kudos-images` là persistence tier THỨ HAI, và LẦN ĐẦU app tự viết migration (xem § Pending ở trên). 3 `localStorage` keys vẫn là toàn bộ client-side persisted state không đổi.
+- **Persistence tier**: Không có server-side storage do app tự định nghĩa; **thêm 2026-08-19** — Postgres nội bộ của Supabase local (`auth.users`, app không viết migration) là persistence tier ĐẦU TIÊN app không tự sở hữu. 3 `localStorage` keys vẫn là toàn bộ client-side persisted state không đổi.

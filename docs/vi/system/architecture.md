@@ -462,15 +462,9 @@ trúc thay vì để nó ẩn trong lịch sử quyết định:
 
 - Toàn bộ mặt đọc hiện có của app (`/`, `/awards`, `/kudos`, `/profile`, `/admin`) tiếp tục
   đọc y nguyên các static module trong `lib/` — không đổi file, không đổi hành vi.
-- `/kudos/send` là đường ghi DUY NHẤT vào 3 bảng Supabase mới ở lượt này.
-  **Cập nhật khi reconcile (2026-08-24, as-built)**: trạng thái thành công KHÔNG đọc lại bản
-  ghi vừa tạo — Server Action `submitKudos` (`lib/kudos/send/submit-kudos.ts`) trả về
-  `{ ok: true, kudosId }` nhưng `kudosId` không được hiển thị ở đâu; client
-  (`components/kudos/kudos-send-page-client.tsx`) chỉ ghi một cờ vào `sessionStorage` rồi
-  `router.push('/kudos')`, nơi `KudosSentToast` đọc cờ đó để hiện toast. Lý do: `redirect()`
-  phía server sẽ phải mang query string để báo hiệu thành công, nhưng assertion test
-  `toHaveURL(/\/kudos$/)` neo cứng URL không query (`clarifications.md`, quyết định phiên
-  thứ hai).
+- `/kudos/send` là đường ghi DUY NHẤT vào 3 bảng Supabase mới ở lượt này. Trang có thể đọc
+  lại CHÍNH bản ghi nó vừa tạo (id trả về sau insert) để dựng trạng thái thành công — không
+  đọc lại toàn bảng để hiển thị danh sách.
 - `/kudos` (board) KHÔNG được rewire sang đọc bảng mới ở lượt này — nó vẫn 100% static data.
   **Hệ quả trực tiếp, đã biết trước**: một kudos gửi từ `/kudos/send` sẽ KHÔNG xuất hiện ở
   highlight carousel, spotlight cloud, leaderboard, hay feed "ALL KUDOS" của `/kudos`. Kiểm
@@ -500,13 +494,11 @@ runtime theo định nghĩa hiện có trong `docs/vi/generated/behavior-logic.m
 
 ## 4. Đường tải ảnh lên (browser → server → Storage)
 
-**Cập nhật khi reconcile (2026-08-24, as-built)** — tên thật đã biết:
-
 ```mermaid
 graph LR
-    Browser["Browser<br/>(input file, tối đa 5, .jpg/.png)"] -->|"submit form"| ServerAction["Server Action<br/>submitKudos()<br/>lib/kudos/send/submit-kudos.ts"]
-    ServerAction -->|"validate type + auth.uid()"| Storage["Supabase Storage<br/>bucket: kudos-images (private)"]
-    ServerAction -->|"insert kudos + kudos_hashtags + kudos_images"| KudosTable["bảng kudos"]
+    Browser["Browser<br/>(input file, tối đa 5, .jpg/.png)"] -->|"submit form"| ServerSide["Server Action / Route Handler<br/>(app/kudos/send/*, tên file: TBD)"]
+    ServerSide -->|"validate type + auth.uid()"| Storage["Supabase Storage<br/>bucket: TBD (draft)"]
+    ServerSide -->|"insert 1 row + path ảnh"| KudosTable["bảng kudos"]
 ```
 
 - Kiểu file chấp nhận: `.jpg`/`.png` (test case ID-21, ID-22). Từ chối `.pdf`/`.mp4`/`.txt`
@@ -517,25 +509,22 @@ graph LR
 - Ảnh upload tại thời điểm Gửi (không có luồng upload-nháp trước khi bấm nút) — khớp với
   việc nút Gửi bị disable cho tới khi toàn bộ trường bắt buộc hợp lệ (H.2), nên không tồn
   tại trạng thái "đã upload ảnh nhưng submit dở dang".
-- **Cập nhật khi reconcile (2026-08-24, as-built)**: tên đã biết — bucket `kudos-images`
-  (private, `file_size_limit = 5242880` bytes = 5 MiB, `allowed_mime_types` =
-  `image/jpeg, image/png`), migration `supabase/migrations/20260824031123_kudos_send_tables.sql`
-  + `20260824031159_kudos_images_bucket.sql`, Server Action `submitKudos`
-  (`lib/kudos/send/submit-kudos.ts`). Mã `MODEL###`/`PERM###` cho các đối tượng này vẫn
-  `TBD (draft)` — xem `docs/vi/generated/entities.md` § Pending và
-  `docs/vi/generated/permissions-matrix.md` § Pending.
+- Tên bucket, tên migration, tên route/server-action thật: TBD (draft) — chưa viết code.
+  Không có `**Source:** path:N-M` nào được trích ở tài liệu này cho code chưa tồn tại,
+  theo đúng Minimal-Spec Rule của contract.
 
 ## Tech Stack — bổ sung so với bảng hiện có trong `docs/vi/system/architecture.md`
 
 | Layer | Technology | Version | Ghi chú |
 |---|---|---|---|
 | Database (app-owned) | Postgres qua Supabase migrations | Supabase CLI local (Docker), `major_version = 17` (`supabase/config.toml`) | LẦN ĐẦU app viết migration — trước lượt này chỉ Supabase Auth tự quản `auth.users`, app không đụng vào |
-| Object storage | Supabase Storage | Bucket `kudos-images`, `public = false`, `file_size_limit = 5242880` (5 MiB, đặt CỨNG trên chính bucket, khác giới hạn mặc định `50MiB` của server ở `storage.enabled` cấp global) | LẦN ĐẦU dùng; bucket + 2 policy insert/select (theo `auth.uid()` qua `storage.foldername`) — `supabase/migrations/20260824031159_kudos_images_bucket.sql` |
+| Object storage | Supabase Storage | `storage.enabled = true`, `file_size_limit = "50MiB"` (giới hạn của server, không phải giới hạn ứng dụng — xem § 4 ở trên) | LẦN ĐẦU dùng; bucket + policies cụ thể: TBD (draft) |
 
 ## Unresolved / out of scope cho delta này
 
-- **Cập nhật khi reconcile (2026-08-24)**: tên bucket/migration/Server Action nay đã biết
-  (xem § 4 ở trên) — mục TBD (draft) trước đây chỉ còn áp dụng cho mã `MODEL###`/`PERM###`.
+- Tên bucket, tên file migration, tên route/server-action thật: TBD (draft) — quyết định ở
+  bước implement, không phải ở bản nháp system-level này.
+- Không có giới hạn dung lượng byte cho ảnh đính kèm — xem clarifications.md § Unresolved #4.
 - Rewire `/kudos` board sang đọc bảng mới: ngoài phạm vi lượt này (clarifications.md
   § Next Steps) — xem § 2 ở trên.
 - Rationale đầy đủ cho các quyết định kiến trúc trên (vì sao write-only thay vì rewire ngay,

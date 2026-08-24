@@ -711,9 +711,9 @@ khác biệt so với dự kiến ban đầu đánh dấu **in đậm**. Kết q
 | `components/kudos/kudos-sidebar.tsx:1-18` | Bọc `KudosSidebarStats` + `KudosLeaderboard` |
 | `components/kudos/kudos-sidebar-stats.tsx:1-63` | 5 dòng thống kê (FR-013) + nút "Mở Secret Box" (FR-018) |
 | `components/kudos/kudos-leaderboard.tsx:1-59` | Bảng xếp hạng 5 dòng + empty-state (FR-014) |
-| `components/kudos/spotlight-board.tsx:1-86` | Khung SPOTLIGHT BOARD; xác nhận không có control Pan/Zoom nào được viết (FR-012) |
+| `components/kudos/spotlight-board.tsx:1-95` | Khung SPOTLIGHT BOARD; xác nhận không có control Pan/Zoom nào được viết (FR-012); `data-testid="spotlight-board"` (dòng 67) là hook load-bearing cho regression test dưới đây |
 | `components/kudos/spotlight-search.tsx:31-73` | Ô tìm kiếm, `maxLength={100}` dòng 66 (BR-004) |
-| `components/kudos/spotlight-name-cloud.tsx:1-97` | Word cloud 106 tên; tooltip hover **chỉ hiện tên, không có thời gian** (khác mô tả FR-011/US007 ban đầu — `SpotlightNode` không có field timestamp) |
+| `components/kudos/spotlight-name-cloud.tsx:1-120` | Word cloud 106 tên; tooltip hover **chỉ hiện tên, không có thời gian** (khác mô tả FR-011/US007 ban đầu — `SpotlightNode` không có field timestamp). Bug fix 2026-08-24: 4/106 node có `relY` vượt `BOARD_HEIGHT` (`spotlight-names.ts:133-136`) khiến tên vẽ tràn khỏi khung; tên giờ nằm trong lớp `absolute inset-0 overflow-hidden` riêng (không phải trên khung ngoài, để không cắt luôn tooltip) — xem `edge-cases.md` |
 | `components/kudos/spotlight-ticker.tsx:1-48` | 6 dòng ticker tĩnh trang trí. **Không có trong danh sách dự kiến ban đầu**, không gắn FR nào, tái tạo đúng như frame |
 | `components/kudos/star-tier-tooltip.tsx:1-51` | Chấm hoa thị + tooltip hover (BR-005) |
 
@@ -738,12 +738,12 @@ Ba file dưới **thay thế** file đơn lẻ dự kiến ban đầu — không
 
 | File | Phạm vi |
 |------|---------|
-| `e2e/kudos-board-layout.spec.ts` | Bố cục 5 khối, thứ tự DOM, carousel 3-of-N, empty state (SC-001, SC-002, SC-008) |
+| `e2e/kudos-board-layout.spec.ts` | Bố cục 5 khối, thứ tự DOM, carousel 3-of-N, empty state (SC-001, SC-002, SC-008); + regression test "no spotlight name paints outside the board" (bug fix 2026-08-24) |
 | `e2e/kudos-board-interactions.spec.ts` | Tim toggle, Copy Link, dropdown lọc, carousel next/prev (SC-003, SC-005, SC-006) |
 | `e2e/kudos-board-feed-interactions.spec.ts` | Progressive reveal, spotlight search/tooltip (SC-004, SC-007) |
 
-**Kết quả kiểm thử:** e2e 18/18; suite dự án 96/97 (1 fail có từ trước ở `login-auth-redirect`,
-không liên quan Kudos); unit 93/93; `tsc --noEmit` sạch; responsive 375/768/1440 đạt ngưỡng.
+**Kết quả kiểm thử (cập nhật 2026-08-24):** e2e 19/19 (3 file `kudos-board-*`); suite e2e dự án
+122/122; unit 127/127; `tsc --noEmit` sạch; responsive 375/768/1440 đạt ngưỡng.
 
 ## Unresolved Questions
 

@@ -55,7 +55,16 @@ export function SpotlightBoard() {
         </h2>
 
         {/* mm:2940:14174 — position:relative makes this the cloud's coordinate space */}
+        {/*
+          `data-testid` is load-bearing, not decorative. The regression test in
+          e2e/kudos-board-layout.spec.ts resolves the board through it and then calls
+          `document.elementFromPoint` at each name's centre to prove no name paints outside the
+          box. Remove this attribute and the test does not fail loudly — it times out on a
+          missing locator, which reads as flaky rather than as the escaped-names bug returning.
+          Same reasoning as the redundant `role="button"` in spotlight-name-cloud.tsx.
+        */}
         <div
+          data-testid="spotlight-board"
           className="relative mt-2 w-full [container-type:inline-size]"
           style={{
             aspectRatio: `${BOARD_WIDTH} / ${BOARD_HEIGHT}`,

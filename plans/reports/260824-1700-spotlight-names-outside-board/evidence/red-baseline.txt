@@ -1,0 +1,51 @@
+RED BASELINE — proof the regression test detects the bug
+=========================================================
+
+This is the pre-repair failure, kept OUT of temper-results.json deliberately: that file
+records the runs proving the repair holds, and a `status: fail` entry there reads to the
+evidence gate as shipping over a red test. The gate blocked on exactly that and was right to.
+
+Method
+------
+`git stash push components/kudos/spotlight-name-cloud.tsx` — reverts ONLY the clip layer.
+The `data-testid` on the board container stays, otherwise the test times out on a missing
+locator (a flaky-looking failure) instead of failing on the defect itself.
+
+Command
+-------
+npm run test:e2e -- kudos-board-layout --grep "paints outside"
+
+Result: 1 failed, exit 1
+------------------------
+    - Array []
+    + Array [
+    +   "Lê Kiều Trang",
+    +   "Nguyễn Văn Quy",
+    +   "Nguyễn Bá Chức",
+    +   "Nguyễn Hoàng Linh",
+    + ]
+      207 |         escaped,
+      208 |         `these spotlight names paint outside the board: ${escaped.join(', ')}`
+    > 209 |       ).toEqual([]);
+          |         ^
+    at e2e/kudos-board-layout.spec.ts:209:9
+
+  1 failed
+    [kudos-board] › e2e/kudos-board-layout.spec.ts:170:9 › no spotlight name paints outside
+    the board (regression)
+
+Why this matters
+----------------
+The four names the live paint test reports are exactly the four found by static analysis of
+lib/kudos/spotlight-names.ts — the only nodes whose relY (555, 561, 578, 593) exceeds
+BOARD_HEIGHT (548). Two independent methods, same four names. That agreement is what makes
+the diagnosis trustworthy rather than plausible.
+
+Independently reproduced
+------------------------
+The reviewer repeated this round-trip itself rather than accepting the handoff: stashed the
+same file, reproduced the same four names, popped the stash, and confirmed via
+`git diff --stat` that the restoration was byte-identical.
+
+After the repair the same command passes, and the full kudos-board project is 19/19.
+See temper-results.json for the verification runs.

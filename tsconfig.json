@@ -40,9 +40,7 @@
     ".next-unlocked/types/**/*.ts",
     ".next-unlocked/dev/types/**/*.ts",
     ".next-visual/types/**/*.ts",
-    ".next-visual/dev/types/**/*.ts",
-    ".next-fixcheck/types/**/*.ts",
-    ".next-fixcheck/dev/types/**/*.ts"
+    ".next-visual/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

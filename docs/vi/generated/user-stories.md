@@ -97,14 +97,6 @@ global ở ngay trên. Không renumber một trong hai phía ở lượt này đ
 chưa xác nhận hết ở nơi khác; khuyến nghị `/tkm:rebuild-spec --features F012` cấp mã global
 mới (kế tiếp sau US023) và cập nhật `Screen → US Map` + `SCR002_Awards` bên dưới khi chạy.
 
-**Cảnh báo gap thêm 2026-08-24 (F014_SendKudosWishes)** — cùng tình trạng KHÔNG đối chiếu ngược
-đã ghi cho F012 ở trên (và cùng tình trạng chưa từng ghi cho F013, dù file này chưa có note
-riêng cho F013). `docs/vi/features/F014_SendKudosWishes/technical-spec.md` tự đánh mã cục bộ
-US001…US009 — **trùng số** với US001_ViewHeroSection…US009_ReturnToHomeTop global ở trên,
-không trùng nội dung. Không renumber bên nào ở lượt này. Khuyến nghị: một lượt
-`/tkm:rebuild-spec --features F012,F013,F014` cấp mã global nhất quán cho cả ba feature cùng
-lúc, thay vì vá từng feature một.
-
 
 
 ---
