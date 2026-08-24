@@ -1,0 +1,58 @@
+{
+  "note": "Seeded at F014 promote. This file had never been created in this repo; F001-F013 are backfilled from generated/feature-list.md so future allocations cannot collide.",
+  "seeded_at": "2026-08-24T03:06:05Z",
+  "reservations": [
+    {
+      "fcode": "F001",
+      "slug": "F001_EventOverview"
+    },
+    {
+      "fcode": "F002",
+      "slug": "F002_EventCountdown"
+    },
+    {
+      "fcode": "F003",
+      "slug": "F003_AwardDiscovery"
+    },
+    {
+      "fcode": "F004",
+      "slug": "F004_KudosPromotion"
+    },
+    {
+      "fcode": "F005",
+      "slug": "F005_LanguageSwitching"
+    },
+    {
+      "fcode": "F006",
+      "slug": "F006_QuickActionWidget"
+    },
+    {
+      "fcode": "F007",
+      "slug": "F007_AccountMenuAccess"
+    },
+    {
+      "fcode": "F008",
+      "slug": "F008_NotificationPanelAccess"
+    },
+    {
+      "fcode": "F009",
+      "slug": "F009_ReturnToHomeTop"
+    },
+    {
+      "fcode": "F010",
+      "slug": "F010_PrelaunchCountdownGate"
+    },
+    {
+      "fcode": "F011",
+      "slug": "F011_GoogleOAuthLogin"
+    },
+    {
+      "fcode": "F012",
+      "slug": "F012_AwardSystemPage"
+    },
+    {
+      "fcode": "F013",
+      "slug": "F013_KudosLiveBoard"
+    }
+  ]
+}

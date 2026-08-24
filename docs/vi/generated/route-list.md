@@ -27,6 +27,13 @@ khác với `proxy.ts` ở trên.
 |---|---|---|---|---|---|
 | GET | /auth/callback | `app/auth/callback/route.ts` | ROUTE008 | F011 | Đổi `code` OAuth (Google, qua Supabase) lấy session; redirect `/` (thành công) hoặc `/login?error=...` (thất bại/huỷ). Không trả JSON — luôn 307/308 redirect. Chi tiết: `docs/vi/system/architecture.md` § Authentication Layer. |
 
+**Cập nhật (lượt Send Kudos Wishes, 2026-08-24)**: `submitKudos` (`lib/kudos/send/submit-kudos.ts`)
+là **Server Action** đầu tiên của repo — được `KudosSendPageClient` gọi trực tiếp (không qua
+`fetch`/HTTP method+path công khai). Nó **không được cấp `ROUTE###`**: bảng này định nghĩa
+"route" là một endpoint có Method+Path độc lập, còn Server Action là một RPC gắn liền build ID
+của trang gọi nó, không có Path riêng để liệt kê. Đây là một phán đoán phạm vi, không phải bỏ
+sót — ghi lại tường minh để không bị hiểu nhầm là thiếu hàng.
+
 ## Frontend Routes/Pages
 
 > **Code Column Contract:** `Code` là bắt buộc, dạng `ROUTE###`, liên tục và global
@@ -72,10 +79,23 @@ Turbopack) — bảng Route in ra đúng 6 route ở lần build gốc, **tất 
 nên Next.js không thể prerender tĩnh. 7 route còn lại (kể cả `/prelaunch`) vẫn `○ Static`
 — site vẫn chủ yếu tĩnh, không phải một chuyển dịch kiến trúc toàn phần.
 
+### Pending: `/kudos/send` — F014_SendKudosWishes (2026-08-24, chưa cấp mã ROUTE###)
+
+`/kudos/send` (`app/kudos/send/page.tsx`) là route MỚI thật — Server Component gọi
+`requireSupabaseUser()` (`lib/kudos/send/auth-gate.ts`) trước khi render, `redirect('/login')`
+nếu chưa có phiên Supabase hợp lệ (TC ID-1), rồi đọc song song `listProfiles()`/`listHashtags()`
+(`lib/kudos/send/queries.ts`, bọc `withRetry()`) trước khi render form. Mã `ROUTE###` giữ
+`TBD (draft)` — không tự đánh số ở lượt promote này.
+
+| Path | Component | Owner F### | Rendering | Ghi chú |
+|------|-----------|------------|-----------|---------|
+| /kudos/send | KudosSendPage (`app/kudos/send/page.tsx`) | F014 | ƒ Dynamic (đọc `getUser()` + 2 query Supabase trước khi render) | Route ĐẦU TIÊN gate theo chiều "chưa đăng nhập → đá đi" (ngược PERM004); xem `permissions-matrix.md` § Pending. `GET /kudos/send` intermittently 500 (`JWT issued at future`, vài % mỗi lần chạy) — verdict inspection REWORK, chưa sealed, xem `clarifications.md` § "Decision on the residual 500". |
+
 ## Summary
 
 | Category | Count |
 |----------|-------|
 | Backend Routes | 1 (ROUTE008 `/auth/callback` — thêm 2026-08-19; `proxy.ts` không tính, vẫn là request-interception layer, không phải route) |
-| Frontend Pages | 9 (7 route cũ + ROUTE009 `/login`) |
-| Total | 10 |
+| Frontend Pages | 9 (7 route cũ + ROUTE009 `/login`) — **+1 pending** (`/kudos/send`, F014, chưa cấp mã nên không cộng vào 9) |
+| Total | 10 (+1 pending) |
+| Server Actions | 1 (`submitKudos`, F014, thêm 2026-08-24 — không cấp `ROUTE###`, xem § Backend Routes) |

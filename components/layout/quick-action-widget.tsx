@@ -41,7 +41,7 @@ export function QuickActionWidget() {
         {({ close }) => (
           <div className="flex w-48 flex-col text-sm font-bold text-white">
             <Link
-              href="/kudos"
+              href="/kudos/send"
               role="menuitem"
               onClick={close}
               className="px-4 py-2 hover:bg-secondary-button-bg"

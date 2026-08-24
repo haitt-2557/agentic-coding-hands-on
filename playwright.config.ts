@@ -15,7 +15,7 @@ export default defineConfig({
   projects: [
     {
       name: 'prelaunch-gate',
-      testMatch: /^(?!.*awards-page|.*homepage|.*invalid-env|.*prelaunch-countdown-unlocked|.*login-auth-redirect|.*kudos-board).*\.spec\.ts$/,
+      testMatch: /^(?!.*awards-page|.*homepage|.*invalid-env|.*prelaunch-countdown-unlocked|.*login-auth-redirect|.*kudos-board|.*send-kudos).*\.spec\.ts$/,
       use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:3000' },
     },
     {
@@ -64,6 +64,18 @@ export default defineConfig({
     {
       name: 'login-auth-redirect',
       testMatch: /login-auth-redirect\.spec\.ts$/,
+      use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:3200' },
+    },
+    {
+      name: 'send-kudos',
+      // `send-kudos-*` follows the awards-page precedent: the suite is split across
+      // send-kudos-{access,layout,validation,interactions,submit}.spec.ts to stay under the
+      // 200-line file rule. Port 3200 is past-dated, so the launch gate is open — `/kudos/send`
+      // is not in `ALWAYS_ALLOWED` (lib/prelaunch/gate.ts), so on port 3000 every request 307s
+      // to /prelaunch and the test RED would be caused by a config redirect, not missing screen
+      // structure. Port 3200 is reused from other specs; this screen requires a real Supabase
+      // session (unlike static-data tests) so the session fixture is called per-test.
+      testMatch: /send-kudos.*\.spec\.ts$/,
       use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:3200' },
     },
   ],

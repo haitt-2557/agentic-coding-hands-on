@@ -51,6 +51,7 @@ Supabase Auth local (`/login`, `app/auth/callback/route.ts`). Feature-spec đầ
 | F011_GoogleOAuthLogin | Google OAuth Login | ui | TypeScript/TSX | my-app | P0 |
 | F012_AwardSystemPage | Award System Page | ui | TypeScript/TSX | my-app | P1 |
 | F013_KudosLiveBoard | Kudos Live Board | ui | TypeScript/TSX | my-app | P1 |
+| F014_SendKudosWishes | Send Kudos Wishes | ui | TypeScript/TSX | my-app | P1 |
 
 ## Feature Details
 
@@ -514,9 +515,61 @@ kudos, chi tiết kudos, hồ sơ Sunner, Secret Box) dừng ở mức trigger r
 
 ---
 
+### F014_SendKudosWishes: Send Kudos Wishes — thêm 2026-08-24
+
+**Type**: ui
+**Description**: Trang `/kudos/send` — form "Gửi lời chúc Kudos" cho phép một Sunner đã đăng nhập
+soạn và gửi lời cảm ơn tới đồng đội. Đây là feature ĐẦU TIÊN của repo có bảng dữ liệu riêng do app
+định nghĩa (`profiles`, `hashtags`, `kudos` + một bucket Supabase Storage cho ảnh) và cũng là route
+ĐẦU TIÊN có cổng xác thực thật phía server (chưa đăng nhập → chuyển `/login`, TC ID-0/ID-1). Form
+gồm: chọn Người nhận (autocomplete trên `profiles`), Danh hiệu (free text, bắt buộc, tối đa 100 ký
+tự — trường này KHÔNG có spec ở bất kỳ frame nào, xem clarifications.md defect 1), khối soạn nội dung
+với 6 nút định dạng markdown-lite + bộ đếm cứng 1.000 ký tự, Hashtag chọn từ danh sách 8 giá trị
+(toggle, tối đa 5, hàng chưa chọn bị disable khi đủ 5), Image (tối đa 5, `.jpg`/`.png`), checkbox ẩn
+danh mở ra trường Nickname bắt buộc, và footer Hủy/Gửi với Gửi disabled tới khi đủ trường bắt buộc.
+
+**Ranh giới có chủ đích**: bảng mới CHỈ được ghi bởi feature này. Trang `/kudos` (F013) vẫn đọc dữ
+liệu tĩnh trong `lib/kudos/` — nghĩa là **một kudos vừa gửi sẽ KHÔNG xuất hiện trên board**. Đây là
+quyết định 1 của `clarifications.md`, không phải lỗi. Việc chuyển các bề mặt đọc sang CSDL là feature
+riêng, đã ghi ở Next Steps.
+
+**Workspace**: my-app
+**Languages**: TypeScript, TSX
+
+**Related Screens**:
+- Màn hình mới "Gửi lời chúc Kudos" (frame `JsTvi8KVQA`) — **SCR### chưa được cấp**; cần một lượt
+  doc-writer/rebuild-spec cập nhật `screen-list.md`. Hành vi thật lấy từ frame component
+  `ihQ26W78P2` (26 spec item, 57 test case) vì frame đích không có spec nào.
+
+**Related User Stories**:
+- US001…US009 trong `docs/vi/features/F014_SendKudosWishes/technical-spec.md`
+  (mã US### cục bộ của feature-spec; hợp nhất vào `user-stories.md` ở lượt rebuild-spec kế tiếp —
+  cùng tình trạng với US cục bộ của F012 và F013)
+
+**Related APIs/Routes**:
+- (page) /kudos/send — route MỚI, **ROUTE### chưa được cấp**; cần cập nhật `route-list.md`
+
+**Related Data Models**:
+- Bảng `profiles`, `hashtags`, `kudos` + bucket Storage — **MODEL### chưa được cấp**. Đây là tier
+  persistence đầu tiên do app sở hữu; `entities.md` hiện vẫn ghi "Total Entities: 1
+  (MODEL001_Award)" và cần được cập nhật.
+
+**Related Background Logic**:
+- Không có BL### mới — không job/cron nào thuộc feature này. Server Action gửi form là luồng
+  request-response đồng bộ, không phải background logic.
+
+**Related Permissions**:
+- Cổng route thật trên `/kudos/send` — **PERM### chưa được cấp**; `permissions-matrix.md` cần thêm
+  hàng. Đây là guard thật thứ hai sau `PERM004_LoginRouteAuthGate` và chặn theo chiều ngược lại.
+  RLS bắt buộc `sender` suy ra từ `auth.uid()`, không nhận từ client. Mock `role`/`userId` trong
+  `lib/session/session-provider.tsx` vẫn KHÔNG phải ranh giới phân quyền và không được hợp nhất ở
+  lượt này.
+
+---
+
 ## Summary
 
-- **Total Features**: 13
+- **Total Features**: 14
 - **Total Screens**: 8
 - **Total User Stories**: 23
 - **Total Routes**: 8 (ROUTE001–ROUTE005, ROUTE007–ROUTE009; ROUTE006 `/_not-found` loại khỏi mapping — tự sinh bởi Next.js, không có source file, cùng phạm vi loại trừ đã áp dụng ở `screen-list.md`)
@@ -564,3 +617,5 @@ edge-cases}.md`) — tạo mới thư mục per-feature nằm ngoài quyền sur
 **Khuyến nghị: chạy `/tkm:rebuild-spec --features F011`** để sinh bộ feature-spec đầy đủ cho
 `F011_GoogleOAuthLogin`.
 - [x] Every permission maps to a feature (F###) — PERM001/PERM002 → F007, PERM003 → F008
+
+**Ghi chú (lượt Send Kudos wishes, 2026-08-24)**: `Total Features` 13 → 14 cho `F014_SendKudosWishes`. Các con số `Total Screens`/`Routes`/`Data Models`/`Permissions` GIỮ NGUYÊN ở lượt này và đang THIẾU so với thực tế: feature này thêm 1 screen, 1 route, 3 bảng và 1 permission nhưng chưa mã nào được cấp — các inventory sinh tự động (`screen-list.md`, `route-list.md`, `entities.md`, `permissions-matrix.md`) thuộc quyền surgical-edit của doc-writer/rebuild-spec, không phải của bước promote. Ghi rõ ở đây để khoảng lệch không bị đọc thành đã hoàn tất.

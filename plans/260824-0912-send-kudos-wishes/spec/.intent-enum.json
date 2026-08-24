@@ -1,0 +1,11 @@
+{
+  "mode": "single",
+  "intents": [
+    {
+      "actor": "authenticated Sunner",
+      "action_domain": "compose and send a kudos wish to a teammate",
+      "outcome": "the kudos is persisted to Supabase and the sender is returned to the board with confirmation"
+    }
+  ],
+  "justification": "One user-facing intent. The raw task text carries no conjunction: 'Implement the Send Kudos wishes page, use Supabase local project' names one screen and the store it writes to. The form's parts — recipient, danh hiệu, message, hashtags, images, anonymous toggle — are fields of one submission, not separate (actor, action-domain, outcome) triples; none of them is independently useful without the others. Persistence is the same intent's storage, not a second intent: the seeded profiles and hashtags tables exist only to make this one submission valid (clarifications.md decision 6), and the /kudos board is explicitly out of scope (decision 1), so no second reading/browsing intent is in play."
+}
