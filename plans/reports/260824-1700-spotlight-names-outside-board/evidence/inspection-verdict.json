@@ -1,0 +1,52 @@
+{
+  "score": 9,
+  "criticalCount": 0,
+  "decision": "SEALED",
+  "acceptanceCovered": [
+    "no spotlight name paints outside the board at 1440 — proven by: (a) independently reproduced RED by stashing only spotlight-name-cloud.tsx (keeping the data-testid fix in spotlight-board.tsx) and re-running the regression test, which failed naming exactly the four escaping nodes Le Kieu Trang, Nguyen Van Quy, Nguyen Ba Chuc, Nguyen Hoang Linh; (b) popped the stash and re-ran GREEN, then confirmed git diff --stat matched the original diff exactly (clean restoration); (c) visual comparison of plans/reports/260824-1700-spotlight-names-outside-board/evidence/spotlight-board-after-fix-1440.png shows the board's rounded border fully containing all rendered names and the ticker text, nothing floating below it",
+    "the spotlight hover tooltip still appears and carries the node name — proven by: independently re-running the full kudos-board project (19/19 passed) which includes the pre-existing test 'hovering spotlight name node shows tooltip with that name (33ca8f8a)' at e2e/kudos-board-feed-interactions.spec.ts:116, plus structural confirmation that the tooltip div in spotlight-name-cloud.tsx is a sibling of the overflow-hidden clip layer (not a descendant), so it is categorically outside the clipping subtree regardless of viewport",
+    "the spotlight search input remains clickable and enforces its 100-character ceiling — proven by: independently re-running the full kudos-board project (19/19 passed) which includes 'spotlight search input enforces 100-character ceiling (9e689933)' at e2e/kudos-board-feed-interactions.spec.ts:95, plus structural confirmation that the clip layer is pointer-events-none while sitting after SpotlightSearch in DOM order, so hit-testing over the search box falls through to the input beneath it",
+    "the existing kudos-board suite still passes in full — proven by independently re-running npm run test:e2e -- kudos-board myself: 19 passed, exit 0, matching the reported evidence rather than trusting it verbatim"
+  ],
+  "regressionChecked": [
+    "typecheck (npx tsc --noEmit) run independently — clean",
+    "eslint run independently on all three changed files — clean",
+    "full kudos-board e2e project (19 tests) run independently — all pass, including the two pre-existing tests most at risk from the new pointer-events layering (search input, hover tooltip)",
+    "adversarial RED/GREEN round-trip on the regression test itself (stash/pop of spotlight-name-cloud.tsx only), confirming the test fails for the claimed reason and not a harness accident, and that popping the stash left the working tree byte-identical to the original diff",
+    "DOM-contract F35 (no [title]/[role=button] element may precede cloud nodes) — unaffected, wrapping div does not change document order relative to SpotlightSearch",
+    "data-testid=spotlight-board collision check across the repo — none found",
+    "stacking-order interaction between the new clip layer and SpotlightTicker (later sibling, pointer-events auto, overlapping relY ranges) — confirmed pre-existing (unchanged sibling order), not introduced by this diff"
+  ],
+  "contractStatus": "OK",
+  "refuted": [],
+  "unproven": [],
+  "reachableRegressions": [],
+  "riskGate": {
+    "touchesSensitiveArea": false,
+    "signoffRequired": false,
+    "humanSignedOff": false
+  },
+  "findings": [
+    {
+      "severity": "Medium",
+      "category": "Maintainability",
+      "location": "components/kudos/spotlight-board.tsx:59",
+      "summary": "data-testid=spotlight-board is load-bearing for the regression test's failure mode (without it the test times out on locator-not-found instead of reporting escaping names) but nothing documents that dependency, risking a silent test degradation if a future refactor strips it as apparently-decorative",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "Low",
+      "category": "Structure",
+      "location": "e2e/kudos-board-layout.spec.ts:170",
+      "summary": "regression test runs at the kudos-board project's default viewport (1280x720) rather than literally 1440 as the acceptance criterion states; the fix is viewport-independent and a 1440 screenshot corroborates it, so this is a wording/coverage nuance, not a functional gap",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "Low",
+      "category": "Logic",
+      "location": "components/kudos/spotlight-name-cloud.tsx:56-59",
+      "summary": "the near-375px tooltip-clipping justification for placing the clip on an inner layer is architecturally sound and structurally guaranteed (tooltip is a DOM sibling of the clip layer, not a descendant) but the specific 375px scenario invoked in the comment is not demonstrated by any screenshot or test",
+      "disposition": "Accept"
+    }
+  ]
+}

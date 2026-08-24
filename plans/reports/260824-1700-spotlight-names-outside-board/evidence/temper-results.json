@@ -1,0 +1,32 @@
+{
+  "commands": [
+    {
+      "command": "npm run test:e2e -- kudos-board",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "19 passed (15.3s) — the 18 pre-existing kudos-board tests plus the new paint-level regression. Tooltip test 33ca8f8a still green, proving the inner-layer clip did not swallow the tooltip.",
+      "ts": "2026-08-24T12:25:00Z"
+    },
+    {
+      "command": "npm run test:e2e",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "122 passed (34.5s) — whole suite across all projects, no regression. Note the login-auth-redirect failure that was pre-existing at the original delivery now passes, fixed by unrelated work since.",
+      "ts": "2026-08-24T12:30:00Z"
+    },
+    {
+      "command": "npm run test:unit",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "127 passed (829ms) — unchanged by this fix; count is up from 93 at delivery because other features added tests since.",
+      "ts": "2026-08-24T12:30:30Z"
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Clean across the tree after the clip layer and the data-testid addition.",
+      "ts": "2026-08-24T12:31:00Z"
+    }
+  ]
+}

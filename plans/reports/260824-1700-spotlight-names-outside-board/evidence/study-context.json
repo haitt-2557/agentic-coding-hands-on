@@ -1,0 +1,25 @@
+{
+  "task": "Bug: spotlight word-cloud names render outside the SPOTLIGHT BOARD box on /kudos. Root cause — components/kudos/spotlight-board.tsx:58-66 gives the board a border and border-radius but no overflow clip, while lib/kudos/spotlight-names.ts:133-136 holds four of the 106 SPOTLIGHT_NODES whose relY (555, 561, 578, 593) exceeds BOARD_HEIGHT (548). Those four are outside the container in the design data too; Figma masks it because the board's three artwork layers overhang the border (Root further mo rong 1 is 1819x583 against a 1157x548 board), and those layers are the ones recorded as unfetchable — so in this build the names float against bare page ground.",
+  "mode": "autonomous",
+  "acceptanceCriteria": [
+    "no spotlight name paints outside the board at 1440",
+    "the spotlight hover tooltip still appears and carries the node name",
+    "the spotlight search input remains clickable and enforces its 100-character ceiling",
+    "the existing kudos-board suite still passes in full"
+  ],
+  "touchpoints": [
+    "components/kudos/spotlight-name-cloud.tsx",
+    "components/kudos/spotlight-board.tsx",
+    "e2e/kudos-board-layout.spec.ts"
+  ],
+  "blastRadius": [
+    "the clip layer spans the full board and is painted after SpotlightSearch — without pointer-events-none it would intercept clicks meant for the search input, so the search tests are the blast-radius check",
+    "clipping at the board container instead of an inner layer would swallow the hover tooltip near the 375px floor, because the tooltip's padding and text size are fixed px while the board scales via cqw",
+    "data-testid=spotlight-board added to the board container — additive, breaks no existing dom-contract locator"
+  ],
+  "contracts": [
+    "dom-contract.md F32 — at most one role=tooltip in the DOM at a time",
+    "dom-contract.md F35 — cloud nodes must keep the explicit redundant role=button, matched by attribute not tag",
+    "clarifications.md — never invent a visual value; the four out-of-range coordinates are left untouched"
+  ]
+}
