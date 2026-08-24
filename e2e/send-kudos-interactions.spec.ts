@@ -81,6 +81,9 @@ test.describe('Send Kudos Form Interactions (ID-8–10, ID-15–24, ID-25–26, 
   test('image upload accepts .jpg/.png, rejects .pdf/.mp4/.txt with format error (ID-18–24, ID-55)', async ({
     browser,
   }) => {
+    // ID-55: Format validation rejects non-image files with error message.
+    // image-attachments.tsx:101 renders role="alert" with sendKudos.imageFormatError
+    // = "Chỉ chấp nhận định dạng .jpg hoặc .png"
     const context = await browser.newContext({ baseURL: 'http://localhost:3200' });
     const page = await context.newPage();
 
@@ -88,12 +91,39 @@ test.describe('Send Kudos Form Interactions (ID-8–10, ID-15–24, ID-25–26, 
       await seedSupabaseSession(context, 'http://localhost:3200');
       await page.goto('/kudos/send');
 
-      // Find image upload input
       const fileInput = page.locator('input[type="file"]');
       await expect(fileInput).toBeVisible();
 
-      // Note: Full file upload testing would require creating temporary files.
-      // The locator exists and is ready for interaction.
+      // Test 1: Upload valid .png — img element should appear (thumbnail)
+      await fileInput.setInputFiles('./e2e/fixtures/test-image.png');
+      const pngThumbnail = page.locator('img[src*="blob"]').first();
+      await expect(pngThumbnail).toBeVisible();
+
+      // Clear by removing the image and test 2: Upload valid .jpg — img should appear
+      const deleteBtn1 = page.locator('button').filter({ hasText: '×' }).first();
+      await deleteBtn1.click();
+      await fileInput.setInputFiles('./e2e/fixtures/test-image.jpg');
+      const jpgThumbnail = page.locator('img[src*="blob"]').first();
+      await expect(jpgThumbnail).toBeVisible();
+
+      // Remove the jpg image
+      const deleteBtn2 = page.locator('button').filter({ hasText: '×' }).first();
+      await deleteBtn2.click();
+
+      // Test 3: Upload rejected .pdf — error should appear
+      await fileInput.setInputFiles('./e2e/fixtures/test-file.pdf');
+      const pdfError = page.locator('[role="alert"]');
+      await expect(pdfError).toBeVisible();
+
+      // Test 4: Upload rejected .mp4 — error should appear
+      await fileInput.setInputFiles('./e2e/fixtures/test-file.mp4');
+      const mp4Error = page.locator('[role="alert"]');
+      await expect(mp4Error).toBeVisible();
+
+      // Test 5: Upload rejected .txt — error should appear
+      await fileInput.setInputFiles('./e2e/fixtures/test-file.txt');
+      const txtError = page.locator('[role="alert"]');
+      await expect(txtError).toBeVisible();
     } finally {
       await context.close();
     }
@@ -102,6 +132,8 @@ test.describe('Send Kudos Form Interactions (ID-8–10, ID-15–24, ID-25–26, 
   test('image add button hides at 5 and returns on removal (ID-19, ID-38, ID-40)', async ({
     browser,
   }) => {
+    // D12: Add-image button removed entirely from DOM at 5 images, returns on removal.
+    // image-attachments.tsx:84 conditionally renders the add button when canAddMore (< 5 images).
     const context = await browser.newContext({ baseURL: 'http://localhost:3200' });
     const page = await context.newPage();
 
@@ -109,13 +141,39 @@ test.describe('Send Kudos Form Interactions (ID-8–10, ID-15–24, ID-25–26, 
       await seedSupabaseSession(context, 'http://localhost:3200');
       await page.goto('/kudos/send');
 
-      // Find the add image button (should have text like "Thêm ảnh" or "Add Image")
       const fileInput = page.locator('input[type="file"]');
-
-      // Button should be visible initially
       await expect(fileInput).toBeVisible();
 
-      // (Full test would require uploading 5 images; implementation will verify this)
+      // Upload image files 1-5
+      for (let i = 1; i <= 5; i++) {
+        await fileInput.setInputFiles('./e2e/fixtures/test-image.png');
+        await page.waitForTimeout(100); // Brief wait between uploads
+      }
+
+      // After 5 images: input[type="file"] should be removed from DOM entirely
+      // D12 says "removed from the DOM entirely" — not hidden, not display:none, truly absent
+      const inputAfterMax = page.locator('input[type="file"]');
+      await expect(inputAfterMax).not.toBeVisible();
+
+      // Verify 5 img thumbnails are visible (blob: URLs from object-URL previews)
+      const thumbnails = page.locator('img[src*="blob"]');
+      const thumbnailCount = await thumbnails.count();
+      expect(thumbnailCount).toBe(5);
+
+      // Remove one image by clicking its delete badge (×) — there are 5 buttons, get the first one
+      const deleteButtons = page.locator('button').filter({ hasText: '×' });
+      const initialDeleteCount = await deleteButtons.count();
+      expect(initialDeleteCount).toBeGreaterThanOrEqual(5); // At least 5 delete buttons
+
+      await deleteButtons.first().click();
+
+      // After removal, input should return to the DOM and be visible
+      await expect(fileInput).toBeVisible();
+
+      // Verify 4 thumbnails remain
+      const thumbnailsAfterRemoval = page.locator('img[src*="blob"]');
+      const countAfterRemoval = await thumbnailsAfterRemoval.count();
+      expect(countAfterRemoval).toBe(4);
     } finally {
       await context.close();
     }

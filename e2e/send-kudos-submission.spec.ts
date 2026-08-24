@@ -11,6 +11,8 @@ test.describe('Send Kudos Submission & Entry Points (ID-46, ID-47)', () => {
   test('valid submit redirects to /kudos with success toast (ID-46, ID-47)', async ({
     browser,
   }) => {
+    // ID-46/ID-47: Submit succeeds and redirects to /kudos with success toast.
+    // Also extends to cover image upload path: 1-2 images are stored and form is cleared.
     const context = await browser.newContext({ baseURL: 'http://localhost:3200' });
     const page = await context.newPage();
 
@@ -22,6 +24,14 @@ test.describe('Send Kudos Submission & Entry Points (ID-46, ID-47)', () => {
       await fillTitle(page, 'Test Title');
       await fillMessage(page, 'Test message content for submission');
       await selectFirstHashtag(page);
+
+      // ID-12 with-images path: upload 1 image before submission to test Storage upload
+      const fileInput = page.locator('input[type="file"]');
+      await fileInput.setInputFiles('./e2e/fixtures/test-image.png');
+
+      // Wait for thumbnail to appear (img element with blob: URL)
+      const thumbnail = page.locator('img[src*="blob"]').first();
+      await expect(thumbnail).toBeVisible();
 
       const submitButton = page.getByRole('button', { name: /Gửi/i });
       await expect(submitButton).toBeEnabled();

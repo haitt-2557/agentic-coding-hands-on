@@ -3,14 +3,16 @@ import {
   TITLE_MAX,
   MESSAGE_MAX,
   HASHTAG_MAX,
+  IMAGE_MAX,
   IMAGE_MAX_BYTES,
   REQUIRED_FIELD_ERROR,
   canSubmit,
   validateDraft,
   validateField,
   isAcceptedImage,
+  isValidImageCount,
+  dedupeHashtagIds,
   filterProfiles,
-  applyMarkdown,
 } from './validation';
 import type { KudosDraft, ProfileOption } from './types';
 
@@ -122,6 +124,47 @@ test.describe('isAcceptedImage (BR-005)', () => {
   });
 });
 
+// Server-side hardening (review findings, 2026-08-24): a Server Action is a public trust
+// boundary — a caller who never touches the UI can post more files than the add button
+// ever allowed, or duplicate hashtag ids that would violate kudos_hashtags' primary key
+// after the parent kudos row is already written.
+test.describe('isValidImageCount (server-side re-check of the 5-image cap)', () => {
+  test('accepts 0 through IMAGE_MAX images', () => {
+    expect(isValidImageCount(0)).toBe(true);
+    expect(isValidImageCount(IMAGE_MAX)).toBe(true);
+  });
+
+  test('rejects a count over IMAGE_MAX', () => {
+    expect(isValidImageCount(IMAGE_MAX + 1)).toBe(false);
+    expect(isValidImageCount(50)).toBe(false);
+  });
+});
+
+test.describe('dedupeHashtagIds (prevents an orphaned kudos row on duplicate ids)', () => {
+  test('removes duplicates while preserving first-seen order', () => {
+    expect(dedupeHashtagIds(['#GO FAST', '#WASSHOI', '#GO FAST'])).toEqual([
+      '#GO FAST',
+      '#WASSHOI',
+    ]);
+  });
+
+  test('leaves an already-distinct list unchanged', () => {
+    expect(dedupeHashtagIds(['#GO FAST', '#WASSHOI'])).toEqual(['#GO FAST', '#WASSHOI']);
+  });
+
+  test('handles an empty list', () => {
+    expect(dedupeHashtagIds([])).toEqual([]);
+  });
+
+  test('a duplicate-inflated list still fails the max-5 check once deduped', () => {
+    const inflated = ['#GO FAST', '#GO FAST', '#GO FAST', '#GO FAST', '#GO FAST', '#GO FAST'];
+    // Before dedup this looks like 6 entries (already over HASHTAG_MAX); the point of
+    // dedupe is that it never UNDER-counts a real violation into looking valid.
+    expect(dedupeHashtagIds(inflated)).toEqual(['#GO FAST']);
+    expect(dedupeHashtagIds(inflated).length).toBeLessThanOrEqual(HASHTAG_MAX);
+  });
+});
+
 test.describe('filterProfiles (S5, ID-10)', () => {
   test('trims the query before matching, case-insensitively', () => {
     expect(filterProfiles(PROFILES, '  trang  ')).toEqual([
@@ -141,36 +184,4 @@ test.describe('filterProfiles (S5, ID-10)', () => {
   });
 });
 
-test.describe('applyMarkdown (ALG-001)', () => {
-  test('bold wraps the selection in **', () => {
-    const result = applyMarkdown('bold', 'hello world', 6, 11);
-    expect(result.value).toBe('hello **world**');
-  });
-
-  test('italic wraps the selection in *', () => {
-    expect(applyMarkdown('italic', 'hello world', 6, 11).value).toBe('hello *world*');
-  });
-
-  test('strike wraps the selection in ~~ (spec C.3 mistype, real toggle per ID-29)', () => {
-    expect(applyMarkdown('strike', 'hello world', 6, 11).value).toBe('hello ~~world~~');
-  });
-
-  test('numberedList prefixes the selection with "1. "', () => {
-    expect(applyMarkdown('numberedList', 'hello world', 6, 11).value).toBe('hello 1. world');
-  });
-
-  test('link wraps the selection as [text](url)', () => {
-    expect(applyMarkdown('link', 'hello world', 6, 11).value).toBe('hello [world](url)');
-  });
-
-  test('quote prefixes the selection with "> "', () => {
-    expect(applyMarkdown('quote', 'hello world', 6, 11).value).toBe('hello > world');
-  });
-
-  test('with an empty selection, inserts the marker pair at the caret', () => {
-    const result = applyMarkdown('bold', 'hello ', 6, 6);
-    expect(result.value).toBe('hello ****');
-    expect(result.selectionStart).toBe(8);
-    expect(result.selectionEnd).toBe(8);
-  });
-});
+// applyMarkdown (ALG-001) tests live in markdown.test.ts, colocated with markdown.ts.

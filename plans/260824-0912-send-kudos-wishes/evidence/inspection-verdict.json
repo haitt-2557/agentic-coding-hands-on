@@ -1,0 +1,88 @@
+{
+  "score": 6,
+  "criticalCount": 1,
+  "decision": "REWORK",
+  "acceptanceCovered": [
+    "GET /kudos/send renders the form when a real Supabase session is present (TC ID-0)",
+    "GET /kudos/send redirects an unauthenticated visitor to /login (TC ID-1)",
+    "Field order matches the frame (TC ID-3)",
+    "Recipient autocomplete, placeholder, trim (TC ID-8, ID-10, ID-25, ID-26)",
+    "Gửi disabled until all required fields filled (TC ID-48, ID-49)",
+    "Empty required field shows red border + \"Không được để trống\" (TC ID-7, ID-11, ID-14, ID-50-ID-56)",
+    "Hashtags picked by toggle, max 5, disable at 5, removable (TC ID-15-17, ID-34-36)",
+    "Message toolbar markdown transforms + 1000 char cap (partial of AC 8)",
+    "Anonymous checkbox default unchecked + nickname reveal/hide (TC ID-6, ID-41-44)",
+    "Hủy discards and returns to /kudos without writing (TC ID-45)",
+    "Valid submit with zero images writes row, redirects to /kudos with toast (TC ID-46, ID-47, no-image path only)",
+    "RLS prevents a client from writing a kudos row attributed to another user"
+  ],
+  "regressionChecked": [
+    "kudos-action-bar.tsx pill link + overlay does not intercept clicks on the adjacent Sunner-search input",
+    "quick-action-widget.tsx Viết Kudos entry point still opens the dropdown menu before navigating",
+    "playwright.config.ts project split keeps send-kudos, kudos-board, and prelaunch-gate suites mutually exclusive by testMatch",
+    "supabase/seed.sql profile/hashtag inserts use ON CONFLICT DO NOTHING, idempotent across resets",
+    "RLS select policies on kudos/kudos_hashtags/kudos_images all re-check the parent kudos.sender_id, no cross-user read path",
+    "Storage bucket path convention (userId prefix) matches between storage.ts upload code and the bucket's RLS policy expression"
+  ],
+  "contractStatus": "OK",
+  "refuted": [],
+  "unproven": [
+    "Images: .jpg/.png accepted, .pdf/.mp4/.txt rejected with format error, max 5 hides/reappears (TC ID-18-24, ID-37-40, ID-55) — the two e2e tests titled for this only assert input[type=file] visibility, no file is ever attached, no rejection/acceptance/hide behavior is asserted",
+    "Valid submit with images uploads to Supabase Storage and inserts kudos_images rows (TC ID-46/47, with-images half) — never exercised by any test in the suite, only by code reading"
+  ],
+  "reachableRegressions": [
+    "Server Action submit-kudos.ts never re-validates input.images.length against IMAGE_MAX=5, so an authenticated user calling the action directly (bypassing the UI's add-button-hides-at-5 control) can upload unbounded image files per kudos to the private bucket",
+    "Duplicate hashtagIds in a direct Server Action call are not deduped server-side; the kudos row inserts successfully but the batched kudos_hashtags insert then fails on its (kudos_id, hashtag_id) primary key, leaving an orphaned kudos row with zero hashtags (no compensating rollback across the three separate insert calls)"
+  ],
+  "findings": [
+    {
+      "severity": "Critical",
+      "category": "Logic",
+      "location": "e2e/send-kudos-interactions.spec.ts:81-100",
+      "summary": "Test titled for image format accept/reject (ID-18-24, ID-55) only asserts the file input is visible; no file is ever attached, no format error or acceptance is asserted",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "Critical",
+      "category": "Logic",
+      "location": "e2e/send-kudos-interactions.spec.ts:102-122",
+      "summary": "Test titled for add-button-hides-at-5/reappears-on-removal (ID-19, ID-38, ID-40) only asserts the file input is visible; comment admits the real test was never written",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "High",
+      "category": "Security",
+      "location": "lib/kudos/send/submit-kudos.ts:41-56",
+      "summary": "Server Action never checks input.images.length against IMAGE_MAX, contradicting the file's own comment that every check re-runs server-side; allows unbounded Storage writes per submission via direct action invocation",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "High",
+      "category": "Logic",
+      "location": "lib/kudos/send/submit-kudos.ts:81-87",
+      "summary": "Duplicate hashtagIds are not deduped before insert; the batched kudos_hashtags insert fails atomically on the join table's primary key while the parent kudos row (already inserted in a separate call) is not rolled back, leaving an orphaned <1-hashtag row",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "Medium",
+      "category": "Structure",
+      "location": "components/kudos/send/anonymous-toggle.tsx:6-9",
+      "summary": "Comment describes the short anonymous-label decision that was later reversed in clarifications.md third pass; actual dictionary copy is already correct (long form), only the comment is stale",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "Low",
+      "category": "Structure",
+      "location": "lib/i18n/dictionaries/en.ts:65-112",
+      "summary": "Nearly all sendKudos.* keys hold untranslated Vietnamese copy in the English dictionary; consistent with a pre-existing pattern elsewhere in the app, not a regression introduced by this feature",
+      "disposition": "Defer"
+    },
+    {
+      "severity": "Low",
+      "category": "Security",
+      "location": "components/kudos/kudos-action-bar.tsx:35-39",
+      "summary": "readOnly input after the overlay Link in DOM order is a focusable but purposeless keyboard tab stop; not broken, minor a11y polish only",
+      "disposition": "Defer"
+    }
+  ]
+}

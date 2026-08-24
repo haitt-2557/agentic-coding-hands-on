@@ -103,6 +103,27 @@ export function isAcceptedImage(file: File): boolean {
   );
 }
 
+/** BR-005/SM-001 — the client hides the add button at 5 images, but that is a UI affordance,
+ * not a guarantee: a Server Action is a public trust boundary reachable by a caller who never
+ * touches the form. Re-checked here so a payload with more than `IMAGE_MAX` files is rejected
+ * regardless of what the client enforced (review finding, 2026-08-24). */
+export function isValidImageCount(count: number): boolean {
+  return count <= IMAGE_MAX;
+}
+
+/**
+ * Removes duplicate hashtag ids, keeping first-seen order. A duplicate reaching the
+ * `kudos_hashtags` insert violates its `(kudos_id, hashtag_id)` primary key — and because the
+ * parent `kudos` row is inserted first (it must exist before either join table can reference
+ * it) and the three inserts are not transactional, that failure would leave an already-written
+ * `kudos` row with fewer hashtags than BR-004 requires, or none at all. Dedupe BEFORE any
+ * count/min-max check runs (and before the insert), so a duplicate-inflated payload is judged
+ * on its real distinct count, never on the raw array length (review finding, 2026-08-24).
+ */
+export function dedupeHashtagIds(hashtagIds: string[]): string[] {
+  return Array.from(new Set(hashtagIds));
+}
+
 /** S5 / ID-10 — trims the query first; an empty (or all-whitespace) query yields no options
  * rather than the full list, matching the closed-by-default autocomplete. */
 export function filterProfiles(profiles: ProfileOption[], query: string): ProfileOption[] {
