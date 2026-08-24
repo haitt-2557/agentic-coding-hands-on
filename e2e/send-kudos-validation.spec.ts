@@ -127,6 +127,9 @@ test.describe('Send Kudos Form Validation (ID-7, ID-11, ID-14, ID-50–ID-56)', 
   });
 
   test('no hashtag selected shows validation error on blur (ID-56)', async ({ browser }) => {
+    // NOTE: Same C1 resolution as other validation tests — blur-triggered, not submit-click.
+    // ID-56 requires error message on Hashtag field. Hashtag-picker opens on button click (tsx:81)
+    // and closes (calling onBlur, tsx:39) when pointerdown fires outside the component root.
     const context = await browser.newContext({ baseURL: 'http://localhost:3200' });
     const page = await context.newPage();
 
@@ -139,12 +142,27 @@ test.describe('Send Kudos Form Validation (ID-7, ID-11, ID-14, ID-50–ID-56)', 
       await fillTitle(page, 'Test Title');
       await fillMessage(page, 'Test message content');
 
-      // C1 / ID-56: Hashtag validation on blur. Since hashtag is a listbox (D3),
-      // validation is triggered when user tries to submit without selecting.
-      // The submit button will be disabled, so this assertion verifies the form
-      // correctly tracks hashtag as a required field.
-      const submitButton = page.getByRole('button', { name: /Gửi/i });
-      await expect(submitButton).toBeDisabled(); // Required field (hashtag) not filled
+      // ID-56: Hashtag validation. Click the button containing "Hashtag" to open the picker
+      // (The button has two text lines: "Hashtag" and "Tối đa 5", from hashtag-picker.tsx:85-86)
+      const buttons = page.getByRole('button');
+      let hashtagButton = null;
+      for (let i = 0; i < await buttons.count(); i++) {
+        const text = await buttons.nth(i).textContent();
+        if (text && text.includes('Hashtag')) {
+          hashtagButton = buttons.nth(i);
+          break;
+        }
+      }
+
+      if (hashtagButton) {
+        await hashtagButton.click();
+        // Click elsewhere to close and trigger onBlur (pointerdown outside the component)
+        await page.locator('body').click({ position: { x: 0, y: 0 } });
+      }
+
+      // Verify error message appears (hashtag-picker.tsx:112 renders FieldErrorText when error is set)
+      const errorMsg = page.locator('text=Không được để trống').first();
+      await expect(errorMsg).toBeVisible();
     } finally {
       await context.close();
     }
