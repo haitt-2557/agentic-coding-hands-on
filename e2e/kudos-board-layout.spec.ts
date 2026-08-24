@@ -157,5 +157,56 @@ test.describe('Kudos Board Page /kudos', () => {
       const searchPlaceholder = await spotlightSearchInput.getAttribute('placeholder');
       expect(searchPlaceholder).toContain('Tìm kiếm');
     });
+
+    // REGRESSION — spotlight names escaped the board. Four of the 106 nodes carry a relY past
+    // BOARD_HEIGHT (555/561/578/593 vs 548, lib/kudos/spotlight-names.ts), and the board had no
+    // clip, so they painted below the bordered box against the page ground.
+    //
+    // This asserts PAINT, not layout, and the distinction is the whole test: `overflow: hidden`
+    // does not change an element's bounding box, so a boundingBox() assertion would still see
+    // those four below the board and fail even when the bug is fixed. `elementFromPoint` honours
+    // clipping — a clipped node is not hit-testable at its own centre — so this passes only when
+    // the names are genuinely no longer painted outside.
+    test('no spotlight name paints outside the board (regression)', async ({ page }) => {
+      await page.goto('/kudos');
+
+      const board = page.getByTestId('spotlight-board');
+      await board.scrollIntoViewIfNeeded();
+      await expect(board).toBeVisible();
+
+      const nodeCount = await board.locator('[role="button"]').count();
+      expect(nodeCount).toBeGreaterThan(100);
+
+      const escaped = await page.evaluate(() => {
+        const board = document.querySelector('[data-testid="spotlight-board"]');
+        if (!board) return ['board not found'];
+        const br = board.getBoundingClientRect();
+        const out: string[] = [];
+
+        for (const el of Array.from(board.querySelectorAll('[role="button"]'))) {
+          const r = el.getBoundingClientRect();
+          const laidOutBeyond =
+            r.bottom > br.bottom + 1 ||
+            r.top < br.top - 1 ||
+            r.right > br.right + 1 ||
+            r.left < br.left - 1;
+          if (!laidOutBeyond) continue;
+
+          // Laid out past the board is fine on its own — what matters is whether it still
+          // paints there. If the node is hit-testable at its own centre, it is visible outside.
+          const cx = r.left + r.width / 2;
+          const cy = r.top + r.height / 2;
+          if (cx < 0 || cy < 0 || cx > window.innerWidth || cy > window.innerHeight) continue;
+          const hit = document.elementFromPoint(cx, cy);
+          if (hit === el || el.contains(hit)) out.push((el.textContent ?? '').trim());
+        }
+        return out;
+      });
+
+      expect(
+        escaped,
+        `these spotlight names paint outside the board: ${escaped.join(', ')}`
+      ).toEqual([]);
+    });
   });
 });
