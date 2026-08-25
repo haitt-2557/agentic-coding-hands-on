@@ -11,6 +11,8 @@ export default defineConfig({
   retries: isCI ? 2 : 0,
   workers: isCI ? 1 : undefined,
   reporter: 'list',
+  // Defect D (PGRST303 "JWT issued at future"): see e2e/support/docker-clock-skew-guard.ts.
+  globalSetup: './e2e/support/global-setup.ts',
 
   projects: [
     {

@@ -1,0 +1,11 @@
+{
+  "mode": "single",
+  "intents": [
+    {
+      "actor": "authenticated board viewer",
+      "action_domain": "like / unlike a kudos on the Live board",
+      "outcome": "the like persists across reloads, the per-kudos count updates, and the kudos sender's heart ledger is credited or debited by the exact amount that like granted"
+    }
+  ],
+  "justification": "Conjunction smell-flag on the raw task text (\"Implement like kudos use Supabase local project\") fires neither an ALWAYS-fire phrase nor a NEVER-fire CRUD pair, so the decision falls to enumeration. Enumeration yields exactly ONE distinct user-facing intent: toggling a like on a kudos card. The other elements resolved in clarifications.md are not separate intents but constituent rules or displays of that same intent - the special-day +2 multiplier is a pricing rule inside the like action (and ships with no admin UI, so it exposes no second user-facing action); the own-kudos disable and the one-like-per-user constraint are guards on the same action; the sidebar \"So tim ban nhan duoc\" row is a read-only projection of the ledger the like action writes, not an action of its own. Count = 1 confirmed -> SINGLE."
+}

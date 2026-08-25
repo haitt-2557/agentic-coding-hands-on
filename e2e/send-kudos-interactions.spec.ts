@@ -110,19 +110,21 @@ test.describe('Send Kudos Form Interactions (ID-8–10, ID-15–24, ID-25–26, 
       const deleteBtn2 = page.locator('button').filter({ hasText: '×' }).first();
       await deleteBtn2.click();
 
-      // Test 3: Upload rejected .pdf — error should appear
+      // Test 3: Upload rejected .pdf — error should appear.
+      // `:not(#__next-route-announcer__)` excludes Next.js's own injected route announcer,
+      // which also carries role="alert" and otherwise trips Playwright strict mode.
       await fileInput.setInputFiles('./e2e/fixtures/test-file.pdf');
-      const pdfError = page.locator('[role="alert"]');
+      const pdfError = page.locator('[role="alert"]:not(#__next-route-announcer__)');
       await expect(pdfError).toBeVisible();
 
       // Test 4: Upload rejected .mp4 — error should appear
       await fileInput.setInputFiles('./e2e/fixtures/test-file.mp4');
-      const mp4Error = page.locator('[role="alert"]');
+      const mp4Error = page.locator('[role="alert"]:not(#__next-route-announcer__)');
       await expect(mp4Error).toBeVisible();
 
       // Test 5: Upload rejected .txt — error should appear
       await fileInput.setInputFiles('./e2e/fixtures/test-file.txt');
-      const txtError = page.locator('[role="alert"]');
+      const txtError = page.locator('[role="alert"]:not(#__next-route-announcer__)');
       await expect(txtError).toBeVisible();
     } finally {
       await context.close();

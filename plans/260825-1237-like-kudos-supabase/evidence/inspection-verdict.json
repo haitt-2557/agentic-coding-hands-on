@@ -1,0 +1,42 @@
+{
+  "score": 9,
+  "criticalCount": 0,
+  "decision": "SEALED",
+  "acceptanceCovered": [
+    "Clicking the heart on a kudos card persists a like row and the new count survives a full page reload (TC 7a7ec63e). — e2e/kudos-board-like-persistence.spec.ts SC-001 (re-run, passed)",
+    "Clicking the heart again removes the like and the count returns to its pre-like value, also surviving reload (TC 7a7ec63e). — SC-001, same test, second half (re-run, passed)",
+    "The heart icon renders gray when not liked by the viewer and red when liked, with aria-pressed reflecting the persisted state (TC 7a7ec63e). — SC-001 (aria-pressed asserted true/false across both reloads) plus kudos-board-feed-interactions.spec.ts's 'clicking heart toggles count increment on first click, decrement on second' (re-run, passed)",
+    "A viewer whose resolved profile slug equals the kudos senderId sees the heart button disabled and cannot like it (TC 63645b03, BR-002). — SC-003 in kudos-board-like-persistence.spec.ts (re-run, passed; now exercises the RPC-based resolveViewerSlug path end to end)",
+    "A second like attempt by the same user on the same kudos never creates a second row; the unique constraint holds at the database level (TC 91e102ba). — SC-002 in kudos-board-like-rules.spec.ts (re-run, passed)",
+    "An unauthenticated visitor can load /kudos and read real like counts, and the heart button renders disabled with an explanatory aria-label (TC 71b3ef43, clarifications decision 5). — SC-004 in kudos-board-like-persistence.spec.ts (re-run, passed)",
+    "Each like credits the kudos SENDER's heart ledger by 1 on a normal day (spec C.4.1 grant sentence, clarifications decision 3). — SC-008 in kudos-board-like-sidebar.spec.ts (weighted-sum ledger query against the fixture user's authored kudos, re-run, passed) plus lib/kudos/likes/heart-math.test.ts's 'a normal-day like grants 1 heart' unit case",
+    "A like placed while a special_days row covers the current date credits 2 instead of 1, and stores is_special=true on the like row (TC 31936b72). — SC-005 in kudos-board-like-rules.spec.ts (re-run, passed)",
+    "Unliking revokes exactly the amount that like granted, read from the like row's stored is_special flag, not recomputed from today's date (spec C.4.1 QA note). — SC-006 in kudos-board-like-rules.spec.ts (re-run, passed)",
+    "The sidebar row \"Số tim bạn nhận được:\" reads the real ledger for the signed-in viewer; the other four D.1 rows stay the static 25 placeholders (clarifications decision 6). — SC-008 in kudos-board-like-sidebar.spec.ts (both the authenticated and unauthenticated cases, re-run, passed) plus lib/kudos/viewer-stats.test.ts's buildStatRows cases",
+    "The displayed per-card count equals the record's static heartCount plus the real like delta (clarifications decision 1). — FR-003 test in kudos-board-like-persistence.spec.ts (re-run, passed)",
+    "RLS prevents a client from writing a kudos_likes row attributed to another user. — SC-007 in kudos-board-like-rules.spec.ts (re-run, passed)",
+    "profiles.auth_user_id is no longer Data-API-readable by anon or authenticated — independently verified via psql (attacl empty on the column, relacl shows authenticated has no table-level SELECT, live SET ROLE + SELECT attempts both return real 'permission denied for table profiles' for anon and authenticated)",
+    "resolve_viewer_slug/is_static_kudos_author/is_special_day EXECUTE is no longer PUBLIC-default — independently verified via pg_proc.proacl: is_special_day has zero role grants, the other two grant only to authenticated, anon has none"
+  ],
+  "regressionChecked": [
+    "Full kudos-board Playwright project independently re-run: 33/33 passed (includes all like-* specs, board layout/interactions/feed-interactions) — no regression from the profiles grant narrowing or the RPC-based slug resolution",
+    "lib/kudos/send/queries.ts's listProfiles() selects exactly (id, display_name, department) — the same three columns the new column-scoped grant provides — confirmed by reading the file; independently re-ran the full send-kudos project (24/24 passed), proving the F014 recipient picker is unaffected by the profiles grant rework",
+    "Unit suite independently re-run via `npx playwright test --config playwright.unit.config.ts`: 133/133 passed",
+    "tsc --noEmit independently re-run: exit 0",
+    "eslint independently re-run on every file this cycle touched: 0 errors (one pre-existing unused-var warning in kudos-board-like-rules.spec.ts:92, predates this cycle's edits, not introduced by the rework)",
+    "kudos_likes_set_is_special's residual PUBLIC EXECUTE (proacl empty = default) independently proven harmless, not merely assumed: `select public.kudos_likes_set_is_special();` was attempted directly via psql as both `authenticated` and as the table owner (postgres) — both fail with 'ERROR: trigger functions can only be called as triggers', a Postgres language-level restriction (prokind checked: it returns pseudo-type `trigger`) that blocks direct invocation regardless of EXECUTE privilege. No fix needed; confirmed, not just plausible."
+  ],
+  "contractStatus": "OK",
+  "refuted": [],
+  "unproven": [],
+  "reachableRegressions": [],
+  "findings": [
+    {
+      "severity": "Low",
+      "category": "Structure",
+      "location": "e2e/kudos-board-like-rules.spec.ts:1-328",
+      "summary": "File is 328 lines, over the project's 200-line guideline for code files (already 262 before this cycle's added BR-002 test). Consistent with existing precedent elsewhere in this repo's e2e suite (send-kudos-interactions.spec.ts is 261 lines, kudos-board-feed-interactions.spec.ts is 244) — test files carrying rich scenario/defect-history comments routinely exceed the guideline here. The new test's placement was deliberate, reusing SC-007's sign-in/createServerClient fixture rather than duplicating it in a new file. Not blocking; a future split along SC-002/SC-005/SC-006/SC-007/BR-002 lines would be reasonable but is not required.",
+      "disposition": "Defer"
+    }
+  ]
+}

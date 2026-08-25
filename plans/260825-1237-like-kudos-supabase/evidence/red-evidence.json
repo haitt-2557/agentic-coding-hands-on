@@ -1,0 +1,9 @@
+{
+  "redTestFiles": [
+    "e2e/kudos-board-like-persistence.spec.ts"
+  ],
+  "redCommand": "npx playwright test --project=kudos-board e2e/kudos-board-like-persistence.spec.ts",
+  "redExitCode": 1,
+  "redFailure": "3 failed, 1 passed — all three failures are assertion-caused and behavioural, verified by the orchestrator re-running the suite directly. (1) SC-001 FR-001/FR-002: expect(reloadedCount).toBe(initialCount + 1) — Expected 1501, Received 1500; the heart count reverts across a page reload because the state is useState(false) only and is never persisted. (2) SC-003 BR-002: expect(locator).toBeDisabled() failed — Received: enabled; the heart on the kudos sent by the signed-in user resolves to <button aria-pressed=\"false\" aria-label=\"Thả tim kudos này (like)\"> and is enabled, because no profiles.auth_user_id bridge exists to match auth.uid() to the sender slug. (3) SC-004 FR-005: expect(enabledHearts.count()).toBe(0) — Expected 0, Received 3; with no session every heart still renders enabled, because the disable rule reads the client-side mock session instead of real auth. No failure was caused by a missing table, a missing helper, a browser-install problem or a dev-server error.",
+  "capturedAt": "2026-08-25T13:52:00Z"
+}

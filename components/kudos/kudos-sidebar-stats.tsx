@@ -1,25 +1,34 @@
+'use client';
+
 // mms_D.1 (design/kudos-content.md §6.1) — sidebar stat rows: FR-013, dom-contract F39/F41.
 // Frame is truth over the spec CSV's six rows: five verbatim labels, all value `25` (design
 // defect #3/#14). D.1.4 additionally carries an inline heart + `x2` artwork and an 80px-wide
 // value box (not 46px like the other rows) — the frame's own irregular layout, reproduced as
 // drawn rather than normalised. The `Mở Secret Box` button is a real, focusable, inert trigger
 // (FR-018) — frame wins over the spec CSV's `Mở quà` (design defect #2).
+// FR-008 — row 3 ("Số tim bạn nhận được:") reads the real weighted like ledger for the signed-in
+// viewer via `useLikes()` (components/kudos/likes-provider.tsx, computed in phase 03/04). The
+// other four rows stay the static placeholder on purpose (clarifications decision 6).
 
 import { Fragment } from 'react';
 import Image from 'next/image';
-import { STAT_ROWS } from '@/lib/kudos/viewer-stats';
+import { buildStatRows } from '@/lib/kudos/viewer-stats';
+import { useLikes } from '@/components/kudos/likes-provider';
 
 // design/kudos-content.md §6.1 — D.1.4 "Số tim bạn nhận được:" is the third of five rows and the
 // only one that inserts the heart+x2 artwork and the wider 80px value box.
 const HEART_ROW_INDEX = 2;
 
 export function KudosSidebarStats() {
+  const { heartsReceived } = useLikes();
+  const rows = buildStatRows(heartsReceived);
+
   return (
     // mm:2940:13489
     <div className="flex w-full flex-col gap-4 rounded-[17px] border border-border-accent bg-kudos-sidebar-bg p-6">
       {/* mm:2940:13490 */}
       <div className="flex w-full flex-col gap-4">
-        {STAT_ROWS.map((row, index) => (
+        {rows.map((row, index) => (
           <Fragment key={row.label}>
             {/* mm:2940:1349{1,2,3,6,7} */}
             <div className="flex w-full items-center justify-between gap-2">

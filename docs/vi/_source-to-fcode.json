@@ -1,4 +1,38 @@
 {
-  "generated_at": "2026-08-18T08:38:06Z",
-  "index": {}
+  "generated_at": "2026-08-25T13:42:50Z",
+  "index": {
+    "app/kudos/page.tsx": [
+      "F015"
+    ],
+    "app/kudos/send/page.tsx": [
+      "F014"
+    ],
+    "components/kudos/kudos-action-bar.tsx": [
+      "F014"
+    ],
+    "components/kudos/kudos-card-actions.tsx": [
+      "F015"
+    ],
+    "components/kudos/kudos-card.tsx": [
+      "F015"
+    ],
+    "components/layout/quick-action-widget.tsx": [
+      "F014"
+    ],
+    "lib/kudos/kudos-records.ts": [
+      "F015"
+    ],
+    "lib/kudos/send/auth-gate.ts": [
+      "F015"
+    ],
+    "lib/kudos/viewer-stats.ts": [
+      "F015"
+    ],
+    "supabase/migrations/20260824031123_kudos_send_tables.sql": [
+      "F015"
+    ],
+    "supabase/seed.sql": [
+      "F014"
+    ]
+  }
 }
