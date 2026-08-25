@@ -53,6 +53,14 @@
     {
       "fcode": "F013",
       "slug": "F013_KudosLiveBoard"
+    },
+    {
+      "fcode": "F014",
+      "slug": "F014_SendKudosWishes"
+    },
+    {
+      "fcode": "F015",
+      "slug": "F015_LikeKudos"
     }
   ]
 }

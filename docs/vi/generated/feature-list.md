@@ -52,6 +52,7 @@ Supabase Auth local (`/login`, `app/auth/callback/route.ts`). Feature-spec đầ
 | F012_AwardSystemPage | Award System Page | ui | TypeScript/TSX | my-app | P1 |
 | F013_KudosLiveBoard | Kudos Live Board | ui | TypeScript/TSX | my-app | P1 |
 | F014_SendKudosWishes | Send Kudos Wishes | ui | TypeScript/TSX | my-app | P1 |
+| F015_LikeKudos | Like Kudos (thả tim) | mixed | TypeScript/TSX + SQL | my-app | P1 |
 
 ## Feature Details
 
@@ -569,7 +570,7 @@ riêng, đã ghi ở Next Steps.
 
 ## Summary
 
-- **Total Features**: 14
+- **Total Features**: 15
 - **Total Screens**: 8
 - **Total User Stories**: 23
 - **Total Routes**: 8 (ROUTE001–ROUTE005, ROUTE007–ROUTE009; ROUTE006 `/_not-found` loại khỏi mapping — tự sinh bởi Next.js, không có source file, cùng phạm vi loại trừ đã áp dụng ở `screen-list.md`)
@@ -619,3 +620,51 @@ edge-cases}.md`) — tạo mới thư mục per-feature nằm ngoài quyền sur
 - [x] Every permission maps to a feature (F###) — PERM001/PERM002 → F007, PERM003 → F008
 
 **Ghi chú (lượt Send Kudos wishes, 2026-08-24)**: `Total Features` 13 → 14 cho `F014_SendKudosWishes`. Các con số `Total Screens`/`Routes`/`Data Models`/`Permissions` GIỮ NGUYÊN ở lượt này và đang THIẾU so với thực tế: feature này thêm 1 screen, 1 route, 3 bảng và 1 permission nhưng chưa mã nào được cấp — các inventory sinh tự động (`screen-list.md`, `route-list.md`, `entities.md`, `permissions-matrix.md`) thuộc quyền surgical-edit của doc-writer/rebuild-spec, không phải của bước promote. Ghi rõ ở đây để khoảng lệch không bị đọc thành đã hoàn tất.
+
+---
+
+### F015_LikeKudos: Like Kudos (thả tim) — thêm 2026-08-25
+
+**Type**: mixed
+**Description**: Lượt thả tim trên live board `/kudos` trở thành dữ liệu thật lưu trong Supabase.
+Trước feature này, nút trái tim chỉ là `useState(false)` trong `components/kudos/kudos-card-actions.tsx`
+— bấm thì số nhảy, tải lại trang là mất sạch. F015 thêm bảng `kudos_likes` (một dòng = một lượt thả
+tim của một người cho một kudos, unique trên cặp `(kudos_id, user_id)`), bảng `special_days` để cấu
+hình ngày nhân đôi tim, và cột `profiles.auth_user_id` làm cầu nối giữa `auth.uid()` với profile slug.
+
+Quy tắc nghiệp vụ lấy từ spec row C.4.1 `Hearts` của frame `MaZUn5xHXZ`: mỗi người chỉ thả một tim
+cho một kudos; người gửi kudos không được tự thả tim cho bài của mình (chặn ở cả UI lẫn database);
+mỗi lượt thả tim cộng 1 tim cho **người gửi** kudos, hoặc 2 tim nếu rơi vào ngày đặc biệt; huỷ tim
+thu hồi **đúng số đã cộng**, đọc từ cờ `is_special` đóng cứng trên chính dòng lượt tim đó chứ không
+tính lại theo ngày hiện tại.
+
+Đây là feature ĐẦU TIÊN enforce một quy tắc nghiệp vụ ở tầng database thay vì chỉ ở client: trước
+đó nút tim bị vô hiệu hoá dựa trên mock session trong `localStorage`, thứ ai mở DevTools cũng sửa
+được. `/kudos` vẫn công khai — khách chưa đăng nhập đọc được bảng và thấy số tim thật, chỉ hành động
+thả tim là bị chặn (không redirect sang `/login`).
+
+**Ranh giới có chủ ý**: bảng live board VẪN đọc nội dung thẻ từ `lib/kudos/kudos-records.ts` (9 record
+tĩnh). F015 chỉ thay phần lượt thả tim. Seam mà F014 ghi nhận — "kudos bạn gửi không xuất hiện trên
+bảng" — vẫn còn nguyên. Vì thế `kudos_likes.kudos_id` để kiểu `text` chứ không phải khoá ngoại sang
+`kudos.id`; ép khoá ngoại sẽ buộc phải seed 9 record tĩnh vào database, tức là làm luôn phần rewire
+đã hoãn.
+
+**Sai lệch so với spec (có chủ ý, ghi lại)**: row C.4.1 tự mâu thuẫn — câu cộng tim ghi "tài khoản
+gửi", câu thu hồi ghi "tài khoản nhận". Theo clarifications quyết định 3, cộng cho **người gửi**;
+chữ "nhận" ở câu thu hồi coi là lỗi soạn spec.
+
+**Chưa làm**: chưa có màn admin cho `special_days` (cấu hình bằng SQL — không frame MoMorph nào vẽ
+màn này); quy tắc "hoa thị" vẫn ăn theo `kudosReceived` tĩnh; bốn dòng còn lại của khối thống kê
+sidebar vẫn là placeholder `25`, chỉ dòng "Số tim bạn nhận được" đọc sổ cái thật.
+
+**User stories**: US001…US005 trong `docs/vi/features/F015_LikeKudos/technical-spec.md`
+**Screens**: SCR008_KudosLiveBoard (dùng lại, không thêm màn mới)
+
+**Ghi chú (lượt Like Kudos, 2026-08-25)**: `Total Features` 14 → 15 cho `F015_LikeKudos` — con số
+14 ở lượt trước đã thiếu tính chính feature này dù bảng Feature Hierarchy đã có dòng F015.
+`Total Screens`/`Routes`/`Permissions` GIỮ NGUYÊN đúng: không route/màn hình mới, không mã
+`PERM###` mới được cấp (xem `permissions.md` § Delta Thả tim Kudos). Khác với lượt F014 — lượt
+này `entities.md` ĐÃ được cập nhật (§ Pending, doc-writer) để ghi nhận 3 bảng mới
+(`kudos_likes`, `special_days`, `kudos_static_authors`) và cột mới `profiles.auth_user_id`, cùng
+lúc backfill luôn 5 bảng còn thiếu từ F014 — `Total Data Models` ở trên vẫn giữ `1` vì các bảng
+này chưa qua rebuild-spec để cấp mã `MODEL###` chính thức.
