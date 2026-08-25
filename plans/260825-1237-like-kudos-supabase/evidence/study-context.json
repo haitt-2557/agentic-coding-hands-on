@@ -1,0 +1,49 @@
+{
+  "task": "Implement the Kudos like (thả tim) feature on the Live board (MoMorph screen MaZUn5xHXZ), persisting likes and the resulting heart ledger to the local Supabase project. Spec row C.4.1 Hearts is authoritative.",
+  "mode": "interactive",
+  "acceptanceCriteria": [
+    "Clicking the heart on a kudos card persists a like row and the new count survives a full page reload (TC 7a7ec63e).",
+    "Clicking the heart again removes the like and the count returns to its pre-like value, also surviving reload (TC 7a7ec63e).",
+    "The heart icon renders gray when not liked by the viewer and red when liked, with aria-pressed reflecting the persisted state (TC 7a7ec63e).",
+    "A viewer whose resolved profile slug equals the kudos senderId sees the heart button disabled and cannot like it (TC 63645b03, BR-002).",
+    "A second like attempt by the same user on the same kudos never creates a second row; the unique constraint holds at the database level (TC 91e102ba).",
+    "An unauthenticated visitor can load /kudos and read real like counts, and the heart button renders disabled with an explanatory aria-label (TC 71b3ef43, clarifications decision 5).",
+    "Each like credits the kudos SENDER's heart ledger by 1 on a normal day (spec C.4.1 grant sentence, clarifications decision 3).",
+    "A like placed while a special_days row covers the current date credits 2 instead of 1, and stores is_special=true on the like row (TC 31936b72).",
+    "Unliking revokes exactly the amount that like granted, read from the like row's stored is_special flag, not recomputed from today's date (spec C.4.1 QA note).",
+    "The sidebar row \"Số tim bạn nhận được:\" reads the real ledger for the signed-in viewer; the other four D.1 rows stay the static 25 placeholders (clarifications decision 6).",
+    "The displayed per-card count equals the record's static heartCount plus the real like delta (clarifications decision 1).",
+    "RLS prevents a client from writing a kudos_likes row attributed to another user."
+  ],
+  "touchpoints": [
+    "supabase/migrations/* (new: kudos_likes table, special_days table, profiles.auth_user_id column, RLS policies, grants)",
+    "supabase/seed.sql (seed profiles.auth_user_id for the e2e fixture user; special_days seeded empty)",
+    "lib/kudos/likes/* (new: like queries, toggle server action, special-day resolution, heart-credit arithmetic)",
+    "lib/kudos/viewer-identity.ts (new: resolve auth.uid() -> profile slug)",
+    "components/kudos/kudos-card-actions.tsx (heart becomes persisted; own-kudos disable moves off the mock session)",
+    "components/kudos/kudos-card.tsx (must stay hookless/server-renderable - existing constraint)",
+    "components/kudos/kudos-board.tsx (supplies viewer identity + initial like state to cards)",
+    "components/kudos/kudos-sidebar-stats.tsx + lib/kudos/viewer-stats.ts (hearts row only)",
+    "app/kudos/page.tsx (server-side fetch of like counts + viewer's liked set)",
+    "playwright.config.ts (kudos-board project may need an authenticated storageState variant)",
+    "e2e/kudos-like-*.spec.ts (new durable screen suite, e2e-red-first)"
+  ],
+  "blastRadius": [
+    "kudos-card-actions.tsx is asserted by e2e/kudos-board-feed-interactions.spec.ts and kudos-board-interactions.spec.ts; dom-contract.md F26/F27/F29/F30 pin the heart button's text content (digits only), aria-pressed presence, and silent clipboard failure. Those contracts must survive.",
+    "formatHeartCount uses vi-VN thousands separators (1.500); any test parsing the count must strip non-digits before parseInt (existing precedent).",
+    "kudos-card.tsx is required to stay hookless so it can render on the server - like state cannot be fetched inside it.",
+    "The mock session in lib/session/session-provider.tsx currently drives the own-kudos disable; moving that to real auth changes behaviour for every existing kudos-board spec that relies on the default mock viewer nguyen-hoang-linh.",
+    "profiles is a seeded reference table with a select-only policy; adding a column touches the F014 migration's surface.",
+    "supabase/seed.sql is consumed by the login and send-kudos e2e fixtures; additions must stay idempotent across supabase db reset.",
+    "playwright.config.ts is shared by every existing suite - a bad testMatch edit silently orphans other specs.",
+    "config.toml has auto_expose_new_tables unset, so every new table needs an explicit GRANT or all access fails with 'permission denied' in a way that mimics working RLS."
+  ],
+  "contracts": [
+    "MoMorph frame MaZUn5xHXZ, 64 spec items all completed, 41 test cases. Row C.4.1 Hearts (node I3127:21871;256:5175) is the authoritative like-behaviour source.",
+    "Spec defect: C.4.1 credits the sender in its grant sentence and debits the receiver in its revoke sentence. Resolved to sender-credit per clarifications decision 3; recorded as a deviation.",
+    "clarifications.md (this plan dir) is authoritative for all six resolved decisions and must not be re-litigated.",
+    "F014's deliberate seam stands: the board keeps reading static lib/kudos/ records and a sent kudos still does not appear on it.",
+    "testPolicy e2e-red-first: a durable screen-level Playwright suite must produce an assertion-caused RED before implementation begins.",
+    "Local Supabase is running: API 127.0.0.1:54421, DB 127.0.0.1:54422."
+  ]
+}
