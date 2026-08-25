@@ -1,10 +1,35 @@
 import { test, expect } from '@playwright/test';
 import { seedDefaultSession } from './support/seed-defaults';
+import { seedSupabaseSession } from './support/supabase-session';
+import { cleanupTestRows } from './support/local-db';
+import { kudosCardByIdentity } from './support/kudos-card-locator';
+import { clickHeartAndSettle } from './support/heart-toggle';
 
 test.describe('Kudos Feed Interactions /kudos', () => {
   test.beforeEach(seedDefaultSession);
 
   test.describe('Heart Toggle (7a7ec63e, 63645b03)', () => {
+    test.beforeEach(async ({ context }) => {
+      // FR-005: hearts are disabled when unauthenticated. This test requires a real
+      // Supabase session so the heart button is enabled (not disabled by design).
+      // The old precondition (localStorage mock only) is insufficient now.
+      await seedSupabaseSession(context, 'http://localhost:3200');
+      // Defect A (cross-file race, found while verifying the isolation fix for the like-* specs):
+      // this test used to click "the first enabled heart" on the board, which resolves to kudos-1
+      // — the SAME kudos-1 that kudos-board-like-persistence.spec.ts owns and mutates (SC-001,
+      // FR-003). `fullyParallel: true` runs these two files concurrently on different workers with
+      // no ordering guarantee, so this test's click and persistence's click landed on the same row
+      // at the same time (observed: `Expected: 1502, Received: 1500` — persistence's like was
+      // "consumed" as this test's own increment). This file now owns kudos-6 exclusively — a card
+      // untouched by every other kudos-board spec — instead of whichever card happens to render
+      // first, and resets it before/after each test the same way the like-* specs reset their ids.
+      cleanupTestRows(['kudos-6']);
+    });
+
+    test.afterEach(() => {
+      cleanupTestRows(['kudos-6']);
+    });
+
     test('clicking heart toggles count increment on first click, decrement on second (7a7ec63e)', async ({
       page,
     }) => {
@@ -16,14 +41,30 @@ test.describe('Kudos Feed Interactions /kudos', () => {
       // Assert at least one heart exists (required by the test case)
       expect(await heartButtons.count()).toBeGreaterThan(0);
 
-      const firstHeart = heartButtons.first();
+      // kudos-6 (sender 'Mai phương Thúy' → receiver 'Dương thúy An') — not the board's first
+      // enabled heart, but not the viewer's own kudos either, so it is a valid, always-enabled
+      // target for this toggle test. See the beforeEach comment above for why "first enabled
+      // heart" was replaced. It is only the board's 6th card, past the initial REVEAL_BATCH of 4
+      // (components/kudos/all-kudos-feed.tsx), so the lazy-load sentinel must be scrolled into
+      // view first to reveal it.
+      const revealSentinel = allKudosSection.locator('div.h-px.w-full[aria-hidden="true"]');
+      if (await revealSentinel.count() > 0) {
+        await revealSentinel.scrollIntoViewIfNeeded();
+      }
+      const firstHeart = kudosCardByIdentity(page, 'Mai phương Thúy', 'Dương thúy An').locator(
+        'button[aria-label*="heart"], button[aria-label*="like"]'
+      );
+      await expect(firstHeart).toBeEnabled();
       const initialCountText = await firstHeart.textContent();
       // Strip non-digit characters to handle thousands separators (e.g., "1.000" → "1000")
       const initialCount = parseInt((initialCountText || '0').replace(/\D/g, ''));
 
-      // Click to increment (toggle on)
-      await firstHeart.click();
-      await page.waitForTimeout(300);
+      // Click to increment (toggle on). Waits for the toggle's server action to actually commit
+      // (see e2e/support/heart-toggle.ts) rather than a fixed delay: `likes-provider.tsx` applies
+      // the optimistic UI update synchronously but the server round trip can take longer than a
+      // short guess under Playwright's concurrent workers, and a second click fired before the
+      // first one's request settles is silently dropped by the provider's own in-flight guard.
+      await clickHeartAndSettle(page, firstHeart);
 
       const afterFirstClick = await firstHeart.textContent();
       const countAfterFirst = parseInt((afterFirstClick || '0').replace(/\D/g, ''));
@@ -33,8 +74,8 @@ test.describe('Kudos Feed Interactions /kudos', () => {
       // component that never sets the attribute pass, leaving half of TC 7a7ec63e unverified.
       await expect(firstHeart).toHaveAttribute('aria-pressed', 'true');
 
-      // Click again to decrement (toggle off)
-      await firstHeart.click();
+      // Click again to decrement (toggle off) — same reasoning as above.
+      await clickHeartAndSettle(page, firstHeart);
 
       const afterSecondClick = await firstHeart.textContent();
       const countAfterSecond = parseInt((afterSecondClick || '0').replace(/\D/g, ''));
