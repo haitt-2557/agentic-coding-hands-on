@@ -22,6 +22,7 @@ import { useState } from 'react';
 import { useSession } from '@/lib/session/session-provider';
 import { KUDOS_RECORDS, MOCK_VIEWER_ID } from '@/lib/kudos/kudos-records';
 import { highlightTop5, type KudosFilter } from '@/lib/kudos/kudos-queries';
+import { LikesProvider, type LikeBoardState } from './likes-provider';
 import { KudosBanner } from './kudos-banner';
 import { KudosActionBar } from './kudos-action-bar';
 import { KudosFilterBar } from './kudos-filter-bar';
@@ -32,7 +33,11 @@ import { AllKudosFeed } from './all-kudos-feed';
 const INITIAL_FILTER: KudosFilter = { hashtag: null, department: null };
 const NOOP_ON_COPIED = () => {};
 
-export function KudosBoard() {
+interface KudosBoardProps {
+  likes: LikeBoardState;
+}
+
+export function KudosBoard({ likes }: KudosBoardProps) {
   const { userId } = useSession();
   const [filter, setFilter] = useState<KudosFilter>(INITIAL_FILTER);
 
@@ -44,7 +49,7 @@ export function KudosBoard() {
   }
 
   return (
-    <>
+    <LikesProvider initial={likes}>
       <KudosBanner />
       <KudosActionBar />
       {/* mm:2940:13451 */}
@@ -64,6 +69,6 @@ export function KudosBoard() {
         onHashtagClick={handleHashtagClick}
         onCopied={NOOP_ON_COPIED}
       />
-    </>
+    </LikesProvider>
   );
 }

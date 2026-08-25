@@ -7,6 +7,13 @@
 // text node), aria-pressed is always present per this run's job card, and a rejected clipboard
 // write must fail silently — no toast, no unhandled rejection.
 //
+// Phase 05 — heart state is now server-seeded and persisted through `useLikes()`
+// (components/kudos/likes-provider.tsx). The mock session (lib/session/session-provider.tsx) no
+// longer decides anything here: the disable rule is UI convenience over a real RLS boundary
+// (permissions §1) driven by `viewerSlug`/`isAuthenticated` from the real auth bridge. DEC-001 is
+// an ordered chain, not three independent conditions — not signed in beats "own kudos" so a
+// logged-out visitor gets the explanatory label rather than an inapplicable ownership one.
+//
 // The toast is mounted here, one instance per card, rather than lifted to a page-level shell:
 // kudos-card.tsx is required to stay hookless (server-renderable), so it cannot hold the
 // message state itself, and lifting it into the 'use client' shell (kudos-board.tsx, Phase 5)
@@ -17,28 +24,37 @@
 import { useState } from 'react';
 import type { KudosRecord } from '@/lib/kudos/kudos-records';
 import { formatHeartCount } from '@/lib/kudos/kudos-records';
+import { useLikes } from './likes-provider';
 import { KudosToast } from './kudos-toast';
 
 const COPY_TOAST_MESSAGE = 'Link copied — ready to share!';
 
 interface KudosCardActionsProps {
   record: KudosRecord;
+  // Retained even though the heart no longer consults it: dom-contract.md §12 freezes this
+  // component's props signature, and removing it would ripple into three untouched callers.
   viewerId: string;
   showDetailButton: boolean;
   onCopied: (message: string) => void;
 }
 
-export function KudosCardActions({ record, viewerId, showDetailButton, onCopied }: KudosCardActionsProps) {
-  const [liked, setLiked] = useState(false);
+export function KudosCardActions({ record, showDetailButton, onCopied }: KudosCardActionsProps) {
+  const { isAuthenticated, viewerSlug, isLiked, likeCount, toggle } = useLikes();
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
-  const isOwnKudos = record.senderId === viewerId;
-  const displayedCount = record.heartCount + (liked ? 1 : 0);
 
-  const heartLabel = isOwnKudos
-    ? 'Không thể like kudos của chính bạn'
-    : liked
-      ? 'Bỏ tim kudos này (like)'
-      : 'Thả tim kudos này (like)';
+  const liked = isLiked(record.id);
+  const isOwnKudos = viewerSlug !== null && record.senderId === viewerSlug;
+  // DEC-001, in order: not signed in beats "own kudos" (FR-005 before BR-002).
+  const disabled = !isAuthenticated || isOwnKudos;
+  const displayedCount = record.heartCount + likeCount(record.id);
+
+  const heartLabel = !isAuthenticated
+    ? 'Đăng nhập để like kudos này'
+    : isOwnKudos
+      ? 'Không thể like kudos của chính bạn'
+      : liked
+        ? 'Bỏ tim kudos này (like)'
+        : 'Thả tim kudos này (like)';
 
   async function handleCopy() {
     // `navigator.clipboard` is absent entirely on insecure origins and in some embedded
@@ -68,8 +84,8 @@ export function KudosCardActions({ record, viewerId, showDetailButton, onCopied 
           type="button"
           aria-label={heartLabel}
           aria-pressed={liked}
-          disabled={isOwnKudos}
-          onClick={() => setLiked((current) => !current)}
+          disabled={disabled}
+          onClick={() => toggle(record.id)}
           className={`flex items-center gap-2 text-2xl leading-8 font-bold ${liked ? 'text-badge-danger' : 'text-muted-text'} disabled:cursor-not-allowed`}
         >
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
