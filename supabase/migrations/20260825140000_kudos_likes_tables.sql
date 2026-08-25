@@ -21,6 +21,14 @@
 alter table public.profiles
   add column if not exists auth_user_id uuid unique references auth.users (id) on delete set null;
 
+-- Rework (finding 1): `auth_user_id` must NOT be Data-API-readable by `authenticated` — F014's
+-- `profiles_select_authenticated` policy is `using (true)`, and RLS filters ROWS, not columns. A
+-- bare column-level revoke is a no-op: TABLE-level SELECT (F014's grant) reads every column
+-- regardless. Narrowing requires dropping the table-wide grant for a column-scoped one that omits
+-- `auth_user_id`. `anon` never had a grant on `profiles` (F014), so nothing to narrow there.
+revoke select on public.profiles from authenticated;
+grant select (id, display_name, department) on public.profiles to authenticated;
+
 -- BR-003/BR-004: admin-configured date ranges that double a like's grant. Seeded empty in
 -- phase 02, so every like grants +1 until a row exists — the +2 path is still fully exercisable
 -- by inserting a row directly (no admin screen is in scope; no MoMorph frame covers one).
@@ -93,6 +101,23 @@ as $$
   );
 $$;
 
+-- Rework (finding 1): the only sanctioned way left to read `auth_user_id` client-side, now that
+-- `authenticated` has no column-level select on it. Mirrors `is_static_kudos_author`'s shape —
+-- `security definer` + pinned `search_path` — reading the sealed column under the owner's
+-- privileges. `limit 1` over zero rows returns null, matching `resolveViewerSlug()`'s contract.
+create or replace function public.resolve_viewer_slug(p_user uuid)
+returns text
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select p.id
+  from public.profiles p
+  where p.auth_user_id = p_user
+  limit 1;
+$$;
+
 -- BR-005 ("frozen"): is_special is stamped once, from the server, at insert time — never
 -- accepted from the client and never recomputed later. This trigger overwrites whatever the
 -- caller sent; combined with "no UPDATE policy, no UPDATE grant" below, the value can never
@@ -117,6 +142,15 @@ create trigger kudos_likes_freeze_is_special
   for each row
   execute function public.kudos_likes_set_is_special();
 
+-- Rework (finding 2): Postgres auto-grants EXECUTE to PUBLIC on function creation; no migration
+-- here alters that default. Left alone, the functions above would be directly callable by ANY
+-- Data API role via PostgREST RPC, not just via the RLS policy/trigger meant to be their sole
+-- caller. Revoke first, grant back only what's needed. `is_special_day` gets no grant to any
+-- role: its only caller (the trigger fn above) runs under the owner's privileges regardless.
+revoke execute on function public.is_special_day(date) from public;
+revoke execute on function public.is_static_kudos_author(text, uuid) from public;
+revoke execute on function public.resolve_viewer_slug(uuid) from public;
+
 -- Grants — see the file header for why these are not optional. `anon` gets `select` only, so a
 -- signed-out visitor sees real like counts (FR-005); `authenticated` additionally gets insert
 -- and delete for like/unlike. Deliberately absent: any grant on `special_days`, any grant on
@@ -126,6 +160,8 @@ create trigger kudos_likes_freeze_is_special
 grant select on public.kudos_likes to anon, authenticated;
 grant insert, delete on public.kudos_likes to authenticated;
 grant execute on function public.is_static_kudos_author(text, uuid) to authenticated;
+-- `resolveViewerSlug()` calls this via `supabase.rpc(...)`; `anon` never resolves a slug.
+grant execute on function public.resolve_viewer_slug(uuid) to authenticated;
 
 alter table public.special_days enable row level security;
 alter table public.kudos_static_authors enable row level security;
@@ -161,5 +197,4 @@ create policy kudos_likes_delete_own on public.kudos_likes
   to authenticated
   using (user_id = auth.uid());
 
--- No UPDATE policy exists on `kudos_likes`, and none is granted above — see BR-005 note by the
--- grants block. This is intentional, not an oversight.
+-- No UPDATE policy exists on `kudos_likes`, and none is granted above — intentional (BR-005).
