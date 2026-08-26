@@ -1,0 +1,13 @@
+{
+  "mode": "single",
+  "intents": [
+    {
+      "actor": "site visitor (guest, user, or admin)",
+      "action_domain": "switch the interface language via the header dropdown",
+      "outcome": "the whole page renders in the chosen locale (vi | en) and the choice persists"
+    }
+  ],
+  "justification": "One user-facing intent. The task is the MoMorph 'Dropdown-ngôn ngữ' frame (hUyaaugye2), which specs a single control: the open language list with its two rows. No conjunction smell-flag fires on the raw task text ('Implement the language dropdown'), and enumeration yields exactly one (actor, action-domain, outcome) triple. This revises the already-implemented F005_LanguageSwitching rather than introducing a new capability, so the existing fcode is reused.",
+  "fcode": "F005",
+  "run_type": "revision"
+}

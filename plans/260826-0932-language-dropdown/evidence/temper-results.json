@@ -1,0 +1,39 @@
+{
+  "commands": [
+    {
+      "command": "npm run test:e2e -- e2e/homepage-language-dropdown.spec.ts",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "GREEN. The exact phase-01 RED command now passes — panel chrome, both flags, selected-row background, row box, label typography, trigger flag, select-then-close locale swap.",
+      "ts": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "command": "npm run test:e2e -- e2e/homepage-dropdown-menus.spec.ts",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "GREEN. 7 pre-existing behavioural tests (ID-24, ID-25, ID-30..ID-35, ID-58) still pass — accessible names VN/EN intact, SM-001 unbroken.",
+      "ts": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Next.js build clean, TypeScript typecheck clean, 12 routes generated.",
+      "ts": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "ESLint clean — 0 errors. 6 unused-variable warnings, all pre-existing and all in e2e specs not touched by this change.",
+      "ts": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "command": "npx playwright test --project=prelaunch-gate --project=awards-page --project=homepage-with-open-gate --project=invalid-env --project=prelaunch-unlocked",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "GREEN, 79 passed. Every Playwright project that does NOT require a live Supabase. Covers both LanguageSwitcher mount points (site-header on homepage/awards, login-header on prelaunch-gate) and the three sibling dropdowns sharing the edited primitive. The 3 excluded projects (kudos-board, send-kudos, login-auth-redirect) fail identically on a clean baseline — see environmental-note.md.",
+      "ts": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}

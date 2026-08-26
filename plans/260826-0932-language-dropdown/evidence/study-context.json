@@ -1,0 +1,38 @@
+{
+  "task": "Implement the MoMorph 'Dropdown-ngôn ngữ' language dropdown (screen hUyaaugye2, file 9ypp4enmFmdK3YAFJLIu6C) against the existing LanguageSwitcher (F005_LanguageSwitching).",
+  "mode": "interactive",
+  "acceptanceCriteria": [
+    "Open menu panel renders bg #00070C, 1px solid #998C5F border, 8px radius, 6px padding — per node 525:11713.",
+    "Each menu row is 110x56px, flex row, align-items center, with a 4px gap between a 20x15 flag and its label.",
+    "Row label renders Montserrat 700 / 16px / line-height 24px / letter-spacing 0.15px / #FFFFFF, characters 'VN' and 'EN'.",
+    "The VN row shows the Vietnam flag; the EN row shows the Union Flag (node 'GB-NIR - Northern Ireland').",
+    "The currently selected row carries background rgba(255,234,158,0.2); the unselected row is transparent over the panel.",
+    "Hover on a row changes its background to a highlight state.",
+    "Clicking a row sets that locale, updates the trigger's displayed value, and closes the menu.",
+    "Existing dropdown behaviour (open/close, click-outside, Enter, Space, Escape, max 2 options) stays green.",
+    "next build (typecheck) and eslint pass with no new errors."
+  ],
+  "touchpoints": [
+    "components/ui/language-switcher.tsx",
+    "components/ui/dropdown-menu.tsx",
+    "app/globals.css",
+    "public/saa/Flag_EN.svg",
+    "lib/i18n/dictionaries/vi.ts",
+    "lib/i18n/dictionaries/en.ts",
+    "e2e/homepage-language-dropdown.spec.ts"
+  ],
+  "blastRadius": [
+    "components/layout/site-header.tsx — renders LanguageSwitcher on every page.",
+    "components/login/login-header.tsx — renders LanguageSwitcher on the login screen.",
+    "components/ui/account-menu.tsx — shares the DropdownMenu primitive.",
+    "components/ui/notification-bell.tsx — shares the DropdownMenu primitive.",
+    "components/layout/quick-action-widget.tsx — shares the DropdownMenu primitive.",
+    "e2e/homepage-dropdown-menus.spec.ts — existing behavioural coverage that must stay green."
+  ],
+  "contracts": [
+    "useI18n() from lib/i18n/locale-provider: { t, locale, setLocale } — unchanged.",
+    "Locale union type stays 'vi' | 'en' (BR-006: exactly two options).",
+    "DropdownMenu render-prop API: trigger(props, open) + children({ close }) — additive changes only.",
+    "role=\"menu\" on the panel and role=\"menuitem\" on rows must be preserved (existing e2e selectors)."
+  ]
+}
