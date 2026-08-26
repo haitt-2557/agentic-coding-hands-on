@@ -25,6 +25,8 @@
   --divider: #2e3940;
   --badge-danger: #d4271d;
   --secondary-button-bg: rgba(255, 234, 158, 0.1);
+  /* FR-021 — language dropdown selected-row fill (mm:I525:11713;362:6085) */
+  --language-row-selected-bg: rgba(255, 234, 158, 0.2);
 
   /* Sun* Kudos — Live board (frame 2940:13431) — new tokens, see design/kudos-content.md §8 */
   --kudos-card-ground: #fff8e1;
@@ -48,6 +50,7 @@
   --color-divider: var(--divider);
   --color-badge-danger: var(--badge-danger);
   --color-secondary-button-bg: var(--secondary-button-bg);
+  --color-language-row-selected-bg: var(--language-row-selected-bg);
   --color-kudos-card-ground: var(--kudos-card-ground);
   --color-kudos-message-tint: var(--kudos-message-tint);
   --color-kudos-sidebar-bg: var(--kudos-sidebar-bg);
