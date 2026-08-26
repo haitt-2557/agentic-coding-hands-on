@@ -121,7 +121,7 @@ else:
 
 #### BR-006_ChiVNvaEN
 **Linked FR:** FR-002
-**Source:** `components/ui/language-switcher.tsx:14-17` (mảng `options` hard-code đúng 2 phần tử `vi`/`en`)
+**Source:** `components/ui/language-switcher.tsx:18-21` (mảng `options` hard-code đúng 2 phần tử `vi`/`en`)
 **Applies to:** Menu chọn ngôn ngữ
 **Rule:** Chỉ có đúng 2 lựa chọn VN và EN, không thêm ngôn ngữ khác cho đến khi có yêu cầu mở rộng (YAGNI — xem clarifications).
 
@@ -327,7 +327,7 @@ Ghi chú promote: `behavior-logic.md` đã tồn tại thật (Wave sinh tài li
 
 ### US005_ChuyenDoiNgonNgu — Chuyển đổi ngôn ngữ VN/EN (Priority: P2)
 
-**Feature:** F005_LanguageSwitching
+**Feature:** F005_LanguageSwitching — yêu cầu trình bày chi tiết (panel chrome, icon cờ, nền dòng chọn, typography — FR-020..FR-026, BR-009, BR-010) đã tách sang `docs/vi/features/F005_LanguageSwitching/technical-spec.md`, tài liệu này chỉ giữ phần hành vi/cơ chế dùng chung (FR-002, FR-015, BR-006, SM-001).
 **What happens:** Người dùng click nút ngôn ngữ "VN" ở header, thấy menu mở với 2 lựa chọn VN/EN, chọn EN thì toàn bộ copy trang chuyển sang tiếng Anh và lựa chọn được lưu lại cho lần sau.
 **Why this priority:** Quan trọng nhưng không chặn luồng xem nội dung chính — P2 vì trang mặc định đã đúng ngôn ngữ (vi) cho đa số người dùng mục tiêu.
 **Independent Test:** Click nút ngôn ngữ, chọn EN, xác nhận copy đổi sang tiếng Anh; tải lại trang, xác nhận lựa chọn vẫn giữ EN (persist qua `localStorage`).
@@ -340,7 +340,7 @@ Ghi chú promote: `behavior-logic.md` đã tồn tại thật (Wave sinh tài li
 
 **Requirements fulfilled:**
 - **FR-015** Menu ngôn ngữ chỉ có 2 lựa chọn VN/EN, áp dụng FR-002 (Cross-Cutting) để đổi dictionary
-  **Source:** `components/ui/language-switcher.tsx:14-17,58-67`, `lib/i18n/locale-provider.tsx:47-75`
+  **Source:** `components/ui/language-switcher.tsx:18-21,58-67`, `lib/i18n/locale-provider.tsx:47-75`
 
 **Rules enforced:** BR-006 (Cross-Cutting Logic); SM-001 (see Cross-Cutting) — menu ngôn ngữ dùng chung dropdown primitive (toggle, click-outside, Enter, Space, Esc).
 
