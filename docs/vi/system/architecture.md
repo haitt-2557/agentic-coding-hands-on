@@ -136,7 +136,7 @@ graph TD
 
     HomePage --> SiteHeader["components/layout/site-header.tsx (Client)"]
     HomePage --> HeroKeyvisual["components/home/hero-keyvisual.tsx (Server)"]
-    HomePage --> RootFurther["components/home/root-further-content.tsx (Server)"]
+    HomePage --> RootFurther["components/home/root-further-content.tsx (Client)"]
     HomePage --> AwardsSection["components/home/awards-section.tsx (Client)"]
     HomePage --> KudosSection["components/home/kudos-section.tsx (Client)"]
     HomePage --> QuickActionWidget["components/layout/quick-action-widget.tsx (Client)"]
@@ -163,11 +163,18 @@ graph TD
 ```
 
 **Đính chính so với giả định trong task brief**: không phải toàn bộ `components/` đều là
-Client Component. Grep trực tiếp `'use client'` trên từng file trong `components/` (15 file
-`.tsx` tổng cộng) cho thấy đúng 2 ngoại lệ giữ nguyên Server Component:
-`components/home/hero-keyvisual.tsx` và `components/home/root-further-content.tsx` — cả hai
-chỉ compose các component con và không gọi hook/state, nên không cần opt-in client. 13 file
-`.tsx` còn lại trong `components/` đều khai `'use client'` ở dòng đầu.
+Client Component. Trong phạm vi module graph trang chủ ở trên (`app/page.tsx` và cây con của
+nó), `components/home/hero-keyvisual.tsx` giữ nguyên Server Component — chỉ compose các
+component con và không gọi hook/state, nên không cần opt-in client.
+
+**Cập nhật (bug fix nội dung theo ngôn ngữ):** `components/home/root-further-content.tsx`
+trước đây cũng là Server Component (copy tĩnh nhúng trong JSX) nhưng nay đã chuyển sang Client
+Component (`'use client'`) vì cần gọi hook `useI18n()` để đọc copy từ dictionary theo locale —
+không còn là ngoại lệ Server Component nữa. **Lưu ý phạm vi:** con số "2 ngoại lệ" ở bản trước
+của tài liệu này, và số đếm 15 file `.tsx` nói chung, chỉ tính trong cây trang chủ tại thời
+điểm promote (2026-08-18) — `components/` hiện đã có nhiều thư mục con hơn (`awards/`,
+`kudos/`, `login/`, `prelaunch/`, v.v. từ các feature sau đó); một lượt kiểm kê `'use client'`
+đầy đủ trên toàn `components/` nằm ngoài phạm vi bản sửa lỗi này.
 
 Lý do chia 3 lớp `app/` → `components/` → `lib/` không chỉ để tách trình bày khỏi logic: nó
 còn cho phép `lib/countdown.ts` test độc lập bằng input `now` do caller truyền vào (không gọi

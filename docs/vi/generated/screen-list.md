@@ -67,10 +67,10 @@ Trang chủ marketing/sự kiện SAA 2025 — `app/page.tsx`. Compose trực ti
 | CountdownTimer | widget | Đếm ngược days/hours/minutes tới `NEXT_PUBLIC_EVENT_START_AT`; SSR-default zero-state ("Coming soon"), giá trị thật chỉ tính sau mount (tránh hydration mismatch); tick lại mỗi 60s qua `setInterval` (client-UI refresh, không phải BL). `components/home/countdown-timer.tsx` |
 | EventInfo | text | Dòng thông tin sự kiện tĩnh, lấy từ dictionary i18n. `components/home/event-info.tsx` |
 | HeroCta | nav | Hai nút CTA — "Xem giải thưởng" → `/awards`, "Sun* Kudos" → `/kudos`. `components/home/hero-cta.tsx` |
-| RootFurtherContent | section | Khối copy dài "Root Further" tĩnh (2 đoạn văn tiếng Việt + trích dẫn), không có state/logic. `components/home/root-further-content.tsx` |
+| RootFurtherContent | section | Khối copy dài "Root Further" (2 khối văn bản + trích dẫn) — client component, đọc từ i18n dictionary (`rootFurther.*`) nên đổi theo language switcher. `components/home/root-further-content.tsx` |
 | AwardsSection | section | `<section>` heading + `<ul>` render 6 `AwardCard` từ `AWARDS` (`lib/awards.ts`). `components/home/awards-section.tsx` |
-| AwardCard | card | Một hạng mục giải thưởng — badge ảnh dùng chung + wordmark riêng, title/description tĩnh, link "Chi tiết" tới `awardHref(slug)` = `/awards#<slug>`. `components/home/award-card.tsx` |
-| KudosSection | section | Khối promo Sun* Kudos — copy tĩnh + link "Chi tiết" → `/kudos`. `components/home/kudos-section.tsx` |
+| AwardCard | card | Một hạng mục giải thưởng — badge ảnh dùng chung + wordmark riêng, title tĩnh (proper noun, không dịch) + description đọc từ i18n dictionary (`awards.*.description`), link "Chi tiết" tới `awardHref(slug)` = `/awards#<slug>`. `components/home/award-card.tsx` |
+| KudosSection | section | Khối promo Sun* Kudos — nhãn/tiêu đề/nội dung đọc từ i18n dictionary (`kudos.*`) nên đổi theo language switcher, link "Chi tiết" → `/kudos`. `components/home/kudos-section.tsx` |
 | QuickActionWidget | widget | Nút nổi cố định (fixed, ngoài `<main>`) mở dropdown 2 mục: "Viết Kudos" → `/kudos`, "Về SAA" → `/awards`. `components/layout/quick-action-widget.tsx` |
 | SiteFooter | layout | Logo + nav links (About/Awards/Kudos) + "Tiêu chuẩn chung" (text tĩnh, KHÔNG phải link — không có đích đến) + copyright. `components/layout/site-footer.tsx` |
 | AccountMenu | dropdown | Ẩn hoàn toàn khi `role === 'guest'`; menu gồm "Profile" (→ `/profile`), "Sign out" (nút UI, không có logic đăng xuất thật), "Admin Dashboard" (→ `/admin`, chỉ hiện khi `role === 'admin'`). `components/ui/account-menu.tsx` |
