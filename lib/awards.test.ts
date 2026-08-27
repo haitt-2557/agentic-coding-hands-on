@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { AWARDS, EXPECTED_AWARD_SLUGS, awardHref } from './awards';
+import { vi } from './i18n/dictionaries/vi';
 
 // FR-013/014 + BR-005 — award data + slug -> href derivation.
 
@@ -32,11 +33,19 @@ test.describe('AWARDS', () => {
     expect(new Set(slugs).size).toBe(slugs.length);
   });
 
-  test('every entry has a non-empty title, description, and image', () => {
+  test('every entry has a non-empty title, descriptionKey, and image', () => {
     for (const award of AWARDS) {
       expect(award.title.trim().length).toBeGreaterThan(0);
-      expect(award.description.trim().length).toBeGreaterThan(0);
+      expect(award.descriptionKey.trim().length).toBeGreaterThan(0);
       expect(award.image.trim().length).toBeGreaterThan(0);
+    }
+  });
+
+  test('every descriptionKey resolves to a non-empty entry in the vi dictionary', () => {
+    const dictionary = vi as Record<string, string>;
+    for (const award of AWARDS) {
+      expect(dictionary[award.descriptionKey]).toBeDefined();
+      expect(dictionary[award.descriptionKey]?.trim().length).toBeGreaterThan(0);
     }
   });
 });
