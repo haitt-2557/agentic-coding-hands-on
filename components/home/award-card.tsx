@@ -2,8 +2,7 @@
 
 // mms_C2.x — one award card. Shared circular badge background (Award_BG, one asset for
 // all 6 cards) + per-award wordmark thumbnail from `lib/awards.ts` (Track B's AWARDS data,
-// FR-013/BR-005 hash-anchor navigation via `awardHref`). Card title/description are static
-// AWARDS content (not translated — Track B's dictionary scope note keeps only UI chrome).
+// FR-013/BR-005 hash-anchor navigation via `awardHref`).
 // Award_BG (shared, 6 nodes -> 1 asset):
 // mm:I2167:9075;214:1019;81:2442
 // mm:I2167:9076;214:1019;81:2442
@@ -25,6 +24,9 @@
 // mm:I2167:9079;214:1023;186:1441
 // mm:I2167:9080;214:1023;186:1441
 // mm:I2167:9081;214:1023;186:1441
+//
+// Description now comes from the shared dictionary via `award.descriptionKey` so it follows
+// the language switcher; the title stays untranslated (English proper noun).
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -68,7 +70,7 @@ export function AwardCard({ award }: AwardCardProps) {
         <h3 className="text-2xl font-normal text-accent">
           <Link href={href}>{award.title}</Link>
         </h3>
-        <p className="line-clamp-2 text-base text-white">{award.description}</p>
+        <p className="line-clamp-2 text-base text-white">{t(award.descriptionKey)}</p>
         <Link
           href={href}
           className="mt-2 flex items-center gap-1 py-4 text-base font-medium text-white hover:text-accent"

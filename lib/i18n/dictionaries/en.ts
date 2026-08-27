@@ -110,4 +110,32 @@ export const en: Record<DictionaryKey, string> = {
   'sendKudos.submitButton': 'Gửi',
   'sendKudos.submitErrorFallback': 'Gửi Kudos không thành công. Vui lòng thử lại.',
   'sendKudos.successToast': 'Gửi lời cám ơn và ghi nhận thành công!',
+  // rootFurther.* / kudos.badge / kudos.body / awards.*.description — draft EN copy pending
+  // Comms/BTC review (bug fix task: homepage body copy must follow the language switcher).
+  'rootFurther.p1':
+    'Facing the breakneck change of the AI era and ever-rising client expectations, Sun* has chosen a strategy of diversifying capability — not merely to excel in our own field, but to reach for something higher: a place where every Sunner is a "problem-solver", an expert at resolving any issue and finding answers for our projects, our clients and society.',
+  'rootFurther.p2':
+    'Inspired by that diversity of capability, by the ability to grow flexibly, and by the spirit of digging deeper to break through in the AI era, "Root Further" was chosen as the official theme of the Sun* Annual Awards 2025.',
+  'rootFurther.p3':
+    'Beyond its surface meaning, "Root Further" is the journey of reaching ever further, rooting ever deeper, touching the hidden "geological" layers so we can endure, rise, and keep alive the burning passion for creating value that defines Sun* people. Borrowing the image of roots driving relentlessly into the earth, threading through each layer of "sediment" to absorb what is purest, Sun* people are likewise drawing nutrients from the age and from the market\'s challenges to renew themselves every day, widening their capability and rooting firmly into the AI era — a wholly new "geological" layer, complex and hard to predict, yet holding boundless potential and opportunity.',
+  'rootFurther.quote': 'A tree with deep roots fears no storm',
+  'rootFurther.quoteGloss': '(English proverb)',
+  'rootFurther.p4':
+    'In a storm, only trees whose roots are strong enough will stand. An organisation of individuals confident in their diverse capabilities, ready to create and to meet challenges, in command of change — that is an organisation that not only holds firm through upheaval but turns every advantage to account and conquers the challenges of its time. More than the name of a new chapter in our organisation\'s journey, "Root Further" is an encouragement: dare to believe in yourself, dare to dig deep, dare to unlock every potential, dare to break your limits, dare to become the most versatile and excellent version of yourself. Because in the AI era, diverse capability and harnessing the strength of the times are the prerequisites for lasting.',
+  'rootFurther.p5':
+    'No one can foresee how many mysterious "geological" layers still lie deep in the earth of the technology industry and the modern market. We know only that once "Root Further" has become our root-deep spirit, we will meet any uncharted territory on the road ahead without fear — with eagerness instead. Because we believe that within those very boundless reaches wait countless wonders, and the chance to rise.',
+  'kudos.badge': "WHAT'S NEW AT SAA 2025",
+  'kudos.body':
+    "A recognition and thank-you activity for colleagues — held for the first time, open to every Sunner. Running from November 2025, it invites Sun* people to share recognition and thanks for their colleagues on the platform announced by the organising committee. These messages will inform the Heads Council as it selects the award recipients.",
+  'awards.topTalent.description': 'Honouring the top individuals who excel in every respect',
+  'awards.topProject.description':
+    'Honouring projects that excel in every respect, with outstanding revenue',
+  'awards.topProjectLeader.description':
+    'Honouring the manager who inspires and leads a project to break through,',
+  'awards.bestManager.description':
+    'Honouring the manager with strong management ability who leads their team',
+  'awards.signatureCreator.description':
+    'Honouring the manager with strong management ability who leads their team',
+  'awards.mvp.description':
+    'Honouring the manager with strong management ability who leads their team',
 };
