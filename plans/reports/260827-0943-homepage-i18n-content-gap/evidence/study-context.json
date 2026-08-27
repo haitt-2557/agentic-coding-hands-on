@@ -1,0 +1,39 @@
+{
+  "task": "Homepage body copy ignores the language switcher. Root cause: the i18n dictionary was deliberately scoped to chrome only (nav, headings, buttons, labels — 86 keys); long-form content copy was excluded by an earlier decision, documented in the component header comments. Three untranslated blocks: components/home/root-further-content.tsx:9,13,44 (two long paragraphs + blockquote gloss, and the file is a SERVER component so it cannot read the client locale context at all), components/home/kudos-section.tsx:34-39 (hardcoded body inside an already-i18n-aware client component), and lib/awards.ts description fields rendered raw at components/home/award-card.tsx:71. Award titles are already English proper nouns and need no translation.",
+  "mode": "autonomous",
+  "acceptanceCriteria": [
+    "Switching the language dropdown to EN replaces the Root Further theme statement body text — no Vietnamese paragraph text remains visible on the homepage in EN.",
+    "Switching to EN replaces the Kudos promo heading and body paragraph in components/home/kudos-section.tsx.",
+    "Switching to EN replaces all six award card descriptions rendered by components/home/award-card.tsx.",
+    "Switching back to VI restores the original Vietnamese copy verbatim, character-for-character unchanged from what shipped before this fix.",
+    "components/home/root-further-content.tsx becomes a client component so it can read the locale context, and still renders the same markup structure and images.",
+    "The three award descriptions that are identical in the source design stay identical rather than being invented apart, but each award carries its own dictionary key so they can diverge when the design defect is fixed.",
+    "vi.ts and en.ts keep an identical key set — the Record<DictionaryKey, string> typing must still compile.",
+    "Existing homepage e2e coverage stays green, including the language-switch test that asserts the awards heading swaps.",
+    "npm run build (typecheck) and npm run lint pass with no new errors."
+  ],
+  "touchpoints": [
+    "lib/i18n/dictionaries/vi.ts",
+    "lib/i18n/dictionaries/en.ts",
+    "components/home/root-further-content.tsx",
+    "components/home/kudos-section.tsx",
+    "components/home/award-card.tsx",
+    "lib/awards.ts",
+    "lib/awards.test.ts",
+    "e2e/homepage-language-content.spec.ts"
+  ],
+  "blastRadius": [
+    "app/page.tsx — renders every changed homepage component.",
+    "components/awards/award-detail-card.tsx, award-category-nav.tsx, award-detail-list.tsx — consume lib/awards.ts but use title/longDescription/quantity/prizeLines, NOT description; must keep compiling.",
+    "lib/awards.test.ts — asserts every award has a non-empty description; the field is being renamed.",
+    "e2e/homepage-dropdown-menus.spec.ts — existing locale-switch coverage that must stay green.",
+    "The /awards page remains untranslated (longDescription, quantity.unit, prizeLines.note are still Vietnamese) — out of scope for this fix and reported as a known follow-up, not silently implied fixed."
+  ],
+  "contracts": [
+    "DictionaryKey is derived from vi.ts; en.ts is typed Record<DictionaryKey, string>, so a key present in one and absent from the other fails the build. This is the guard that keeps the two dictionaries in step.",
+    "useI18n() returns { t, locale, setLocale } — unchanged.",
+    "Award interface: `description: string` becomes `descriptionKey: string`. Only components/home/award-card.tsx and lib/awards.test.ts consume that field.",
+    "Locale union stays 'vi' | 'en' (BR-006).",
+    "English copy in en.ts is a DRAFT authored in this session, not official Comms/BTC wording — flagged for review before merge per the user's decision."
+  ]
+}
