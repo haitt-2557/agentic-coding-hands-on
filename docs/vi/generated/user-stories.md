@@ -28,10 +28,10 @@ không cần một US "hệ thống" song song.
 |--------|---------|------|--------|---------|
 | SCR001_Home | HeroKeyvisual + EventInfo (`hero-keyvisual.tsx`, `event-info.tsx`) | secondary-action | Hiển thị keyvisual + thông tin sự kiện tĩnh | N/A — nội dung tĩnh |
 | SCR001_Home | CountdownTimer (`countdown-timer.tsx`) | secondary-action | Đếm ngược tới `NEXT_PUBLIC_EVENT_START_AT`, tick mỗi 60s; 3 trạng thái: coming-soon/normal, expired, invalid-config | N/A — hàm thuần `computeCountdown` (`lib/countdown.ts`), không network |
-| SCR001_Home | RootFurtherContent (`root-further-content.tsx`) | secondary-action | Hiển thị copy "Root Further" tĩnh | N/A — nội dung tĩnh |
+| SCR001_Home | RootFurtherContent (`root-further-content.tsx`) | secondary-action | Hiển thị copy "Root Further" | N/A — copy đọc từ i18n dictionary (`rootFurther.*`), đổi theo language switcher |
 | SCR001_Home | AwardsSection heading + `<ul>` (`awards-section.tsx`) | secondary-action | Hiển thị danh sách 6 hạng mục giải thưởng | N/A — hằng số `AWARDS` (`lib/awards.ts`) |
 | SCR001_Home | AwardCard image/title/"Chi tiết" link ×6 card (`award-card.tsx`) | navigation | Điều hướng tới `/awards#<slug>` theo hạng mục | N/A — client-side Next.js Link, không network |
-| SCR001_Home | KudosSection promo copy (`kudos-section.tsx`) | secondary-action | Hiển thị nội dung giới thiệu Sun* Kudos | N/A — nội dung tĩnh |
+| SCR001_Home | KudosSection promo copy (`kudos-section.tsx`) | secondary-action | Hiển thị nội dung giới thiệu Sun* Kudos | N/A — copy đọc từ i18n dictionary (`kudos.*`), đổi theo language switcher |
 | SCR001_Home | Header nav "Awards" + Footer nav "Awards" + Hero CTA "Xem giải thưởng" + QuickActionWidget "Về SAA" | navigation | Điều hướng tới `/awards` (không hash) | N/A — client-side Next.js Link |
 | SCR001_Home | Header nav "Kudos" + Footer nav "Kudos" + Hero CTA "Sun* Kudos" + KudosSection "Chi tiết" + QuickActionWidget "Viết Kudos" | navigation | Điều hướng tới `/kudos` | N/A — client-side Next.js Link |
 | SCR001_Home | Header logo + Header nav "About" + Footer logo + Footer nav "About" | navigation | Cuộn lên đầu trang + link `/` (đang đứng tại `/`) | N/A — `window.scrollTo` + client-side Link |
@@ -188,14 +188,14 @@ As a guest, I want to read the Root Further content so that I understand the eve
 
 ### Acceptance Criteria
 
-- [ ] Criterion 1: Khối `RootFurtherContent` hiển thị 2 đoạn văn tiếng Việt + trích dẫn, không có state/logic tương tác.
-- [ ] Criterion 2: Nội dung hiển thị cho mọi actor, không phụ thuộc role.
+- [ ] Criterion 1: Khối `RootFurtherContent` hiển thị 2 khối văn bản + trích dẫn, không có state/logic tương tác ngoài đọc locale hiện tại.
+- [ ] Criterion 2: Nội dung hiển thị cho mọi actor, không phụ thuộc role; đổi theo locale (vi/en) qua `LanguageSwitcher`.
 
 ### Technical Notes
 
-- **Endpoint**: N/A — nội dung tĩnh.
-- **Data Required**: Copy tĩnh trong `components/home/root-further-content.tsx` (không qua dictionary i18n theo scope note trong `award-card.tsx`/`kudos-section.tsx`).
-- **Dependencies**: `components/home/root-further-content.tsx`.
+- **Endpoint**: N/A — không network, chỉ đọc dictionary tĩnh phía client.
+- **Data Required**: Copy đọc qua `useI18n()` từ `lib/i18n/dictionaries/{vi,en}.ts` (khóa `rootFurther.*`) — không còn hard-code trong component.
+- **Dependencies**: `components/home/root-further-content.tsx`, `lib/i18n/locale-provider.tsx`.
 
 ### Screens
 
@@ -223,7 +223,7 @@ As a guest, I want to browse the list of award categories so that I know what aw
 ### Acceptance Criteria
 
 - [ ] Criterion 1: `AwardsSection` render đúng 6 `AwardCard` từ hằng số `AWARDS` (`lib/awards.ts`), thứ tự giữ nguyên mảng nguồn.
-- [ ] Criterion 2: Mỗi card hiển thị badge dùng chung + wordmark riêng + title/description tĩnh của đúng hạng mục.
+- [ ] Criterion 2: Mỗi card hiển thị badge dùng chung + wordmark riêng + title tĩnh (proper noun, không dịch) và description đọc từ i18n dictionary (`awards.*.description`) của đúng hạng mục.
 - [ ] Criterion 3: Grid responsive 3 cột (≥lg) / 2 cột (<lg) theo BR-004.
 
 ### Technical Notes
@@ -295,14 +295,14 @@ As a guest, I want to read the Sun* Kudos promotion so that I understand what th
 
 ### Acceptance Criteria
 
-- [ ] Criterion 1: `KudosSection` hiển thị label, title, đoạn giới thiệu dài (tiếng Việt, không qua dictionary) và wordmark "Sun* Kudos".
+- [ ] Criterion 1: `KudosSection` hiển thị label, title, đoạn giới thiệu dài (đọc từ i18n dictionary, đổi theo locale) và wordmark "Sun* Kudos".
 - [ ] Criterion 2: Nội dung hiển thị cho mọi actor.
 
 ### Technical Notes
 
-- **Endpoint**: N/A — nội dung tĩnh.
-- **Data Required**: Copy tĩnh trong `components/home/kudos-section.tsx`.
-- **Dependencies**: `components/home/kudos-section.tsx`.
+- **Endpoint**: N/A — không network, chỉ đọc dictionary tĩnh phía client.
+- **Data Required**: Copy đọc qua `useI18n()` từ `lib/i18n/dictionaries/{vi,en}.ts` (khóa `kudos.badge`/`kudos.body`, cộng `kudos.label`/`kudos.title`/`kudos.detailLink` có sẵn từ trước).
+- **Dependencies**: `components/home/kudos-section.tsx`, `lib/i18n/locale-provider.tsx`.
 
 ### Screens
 

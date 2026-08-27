@@ -1,0 +1,39 @@
+{
+  "commands": [
+    {
+      "command": "npx playwright test --project=homepage-with-open-gate e2e/homepage-language-content.spec.ts",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "GREEN, 4 passed. The exact regression command that was RED (exit 1, four assertion failures) before the repair. Covers all three blocks VI->EN->VI in both directions.",
+      "ts": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "command": "npx playwright test --project=prelaunch-gate --project=awards-page --project=homepage-with-open-gate --project=invalid-env --project=prelaunch-unlocked",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "GREEN, 83 passed (79 before this fix, +4 new regression tests). Every Playwright project that does not require a live Supabase. Includes e2e/homepage-dropdown-menus.spec.ts and the awards-page project, which consumes the renamed lib/awards.ts.",
+      "ts": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Next.js build + TypeScript typecheck clean. Proves vi.ts and en.ts still have an identical key set — en.ts is typed Record<DictionaryKey, string>, so a missing or misspelled key fails compilation.",
+      "ts": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "ESLint clean, 0 errors. Pre-existing warnings only, all in e2e files untouched by this repair.",
+      "ts": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "command": "npx playwright test --config playwright.unit.config.ts",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "GREEN, 134 passed. Includes lib/awards.test.ts, whose assertion was strengthened from 'description is non-empty' to 'descriptionKey is non-empty AND resolves to a non-empty vi dictionary entry' — a typo'd key now fails at unit-test time.",
+      "ts": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}

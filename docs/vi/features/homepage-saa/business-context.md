@@ -28,3 +28,9 @@ Trang chủ SAA 2025 (`SCR001_Home`, route `/`) là điểm chạm đầu tiên 
 ## Unresolved Questions
 
 None. Hai điểm ngoài phạm vi ghi nhận trong `clarifications.md`: nội dung thật của `/awards` và `/kudos` (placeholder ở lần build này), và việc thay session mock bằng auth thật.
+
+**Ghi chú bản sửa lỗi (bug fix nội dung theo ngôn ngữ trên trang chủ):**
+
+- Bản sửa này mở rộng phạm vi i18n của trang chủ (`/`) từ chỉ chrome (nav, heading, nút, nhãn) sang cả nội dung dài (Root Further, Sun* Kudos, mô tả thẻ giải thưởng) — xem `rootFurther.*`, `kudos.badge`/`kudos.body`, `awards.*.description` trong `lib/i18n/dictionaries/vi.ts`/`en.ts`.
+- **Copy tiếng Anh (`en.ts`) cho các khóa mới ở trên là bản dịch nháp do AI soạn trong phiên sửa lỗi này** — chưa phải văn bản chính thức của Comms/BTC, người dùng đã chấp nhận dùng tạm với điều kiện sẽ được rà soát lại sau.
+- Trang `/awards` (`lib/awards.ts`: `longDescription`, `quantity.unit`, `prizeLines[].note`) **vẫn chỉ có tiếng Việt** — bản sửa này cố ý chỉ giới hạn ở trang chủ, không mở rộng sang `/awards`. Đừng suy diễn rằng toàn site đã song ngữ.

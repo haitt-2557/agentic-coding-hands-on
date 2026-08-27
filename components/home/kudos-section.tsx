@@ -1,8 +1,8 @@
 'use client';
 
-// R5 Sun* Kudos promo (mms_D1_Sunkudos) — FR-018: "Chi tiết" navigates to `/kudos`. The
-// long-form body paragraph is static Track A content (Track B's dictionary scope note) —
-// only the label/title/detail-link chrome comes from the shared dictionary.
+// R5 Sun* Kudos promo (mms_D1_Sunkudos) — FR-018: "Chi tiết" navigates to `/kudos`. All copy,
+// including the badge label and long-form body paragraph, comes from the shared dictionary
+// (`kudos.*` in `lib/i18n/dictionaries/{vi,en}.ts`) so it follows the language switcher.
 // mm:I3390:10349;313:8416
 // mm:I3390:10349;313:8426;186:1766
 // mm:I3390:10349;329:2948
@@ -31,12 +31,8 @@ export function KudosSection() {
               {t('kudos.title')}
             </h2>
             <p className="text-base font-bold text-white">
-              <span className="block">ĐIỂM MỚI CỦA SAA 2025</span>
-              Hoạt động ghi nhận và cảm ơn đồng nghiệp - lần đầu tiên được diễn ra dành cho
-              tất cả Sunner. Hoạt động sẽ được triển khai vào tháng 11/2025, khuyến khích
-              người Sun* chia sẻ những lời ghi nhận, cảm ơn đồng nghiệp trên hệ thống do BTC
-              công bố. Đây sẽ là chất liệu để Hội đồng Heads tham khảo trong quá trình lựa
-              chọn người đạt giải.
+              <span className="block">{t('kudos.badge')}</span>
+              {t('kudos.body')}
             </p>
           </div>
           <Link

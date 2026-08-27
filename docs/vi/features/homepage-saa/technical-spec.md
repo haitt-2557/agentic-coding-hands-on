@@ -106,10 +106,10 @@ columns = viewport >= desktopBreakpoint ? 3
 
 #### BR-005_DieuHuongKhiThieuSlug
 **Linked FR:** FR-013
-**Source:** `lib/awards.ts:69-74` (`awardHref` — trả `/awards` khi `slug` falsy, `/awards#${slug}` khi có)
+**Source:** `lib/awards.ts:138-143` (`awardHref` — trả `/awards` khi `slug` falsy, `/awards#${slug}` khi có)
 **Applies to:** Điều hướng thẻ giải thưởng
 **Rule:** Nếu thẻ giải thưởng không có slug hợp lệ, điều hướng đến `/awards` không kèm hash và không tự cuộn.
-**Ghi chú promote:** cả 6 phần tử trong `AWARDS` (`lib/awards.ts:25-62`) đều có slug hợp lệ — nhánh fallback này **không thể trigger được từ UI thật** trong bản build hiện tại; coverage thật nằm ở unit test `lib/awards.test.ts:51-52` (`awardHref(undefined)` / `awardHref('')`). Không phải lỗi — chỉ là nhánh phòng thủ chưa có dữ liệu nào kích hoạt nó qua trình duyệt.
+**Ghi chú promote:** cả 6 phần tử trong `AWARDS` (`lib/awards.ts:59-131`) đều có slug hợp lệ — nhánh fallback này **không thể trigger được từ UI thật** trong bản build hiện tại; coverage thật nằm ở unit test `lib/awards.test.ts:107-108` (`awardHref(undefined)` / `awardHref('')`). Không phải lỗi — chỉ là nhánh phòng thủ chưa có dữ liệu nào kích hoạt nó qua trình duyệt.
 
 **Pseudocode:**
 ```text
@@ -226,8 +226,8 @@ Ghi chú promote: `behavior-logic.md` đã tồn tại thật (Wave sinh tài li
 **Requirements fulfilled:**
 - **FR-004** Render hero/keyvisual với tiêu đề "ROOT FURTHER" (outline type) + nhãn "Coming soon" (điều kiện — xem BR-002)
   **Source:** `components/home/hero-keyvisual.tsx:17-47`
-- **FR-005** Render nội dung Root Further (2 đoạn văn dài + trích dẫn "A tree with deep roots fears no storm" / "Cây sâu bén rễ, bão giông chẳng nề — Ngạn ngữ Anh")
-  **Source:** `components/home/root-further-content.tsx:16-53` (trích dẫn dòng 42-45)
+- **FR-005** Render nội dung Root Further (2 khối văn bản + trích dẫn "A tree with deep roots fears no storm" / "Cây sâu bén rễ, bão giông chẳng nề — Ngạn ngữ Anh"), copy đọc từ i18n dictionary (`rootFurther.*`) nên đổi theo language switcher
+  **Source:** `components/home/root-further-content.tsx:17-56` (trích dẫn dòng 45-48), khóa dictionary tại `lib/i18n/dictionaries/vi.ts:125-138` (`rootFurther.*`)
 
 **Rules enforced:** BR-002 (see Cross-Cutting) — nhãn "Coming soon" ẩn/hiện theo trạng thái countdown ngay trên hero này.
 
@@ -303,20 +303,20 @@ Ghi chú promote: `behavior-logic.md` đã tồn tại thật (Wave sinh tài li
 
 **Acceptance Scenarios:**
 
-1. **Given** viewport desktop, **When** xem phần giải thưởng, **Then** 6 thẻ hiển thị lưới 3 cột, mỗi thẻ có thumbnail + tiêu đề + mô tả tối đa 2 dòng (`components/home/award-card.tsx:71` `line-clamp-2`) + link "Chi tiết".
+1. **Given** viewport desktop, **When** xem phần giải thưởng, **Then** 6 thẻ hiển thị lưới 3 cột, mỗi thẻ có thumbnail + tiêu đề (không dịch, proper noun) + mô tả tối đa 2 dòng đọc từ i18n dictionary (`components/home/award-card.tsx:73` `line-clamp-2`, khóa `awards.*.description` — xem FR-013) + link "Chi tiết".
 2. **Given** viewport tablet hoặc mobile, **When** xem phần giải thưởng, **Then** lưới hiển thị 2 cột (BR-004 — 3/2/2 thắng theo frame + TC, không theo dòng CSV tiếng Anh "3/2/1" đã lỗi thời).
 3. **Given** thẻ "Top Talent" có slug `top-talent`, **When** click ảnh, tiêu đề, hoặc "Chi tiết" của thẻ, **Then** điều hướng `/awards#top-talent` và tự cuộn tới đúng section (`app/awards/page.tsx:12` `scroll-mt-24`, hành vi cuộn gốc của trình duyệt theo hash anchor, không phải app tự code).
-4. **Given** hover một thẻ bất kỳ, **When** rê chuột qua, **Then** thẻ nổi nhẹ với hiệu ứng viền/ánh sáng tăng cường (`components/home/award-card.tsx:46` class `saa-glow`).
+4. **Given** hover một thẻ bất kỳ, **When** rê chuột qua, **Then** thẻ nổi nhẹ với hiệu ứng viền/ánh sáng tăng cường (`components/home/award-card.tsx:48` class `saa-glow`).
 
 **Requirements fulfilled:**
 - **FR-012** Lưới giải thưởng responsive 3/2/2 cột
   **Source:** `components/home/awards-section.tsx:21`
 - **FR-013** Điều hướng thẻ (ảnh/tiêu đề/Chi tiết) → `/awards#<slug>` với auto-scroll
-  **Source:** `components/home/award-card.tsx:44-46,69,72-73`, `lib/awards.ts:69-74`
+  **Source:** `components/home/award-card.tsx:46-48,71,74-75`, `lib/awards.ts:138-143`
 - **FR-014** Fallback khi thẻ thiếu slug → `/awards` không auto-scroll
-  **Source:** `lib/awards.ts:69-74` (nhánh không có thẻ nào trong `AWARDS` kích hoạt được từ UI — xem ghi chú tại BR-005 ở trên; coverage thật là `lib/awards.test.ts:51-52`)
+  **Source:** `lib/awards.ts:138-143` (nhánh không có thẻ nào trong `AWARDS` kích hoạt được từ UI — xem ghi chú tại BR-005 ở trên; coverage thật là `lib/awards.test.ts:107-108`)
 
-**Design defect đã biết (không phải bug code):** 3/6 thẻ (Best Manager, Signature 2025 - Creator, MVP) dùng chung một mô tả placeholder trong chính frame thiết kế — `lib/awards.ts:47,53,59` tái tạo nguyên văn theo quy tắc "frame thắng về copy". Xem mục C1 của `design-defects-260818-homepage-saa.md` — được đánh dấu **chặn public**.
+**Design defect đã biết (không phải bug code):** 3/6 thẻ (Best Manager, Signature 2025 - Creator, MVP) dùng chung một mô tả placeholder trong chính frame thiết kế — trước đây tái tạo nguyên văn tại `lib/awards.ts`, nay text đã chuyển vào i18n dictionary (`lib/i18n/dictionaries/vi.ts:151-155`, khóa `awards.bestManager.description`/`awards.signatureCreator.description`/`awards.mvp.description`), giá trị vẫn giống hệt nhau đúng theo frame. Xem mục C1 của `design-defects-260818-homepage-saa.md` — được đánh dấu **chặn public**.
 
 **Rules enforced:** BR-004, BR-005 (Cross-Cutting Logic).
 
@@ -390,8 +390,8 @@ Ghi chú promote: `behavior-logic.md` đã tồn tại thật (Wave sinh tài li
 2. **Given** section Kudos hiển thị, **When** click "Chi tiết", **Then** điều hướng tới `/kudos`.
 
 **Requirements fulfilled:**
-- **FR-018** Nút "Chi tiết" Kudos điều hướng `/kudos`
-  **Source:** `components/home/kudos-section.tsx:14-60` (Link dòng 42-48)
+- **FR-018** Nút "Chi tiết" Kudos điều hướng `/kudos`; nhãn/tiêu đề/badge/nội dung đều đọc từ i18n dictionary (`kudos.*`) nên đổi theo language switcher
+  **Source:** `components/home/kudos-section.tsx:14-56` (Link dòng 38-44), khóa dictionary `kudos.badge`/`kudos.body` tại `lib/i18n/dictionaries/vi.ts:139-143` (`kudos.label`/`kudos.title`/`kudos.detailLink` đã có sẵn từ trước, tại dòng 39-41)
 
 **Verification:**
 - **SC-001** (covers FR-018)
@@ -431,7 +431,7 @@ Greenfield — không có bảng CSDL thật; xác nhận tại `docs/vi/generat
 
 | Entity | Table | Key Columns | Purpose |
 |--------|-------|-------------|---------|
-| MODEL001_Award | N/A (hằng số hard-code, `lib/awards.ts:25-62`) | slug, title, description, image | 6 thẻ giải thưởng hiển thị + điều hướng hash-anchor (FR-013) |
+| MODEL001_Award | N/A (hằng số hard-code, `lib/awards.ts:59-131`) | slug, title, descriptionKey (trỏ vào i18n dictionary), image | 6 thẻ giải thưởng hiển thị + điều hướng hash-anchor (FR-013) |
 | SessionState (non-entity, DISC-001) | N/A (client-side mock, `lib/session/session-provider.tsx:16-19`) | role (`guest\|user\|admin`), unreadCount | Điều khiển hiển thị chuông thông báo + menu tài khoản theo vai trò |
 | I18nState/Locale (non-entity, DISC-002) | N/A (lưu `localStorage`, `lib/i18n/locale-provider.tsx:11-17`) | locale (`vi\|en`) | Điều khiển từ điển copy hiển thị toàn trang (FR-002) |
 | CountdownResult (non-entity, computed) | N/A (`lib/countdown.ts:5-14`) | days, hours, minutes, isExpired, isInvalid | Nguồn tính đếm ngược (ALG-001) |
@@ -495,7 +495,7 @@ app/layout.tsx
     -> app/page.tsx
       -> SiteHeader (logo, nav, LanguageSwitcher, NotificationBell, AccountMenu — mỗi dropdown dùng DropdownMenu)
       -> HeroKeyvisual (CountdownTimer, EventInfo, HeroCta)
-      -> RootFurtherContent (static copy)
+      -> RootFurtherContent (client component, copy từ i18n dictionary — theo language switcher)
       -> AwardsSection (6x AwardCard)
       -> KudosSection
       -> QuickActionWidget (DropdownMenu, ngoài <main>)
