@@ -10,6 +10,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { tallyLikeCounts } from './heart-math';
+import { formatQueryFailure } from './query-failure-log';
 import type { BoardLikeState } from './types';
 
 const EMPTY_STATE: BoardLikeState = { counts: {}, likedIds: [] };
@@ -35,7 +36,7 @@ export async function loadBoardLikeState(userId: string | null): Promise<BoardLi
       .select('kudos_id');
 
     if (allRowsError || !allRows) {
-      console.error('loadBoardLikeState count query failed:', allRowsError?.message);
+      console.error(formatQueryFailure('count', allRowsError));
       return EMPTY_STATE;
     }
 
@@ -51,7 +52,7 @@ export async function loadBoardLikeState(userId: string | null): Promise<BoardLi
       .eq('user_id', userId);
 
     if (ownRowsError || !ownRows) {
-      console.error('loadBoardLikeState viewer query failed:', ownRowsError?.message);
+      console.error(formatQueryFailure('viewer', ownRowsError));
       return { counts, likedIds: [] };
     }
 
