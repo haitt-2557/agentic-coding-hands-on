@@ -1,0 +1,49 @@
+{
+  "score": 9,
+  "criticalCount": 0,
+  "decision": "SEALED",
+  "acceptanceCovered": [
+    "Open menu panel renders bg #00070C, 1px solid #998C5F border, 8px radius, 6px padding — per node 525:11713. — PROOF: Open panel bg #00070C / border 1px solid #998C5F / radius 8px / padding 6px — verified via bg-kudos-sidebar-bg (#00070c) + border-border-accent (#998c5f) tokens, confirmed by re-running homepage-language-dropdown.spec.ts (exit 0)",
+    "Each menu row is 110x56px, flex row, align-items center, with a 4px gap between a 20x15 flag and its label. — PROOF: Row 110x56, flex row, items-center, 4px flag-label gap — w-[110px] h-14 items-center gap-1, confirmed by test + independent rerun",
+    "Row label renders Montserrat 700 / 16px / line-height 24px / letter-spacing 0.15px / #FFFFFF, characters 'VN' and 'EN'. — PROOF: Row label Montserrat 700/16px/24px/0.15px/#FFFFFF — leading-6 tracking-[0.15px] text-white font-bold text-base, confirmed",
+    "The VN row shows the Vietnam flag; the EN row shows the Union Flag (node 'GB-NIR - Northern Ireland'). — PROOF: VN flag / EN Union Flag per row — Flag_VN.svg and new Flag_EN.svg, both 20x15, confirmed",
+    "The currently selected row carries background rgba(255,234,158,0.2); the unselected row is transparent over the panel. — PROOF: Selected row rgba(255,234,158,0.2) vs transparent unselected — new --language-row-selected-bg token, confirmed",
+    "Hover on a row changes its background to a highlight state. — PROOF: Hover highlight — reuses existing hover:bg-secondary-button-bg token per clarified assumption",
+    "Clicking a row sets that locale, updates the trigger's displayed value, and closes the menu. — PROOF: Click row sets locale, updates trigger, closes menu — confirmed by e2e assertions and independent rerun",
+    "Existing dropdown behaviour (open/close, click-outside, Enter, Space, Escape, max 2 options) stays green. — PROOF: Existing dropdown behaviour (open/close, click-outside, Enter, Space, Escape, max 2 options) stays green — independently reran homepage-dropdown-menus.spec.ts, 7/7 pass",
+    "next build (typecheck) and eslint pass with no new errors. — PROOF: next build (typecheck) and eslint pass with no new errors — independently reran npm run build (exit 0) and npm run lint (exit 0, only 6 pre-existing unrelated e2e warnings)"
+  ],
+  "regressionChecked": [
+    "DropdownMenu menuClassName is substitution (??) not concatenation — default branch renders byte-identical class string to pre-change code, confirmed by diff read",
+    "account-menu.tsx, notification-bell.tsx, quick-action-widget.tsx do not pass menuClassName — confirmed by reading all three call sites, default chrome unaffected",
+    "Accessible names VN/EN unaffected by locale (dictionary keys identical in vi.ts and en.ts) — homepage-dropdown-menus.spec.ts selectors /VN|VI/i and /EN/i remain valid, confirmed by independent rerun",
+    "Full test:e2e suite red (exit 1) is pre-existing Docker/Supabase environment gap, not caused by this diff — verified the stash-compare methodology in environmental-note.md is sound and independently reran the unaffected-project subset clean"
+  ],
+  "contractStatus": "OK",
+  "refuted": [],
+  "unproven": [],
+  "reachableRegressions": [],
+  "findings": [
+    {
+      "severity": "Low",
+      "category": "Structure",
+      "location": "components/ui/language-switcher.tsx:35-42",
+      "summary": "The flag <Image alt=\"\" aria-hidden width=20 height=15 className=\"h-[15px] w-5\"> markup is duplicated between the trigger (lines 35-42) and the row (lines 72-79). A small FlagIcon helper would remove the duplication.",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "Low",
+      "category": "Logic",
+      "location": "e2e/homepage-language-dropdown.spec.ts:18-36",
+      "summary": "The design contract test asserts panel chrome (bg/border/radius/padding) and row bounding boxes but never asserts the outer panel's own width/height (spec: 122x124px). It is arithmetically implied by row width (110px) + padding (6px*2) + border (1px*2), so this is a coverage gap, not a defect.",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "Low",
+      "category": "Logic",
+      "location": "e2e/homepage-dropdown-menus.spec.ts:1-100",
+      "summary": "No e2e spec anywhere in the repo directly exercises account-menu.tsx / notification-bell.tsx / quick-action-widget.tsx open/close interactions — regression assurance for those three DropdownMenu consumers rests on source-code inspection (no menuClassName passed) rather than executed behavior. Pre-existing gap, not introduced by this diff, out of scope to fix here.",
+      "disposition": "Defer"
+    }
+  ]
+}

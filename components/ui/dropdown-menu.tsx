@@ -36,6 +36,13 @@ interface DropdownMenuProps {
   align?: 'left' | 'right';
   menuLabel?: string;
   className?: string;
+  /**
+   * Substitutes the panel's chrome classes (background/border/radius/padding/spacing)
+   * outright — it does not concatenate. Omit it and the rendered class string is
+   * byte-for-byte the default below. See language-switcher.tsx for the one caller
+   * that supplies a design-specific chrome (mm:525:11713).
+   */
+  menuClassName?: string;
 }
 
 export function DropdownMenu({
@@ -44,6 +51,7 @@ export function DropdownMenu({
   align = 'left',
   menuLabel,
   className,
+  menuClassName,
 }: DropdownMenuProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -103,9 +111,10 @@ export function DropdownMenu({
           role="menu"
           aria-labelledby={triggerId}
           aria-label={menuLabel}
-          className={`absolute z-50 mt-2 min-w-[10rem] rounded-md border border-border-accent bg-header-bg py-1 saa-glow ${
-            align === 'right' ? 'right-0' : 'left-0'
-          }`}
+          className={`absolute z-50 ${
+            menuClassName ??
+            'mt-2 min-w-[10rem] rounded-md border border-border-accent bg-header-bg py-1 saa-glow'
+          } ${align === 'right' ? 'right-0' : 'left-0'}`}
         >
           {children({ close })}
         </div>

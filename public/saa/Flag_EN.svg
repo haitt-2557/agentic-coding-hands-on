@@ -1,0 +1,22 @@
+<svg width="20" height="15" viewBox="0 0 20 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_flagEN_2026)">
+<rect width="20" height="15" fill="#2E42A5"/>
+<g stroke="#F7FCFF" stroke-width="3">
+<line x1="0" y1="0" x2="20" y2="15"/>
+<line x1="20" y1="0" x2="0" y2="15"/>
+</g>
+<g stroke="#E31D1C" stroke-width="1.2">
+<line x1="0" y1="0" x2="20" y2="15"/>
+<line x1="20" y1="0" x2="0" y2="15"/>
+</g>
+<rect x="7" y="0" width="6" height="15" fill="#F7FCFF"/>
+<rect x="0" y="5.25" width="20" height="4.5" fill="#F7FCFF"/>
+<rect x="8.5" y="0" width="3" height="15" fill="#E31D1C"/>
+<rect x="0" y="6.375" width="20" height="2.25" fill="#E31D1C"/>
+</g>
+<defs>
+<clipPath id="clip0_flagEN_2026">
+<rect width="20" height="15" fill="white"/>
+</clipPath>
+</defs>
+</svg>
