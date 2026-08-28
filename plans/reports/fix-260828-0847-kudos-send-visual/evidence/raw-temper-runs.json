@@ -1,0 +1,26 @@
+[
+  {
+    "command": "npx playwright test e2e/send-kudos-access.spec.ts e2e/send-kudos-layout.spec.ts e2e/send-kudos-interactions.spec.ts e2e/send-kudos-validation.spec.ts e2e/send-kudos-submission.spec.ts e2e/send-kudos-submit.spec.ts",
+    "exitCode": 0,
+    "status": "pass",
+    "summary": "Regression: 24 tests passed (all send-kudos E2E suites GREEN)"
+  },
+  {
+    "command": "npx playwright test e2e/send-kudos-layout.spec.ts",
+    "exitCode": 0,
+    "status": "pass",
+    "summary": "Layout + visual prevention: 5 tests passed (cream card, dark heading, side-by-side labels)"
+  },
+  {
+    "command": "npx tsc --noEmit",
+    "exitCode": 0,
+    "status": "pass",
+    "summary": "TypeScript: no type errors"
+  },
+  {
+    "command": "npm run lint",
+    "exitCode": 0,
+    "status": "pass",
+    "summary": "ESLint: no errors (6 warnings in unrelated test files, pre-existing)"
+  }
+]

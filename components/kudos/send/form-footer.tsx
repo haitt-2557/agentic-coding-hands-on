@@ -1,7 +1,10 @@
 'use client';
 
 // FR-010/FR-011/FR-012, US008, BR-007/BR-008, DEC-001 — footer buttons (frame node
-// I1612:5057;520:9905: "Hủy" node 520:9906, "Gửi" node 520:9907 bg #FFEA9E / accent).
+// I662:9637;520:9905: "Hủy" node 520:9906, "Gửi" node 520:9907 bg #FFEA9E / accent). Icon
+// glyphs are literal characters, not assets — componentSetId 178:1020 (the IC instances on
+// both buttons) is a vector icon set with no mm_media_* export, same precedent as
+// message-toolbar.tsx.
 //
 // dom-contract.md D13 — exactly ONE button matching /Gửi/i and exactly ONE matching /Hủy/i;
 // Gửi disabled until DEC-001's four fields are filled; Hủy always enabled.
@@ -19,17 +22,18 @@ export function FormFooter({ canSubmit, isSubmitting, onCancel, onSubmit }: Form
   const { t } = useI18n();
 
   return (
-    // mm:I1612:5057;520:9905
+    // mm:I662:9637;520:9905
     <div className="flex w-full max-w-[672px] items-start gap-6">
-      {/* mm:I1612:5057;520:9906 */}
+      {/* mm:I662:9637;520:9906 */}
       <button
         type="button"
         onClick={onCancel}
-        className="self-stretch rounded border border-border-accent bg-secondary-button-bg px-10 py-4 text-base leading-6 font-bold tracking-[0.15px] text-white"
+        className="flex items-center justify-center gap-2 self-stretch rounded border border-border-accent bg-secondary-button-bg px-10 py-4 text-base leading-6 font-bold tracking-[0.15px] text-background"
       >
         {t('sendKudos.cancelButton')}
+        <span aria-hidden="true">✕</span>
       </button>
-      {/* mm:I1612:5057;520:9907 */}
+      {/* mm:I662:9637;520:9907 */}
       <button
         type="button"
         disabled={!canSubmit || isSubmitting}
@@ -37,6 +41,7 @@ export function FormFooter({ canSubmit, isSubmitting, onCancel, onSubmit }: Form
         className="flex h-[60px] flex-1 items-center justify-center gap-2 rounded-lg bg-accent px-4 py-4 text-base leading-6 font-bold tracking-[0.15px] text-accent-foreground disabled:cursor-not-allowed disabled:opacity-50"
       >
         {t('sendKudos.submitButton')}
+        <span aria-hidden="true">→</span>
       </button>
     </div>
   );

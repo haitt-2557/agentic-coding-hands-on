@@ -95,4 +95,53 @@ test.describe('Send Kudos Layout & Field Order (ID-3, ID-4, ID-5, ID-6)', () => 
       await context.close();
     }
   });
+
+  test('visual regression prevention: cream card + dark heading + side-by-side labels (visual-contract)', async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({ baseURL: 'http://localhost:3200' });
+    const page = await context.newPage();
+
+    try {
+      await seedSupabaseSession(context, 'http://localhost:3200');
+      await page.goto('/kudos/send');
+      await expect(page).toHaveURL(/\/kudos\/send$/);
+
+      // Assertion 1: form's card has cream background (#FFF8E1 = rgb(255, 248, 225))
+      const formCard = page.locator('form');
+      const bgColor = await formCard.evaluate((el) => window.getComputedStyle(el).backgroundColor);
+      expect(bgColor).toBe('rgb(255, 248, 225)');
+
+      // Assertion 2: page heading (role heading level 1, text matching /Gửi lời cám ơn/)
+      // has dark text (rgb(0, 16, 26))
+      const heading = page.getByRole('heading', { level: 1, name: /Gửi lời cám ơn/ });
+      await expect(heading).toBeVisible();
+      const headingColor = await heading.evaluate((el) => window.getComputedStyle(el).color);
+      expect(headingColor).toBe('rgb(0, 16, 26)');
+
+      // Assertion 3: "Người nhận" label and search input are horizontally side-by-side
+      // (label's right edge <= input's left edge, same vertical row)
+      const recipientLabel = page.locator('label', { hasText: /Người nhận/ }).first();
+      const recipientInput = page.locator('input[placeholder*="Tìm kiếm"]').first();
+
+      await expect(recipientLabel).toBeVisible();
+      await expect(recipientInput).toBeVisible();
+
+      const labelBox = await recipientLabel.boundingBox();
+      const inputBox = await recipientInput.boundingBox();
+
+      expect(labelBox).not.toBeNull();
+      expect(inputBox).not.toBeNull();
+
+      if (labelBox && inputBox) {
+        // Horizontal alignment: label right edge <= input left edge
+        expect(labelBox.x + labelBox.width).toBeLessThanOrEqual(inputBox.x + 5); // 5px tolerance
+        // Vertical overlap: same row (label.y within input row, or close)
+        const verticalOverlap = !(labelBox.y + labelBox.height < inputBox.y || inputBox.y + inputBox.height < labelBox.y);
+        expect(verticalOverlap).toBe(true);
+      }
+    } finally {
+      await context.close();
+    }
+  });
 });

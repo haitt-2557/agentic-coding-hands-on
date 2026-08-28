@@ -1,0 +1,20 @@
+{ "score": 8, "criticalCount": 0, "decision": "SEALED",
+  "acceptanceCovered": [
+    "Form renders on a #FFF8E1 card with 24px radius and 40px padding; all labels, heading, toolbar glyphs, and checkbox label are visible — confirmed via app/globals.css --kudos-card-ground token, rounded-3xl/p-10 utilities, and post-repair screenshot",
+    "Heading is 32px/40px bold, centered, per node I662:9637;520:9870 — kudos-send-form.tsx:120 text-[32px] leading-10 font-bold text-center",
+    "Field labels sit beside their controls per row nodes (I662:9637;520:9871 flexDirection row) — recipient-field.tsx, title-field.tsx, anonymous-toggle.tsx, image-attachments.tsx restructured to row layout with flex-1 control column",
+    "Existing send-kudos e2e specs still pass (dom-contract D5/D8/D13 unchanged) — tester ran 24/24 GREEN exit 0; single title placeholder input unchanged, footer button text regexes still match, all htmlFor/id pairs intact",
+    "npx tsc --noEmit and npm run lint exit 0 — independently re-run by reviewer, both pass"
+  ],
+  "regressionChecked": [
+    "No behavior/validation/state logic changed in any of the 6 component files (diffed non-JSX code, identical)",
+    "Recipient dropdown absolute positioning still anchors correctly after div restructuring",
+    "Footer button accessible names unaffected by new aria-hidden icon glyphs"
+  ],
+  "contractStatus": "OK", "refuted": [], "unproven": [], "reachableRegressions": [],
+  "findings": [
+    { "severity": "Medium", "category": "Structure", "location": "e2e/send-kudos-layout.spec.ts:111",
+      "summary": "new regression test locates the card via fragile `[class*=\"card\"]` substring match instead of `page.locator('form')`, which is the actual card element", "disposition": "Accept" },
+    { "severity": "Low", "category": "Logic", "location": "components/kudos/send/title-field.tsx:28",
+      "summary": "items-center on a row whose right side is a variable-height column (input+helper+error) can drift the label vertically once an error line appears", "disposition": "Accept" }
+  ] }

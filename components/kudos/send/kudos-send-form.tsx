@@ -112,10 +112,14 @@ export function KudosSendForm({ profiles, hashtags, onSubmit }: KudosSendFormPro
         event.preventDefault();
         void handleSubmit();
       }}
-      className="flex w-full max-w-[672px] flex-col items-start gap-6 py-10"
+      className="flex w-full max-w-[752px] flex-col items-start gap-8 rounded-3xl bg-kudos-card-ground p-10"
     >
-      {/* mm:I1612:5057;520:9870 */}
-      <h1 className="text-2xl leading-8 font-bold text-background">{t('sendKudos.pageTitle')}</h1>
+      {/* mm:662:9637 — card container (root cause fix: was missing, dark-on-light text was
+          invisible on the site's dark page background; see fix-260828-0847-kudos-send-visual) */}
+      {/* mm:I662:9637;520:9870 */}
+      <h1 className="w-full text-center text-[32px] leading-10 font-bold text-background">
+        {t('sendKudos.pageTitle')}
+      </h1>
 
       <RecipientField
         profiles={profiles}
