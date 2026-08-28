@@ -18,8 +18,8 @@ Route `/kudos` — điền nội dung thật vào placeholder cũ (`app/kudos/pa
 `MaZUn5xHXZ`: banner + pill nhập kudos, khối HIGHLIGHT KUDOS (carousel tối đa 5 thẻ nhiều tim nhất,
 3 hiển thị cùng lúc, 2 dropdown lọc), khối SPOTLIGHT BOARD (word cloud 106 tên, tìm kiếm, tooltip chỉ
 tên), khối ALL KUDOS (feed thẻ với progressive reveal, lô 4 thẻ), và sidebar thống kê cá nhân + bảng
-xếp hạng. Toàn bộ dữ liệu là module tĩnh `lib/kudos/` (10 file gồm 3 test, mỗi file dưới 200 dòng,
-cùng tiền lệ `lib/awards.ts`) — không có bảng CSDL, không có API route. Bốn đích điều hướng được frame
+xếp hạng. 9 bản ghi gốc vẫn là module tĩnh `lib/kudos/` (10 file gồm 3 test, mỗi file dưới 200 dòng,
+cùng tiền lệ `lib/awards.ts`); **board rewire** (migration `20260828154500`, 2026-08-28) nối thêm vào ALL KUDOS mọi kudos đã lưu ở `public.kudos` (bảng của F014), đọc qua RPC `list_board_kudos()` — không có API route mới, chỉ RPC đọc. Bốn đích điều hướng được frame
 tham chiếu nhưng không có frame riêng (dialog gửi kudos, trang chi tiết kudos, trang hồ sơ, dialog
 Secret Box) đều dừng ở mức trigger render + focusable, không xây đích. Đây là feature dày đặc chuyển trạng thái
 nhất trong 5 lượt gần đây nên dùng strict E2E (`e2e-red-first`): carousel next/prev disable ở hai
@@ -156,9 +156,9 @@ dòng 42-44), `lib/kudos/kudos-queries.ts:16-36` (`matchesFilter`, `filterRecord
 
 ```pseudo
 onFilterOrHashtagClick(value):
-  sharedFilter = applyFilter(sharedFilter, value)
-  highlightList = KUDOS_RECORDS.filter(matchesFilter(sharedFilter)).sortByHeartDesc().take(5)
-  allKudosList = KUDOS_RECORDS.filter(matchesFilter(sharedFilter))
+  sharedFilter = applyFilter(sharedFilter, value); allRecords = [...KUDOS_RECORDS, ...dbRecords]
+  highlightList = allRecords.filter(matchesFilter(sharedFilter)).sortByHeartDesc().take(5)
+  allKudosList = sortLatestFirst(allRecords.filter(matchesFilter(sharedFilter)))
   carouselPage = 1
 ```
 
@@ -607,12 +607,12 @@ See [edge-cases.md](edge-cases.md).
 
 ## Key Entities
 
-Không có bảng CSDL; toàn bộ dữ liệu là hằng số tĩnh trong `lib/kudos/` (10 file bao gồm 3 file test,
-mỗi file dưới 200 dòng, cùng tiền lệ `lib/awards.ts`).
+Không có bảng CSDL mới ở F013; 9 bản ghi gốc vẫn là hằng số tĩnh trong `lib/kudos/` (10 file bao gồm
+3 file test, mỗi file dưới 200 dòng, cùng tiền lệ `lib/awards.ts`). Board rewire nối thêm một nguồn thứ hai — bảng `public.kudos` (F014) đọc qua RPC `list_board_kudos()` — xem dòng KudosRecord bên dưới; entity CSDL đã có ở `entities.md`, không cấp thêm mã nào ở đây.
 
 | Entity | Table | Key Columns | Purpose |
 |--------|-------|-------------|---------|
-| KudosRecord | N/A (hằng số, `lib/kudos/kudos-records.ts:29-91`) | id, senderId, senderName, senderDept, senderBadge, senderKudosReceived, receiverId, receiverName, receiverDept, receiverBadge, receiverKudosReceived, category, message, highlightMessage, hashtags[], attachments[], heartCount, timestamp, variant | Nguồn dữ liệu duy nhất cho cả HIGHLIGHT KUDOS (top-5 nhiều tim) và ALL KUDOS feed. **Đúng 9 bản ghi** (không phải khoảng 8–10 như ước tính ban đầu) tái tổ hợp từ đúng từ vựng thật của frame (7 tên word cloud, 4 hạng huy hiệu New/Rising/Super/Legend Hero, phòng ban/hashtag/category có trong dữ liệu) — không transcribe verbatim vì frame chỉ vẽ một kudos lặp lại 7 lần (xem `## Assumptions`). `variant` chỉ ghi nhận thẻ nguồn transcribe từ đâu (`'post'`/`'highlight'`), không điều khiển render nào — nội dung hiển thị lấy theo prop `variant` của `KudosCard`, không theo field này của record |
+| KudosRecord | N/A (hằng số, `lib/kudos/kudos-records.ts:29-91`) | id, senderId, senderName, senderDept, senderBadge, senderKudosReceived, receiverId, receiverName, receiverDept, receiverBadge, receiverKudosReceived, category, message, highlightMessage, hashtags[], attachments[], heartCount, timestamp, variant | Nguồn dữ liệu gốc cho cả HIGHLIGHT KUDOS (top-5 nhiều tim) và ALL KUDOS feed. **Đúng 9 bản ghi** (không phải khoảng 8–10 như ước tính ban đầu) tái tổ hợp từ đúng từ vựng thật của frame (7 tên word cloud, 4 hạng huy hiệu New/Rising/Super/Legend Hero, phòng ban/hashtag/category có trong dữ liệu) — không transcribe verbatim vì frame chỉ vẽ một kudos lặp lại 7 lần (xem `## Assumptions`). `variant` chỉ ghi nhận thẻ nguồn transcribe từ đâu (`'post'`/`'highlight'`), không điều khiển render nào — nội dung hiển thị lấy theo prop `variant` của `KudosCard`, không theo field này của record. **Từ board rewire (`20260828154500`) trở đi, KudosRecord không còn là nguồn duy nhất**: ALL KUDOS nối thêm kudos đã lưu ở `public.kudos`, ánh xạ qua `mapBoardKudosRow()` (`lib/kudos/board-feed-mapper.ts`) sang cùng shape này (`heartCount: 0`, `badge: 'New Hero'`, `attachments: []` vì bucket ảnh vẫn private), xếp sau 9 bản ghi tĩnh rồi `sortLatestFirst()` đảo ngược để DB rows hiện mới nhất trước |
 | SpotlightNode | N/A (hằng số, `lib/kudos/spotlight-names.ts:7-14,30-137`) | id, name, relX, relY, fontSize, highlighted | 106 tên cho word cloud SPOTLIGHT BOARD (không phải ~100 như ước tính ban đầu) — không có field thời gian, nên tooltip hover chỉ hiện tên (xem US007) |
 | LeaderboardEntry | N/A (hằng số, `lib/kudos/leaderboard.ts:5-22`) | rank, name, prizeDescription | 5 dòng "10 SUNNER NHẬN QUÀ MỚI NHẤT" ở sidebar |
 | FilterVocabulary | N/A (hằng số, `lib/kudos/filters.ts:8,11`) | hashtags[], departments[] | Danh sách giá trị cho 2 dropdown lọc dùng chung 2 khối (`HASHTAG_OPTIONS`, `DEPARTMENT_OPTIONS`) |
@@ -793,7 +793,7 @@ dùng — F15 DRY, một danh sách không phải hai).
 
 ## DB Impact per Event
 
-N/A — read-only feature, no DB writes. Toàn bộ dữ liệu là hằng số client-side trong `lib/kudos/`;
-trạng thái trang carousel (`SM-001`), tiến trình hiện dần của All Kudos (`SM-002`), lượt thả tim
-(`BR-001`/`BR-002`), và bộ lọc dùng chung (`DEC-001`) đều là UI state không persist qua reload. Không
-có API route hay bảng CSDL nào bị ghi ở feature này.
+N/A — read-only feature, không có DB write nào ở F013. 9 bản ghi gốc vẫn là hằng số client-side
+trong `lib/kudos/`; board rewire (`20260828154500`) bổ sung một READ — `loadBoardKudos()` gọi RPC `list_board_kudos()` đọc `public.kudos` (F014) cho ALL KUDOS — không thêm write nào. Trạng thái trang
+carousel (`SM-001`), tiến trình hiện dần All Kudos (`SM-002`), lượt thả tim (`BR-001`/`BR-002`), và bộ
+lọc dùng chung (`DEC-001`) đều là UI state không persist qua reload; không có bảng CSDL nào bị ghi.
