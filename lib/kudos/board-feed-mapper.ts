@@ -27,6 +27,7 @@ export interface BoardKudosRow {
   recipient_name: string;
   recipient_dept: string | null;
   hashtags: string[];
+  is_own: boolean;
 }
 
 const DEFAULT_BADGE = 'New Hero';
@@ -57,8 +58,10 @@ export function formatKudosTimestamp(iso: string): string {
  * anonymous → nickname only (the RPC already withheld the profile — see the migration header);
  * bridged → the real profile slug/name/department, which also lets the existing
  * `senderId === viewerSlug` rule disable the sender's own heart button; unbridged → a 'db:'-
- * prefixed synthetic id that can never equal a viewer slug (DEC-002 edge-case precedent: an
- * unresolvable identity leaves the heart enabled — the RLS policy is the backstop).
+ * prefixed synthetic id that can never equal a viewer slug. Because that synthetic id (and an
+ * anonymous row's withheld profile) blinds the slug rule, ownership rides separately as
+ * `viewerIsSender` — the RPC's per-caller `auth.uid()` verdict (TC 63645b03) — so the heart
+ * still disables on the sender's own kudos; the RLS policy remains the hard backstop.
  */
 export function mapBoardKudosRow(row: BoardKudosRow): KudosRecord {
   const senderName = row.is_anonymous
@@ -89,5 +92,6 @@ export function mapBoardKudosRow(row: BoardKudosRow): KudosRecord {
     heartCount: 0,
     timestamp: formatKudosTimestamp(row.created_at),
     variant: 'post',
+    viewerIsSender: row.is_own,
   };
 }

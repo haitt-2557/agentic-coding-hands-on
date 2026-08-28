@@ -43,7 +43,12 @@ export function KudosCardActions({ record, showDetailButton, onCopied }: KudosCa
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
 
   const liked = isLiked(record.id);
-  const isOwnKudos = viewerSlug !== null && record.senderId === viewerSlug;
+  // Ownership is a union of the two identity spaces: `viewerIsSender` is the server's own
+  // `auth.uid()` verdict for DB-persisted rows (an anonymous/unbridged sender's `senderId` is
+  // 'db:…' and can never match a slug — TC 63645b03), while the slug rule still covers the 9
+  // static records, which carry no `viewerIsSender`.
+  const isOwnKudos =
+    record.viewerIsSender === true || (viewerSlug !== null && record.senderId === viewerSlug);
   // DEC-001, in order: not signed in beats "own kudos" (FR-005 before BR-002).
   const disabled = !isAuthenticated || isOwnKudos;
   const displayedCount = record.heartCount + likeCount(record.id);
