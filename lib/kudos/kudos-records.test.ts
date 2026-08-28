@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { KUDOS_RECORDS, MOCK_VIEWER_ID, formatHeartCount } from './kudos-records';
-import { matchesFilter, filterRecords, highlightTop5 } from './kudos-queries';
+import { matchesFilter, filterRecords, highlightTop5, sortLatestFirst } from './kudos-queries';
 import { HASHTAG_OPTIONS, DEPARTMENT_OPTIONS } from './filters';
 
 // dom-contract.md §10 S1-S8 — the seed data breaks its own test here, not the E2E suite.
@@ -133,6 +133,29 @@ test.describe('highlightTop5', () => {
   test('respects the active filter before ranking (S5 empty combination)', () => {
     const top5 = highlightTop5(KUDOS_RECORDS, { hashtag: '#Dedicated', department: 'CECV10' });
     expect(top5).toHaveLength(0);
+  });
+});
+
+test.describe('sortLatestFirst', () => {
+  test('reverses array order so the most recently sent kudos leads (ALL KUDOS feed)', () => {
+    const sorted = sortLatestFirst(KUDOS_RECORDS);
+    expect(sorted.map((record) => record.id)).toEqual(
+      [...KUDOS_RECORDS].reverse().map((record) => record.id)
+    );
+    expect(sorted[0].id).toBe('kudos-9');
+    expect(sorted[sorted.length - 1].id).toBe('kudos-1');
+  });
+
+  test('does not mutate its input', () => {
+    const before = KUDOS_RECORDS.map((record) => record.id);
+    sortLatestFirst(KUDOS_RECORDS);
+    expect(KUDOS_RECORDS.map((record) => record.id)).toEqual(before);
+  });
+
+  test('preserves relative order of an already-filtered subset', () => {
+    const filtered = filterRecords(KUDOS_RECORDS, { hashtag: '#Dedicated', department: null });
+    const sorted = sortLatestFirst(filtered);
+    expect(sorted.map((record) => record.id)).toEqual([...filtered].reverse().map((record) => record.id));
   });
 });
 

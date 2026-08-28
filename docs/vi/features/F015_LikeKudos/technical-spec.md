@@ -23,8 +23,19 @@ Feature này thêm ba thứ: bảng lượt thả tim có ràng buộc "một ng
 cộng cho **người gửi** kudos, và cầu nối danh tính giữa `auth.uid()` với profile slug để chặn
 người gửi tự thả tim cho kudos của chính mình.
 
-Bảng `/kudos` **vẫn đọc dữ liệu tĩnh** từ `lib/kudos/kudos-records.ts`. Đường nối giữa kudos gửi
-đi và bảng live board vẫn để nguyên như F014 đã ghi nhận — đó là feature khác.
+Lúc feature này lên (2026-08-25), bảng `/kudos` **vẫn đọc dữ liệu tĩnh** từ
+`lib/kudos/kudos-records.ts`; đường nối giữa kudos gửi đi và bảng live board để nguyên như F014 đã
+ghi nhận — feature khác.
+
+**Cập nhật 2026-08-28 (board rewire, migration `20260828154500`):** đường nối đó đã đóng — ALL KUDOS
+giờ nối thêm mọi kudos đã lưu ở `public.kudos` (đọc qua RPC `list_board_kudos()`,
+`lib/kudos/board-feed.ts` + `lib/kudos/board-feed-mapper.ts`), xếp sau 9 bản ghi tĩnh. Cơ chế thả tim
+dưới đây (ledger, ràng buộc BR-001/BR-002) không đổi, nhưng `toggleKudosLike()`
+(`lib/kudos/likes/toggle-like.ts`) giờ xác thực một kudos không nằm trong 9 id tĩnh bằng cách gọi
+RPC `dynamic_kudos_exists()` rồi `is_dynamic_kudos_author()` thay vì trả lỗi "không tìm thấy" như
+trước — hai RPC này cùng migration `20260828154500` với `list_board_kudos()`, và policy
+`kudos_likes_insert_own` được tạo lại để cấm luôn tự-thả-tim trên một dòng kudos động (mở rộng
+BR-002 sang kudos đã lưu, không chỉ 9 id tĩnh).
 
 ## Polymorphic Behavior
 
@@ -168,9 +179,11 @@ See edge-cases.md.
 
 1. Sổ cái tim **tính bằng aggregate**, không nuôi cột đếm. Với 9 record tĩnh thì chi phí không
    đáng kể, và tránh hẳn lớp bug "số đếm lệch với dữ liệu thật" (YAGNI).
-2. `kudos_id` để kiểu `text` chứ không FK sang `kudos.id`. Bảng live board đang chạy trên id tĩnh;
-   ép FK bây giờ sẽ buộc phải seed 9 record vào DB, tức là làm luôn feature rewire đã hoãn.
-   Đánh đổi: mất ràng buộc toàn vẹn tham chiếu — ghi rõ ở edge-cases.md.
+2. `kudos_id` để kiểu `text` chứ không FK sang `kudos.id`. Lúc quyết định này chốt, bảng live board
+   đang chạy trên id tĩnh; ép FK sẽ buộc phải seed 9 record vào DB, tức là làm luôn feature rewire
+   đã hoãn. Đánh đổi: mất ràng buộc toàn vẹn tham chiếu — ghi rõ ở edge-cases.md. Board rewire
+   (2026-08-28) đã đóng đường nối, nhưng cột vẫn giữ kiểu `text` — không đổi ngược lại thành FK,
+   vì `kudos_likes.kudos_id` cần chứa được cả 9 id tĩnh `kudos-N` lẫn uuid thật, và `dynamic_kudos_exists()` đã thay thế vai trò "ràng buộc toàn vẹn" ở tầng ứng dụng.
 3. `special_days` seed rỗng, nên mặc định mọi lượt thả tim là +1. Đường +2 vẫn phải test được
    bằng cách chèn dòng trong test setup.
 4. Quy tắc "hoa thị" (BR-005 của F013) vẫn ăn theo `kudosReceived` tĩnh, không đọc sổ cái mới.
@@ -189,13 +202,17 @@ See edge-cases.md.
 | 5 | `lib/kudos/send/auth-gate.ts` | `requireSupabaseUser()` — mẫu để làm biến thể không redirect |
 | 6 | `lib/kudos/viewer-stats.ts` | khối D.1, nơi dòng "Số tim" đang là `25` tĩnh |
 | 7 | `app/kudos/page.tsx` | server shell, nơi nạp số tim + tập đã-thả-tim |
+| 8 | `supabase/migrations/20260828154500_kudos_board_feed_read.sql` | board rewire: RPC `list_board_kudos`/`is_dynamic_kudos_author`/`dynamic_kudos_exists`, mở rộng policy `kudos_likes_insert_own` sang kudos động |
+| 9 | `lib/kudos/likes/toggle-like.ts` | `toggleKudosLike()` gọi `dynamic_kudos_exists`/`is_dynamic_kudos_author` cho id ngoài 9 record tĩnh |
 
 ## Unresolved Questions
 
 - Chưa có frame MoMorph nào cho màn admin cấu hình ngày đặc biệt. `special_days` để sẵn cho lúc có.
 - Sổ cái tim cộng cho **slug profile** chứ không phải auth user, nên người đăng nhập chỉ thấy số
-  của mình khi cầu nối `auth_user_id` trỏ tới một slug có viết record tĩnh. Chuyện này tự hết khi
-  bảng live board đọc dữ liệu thật.
+  của mình khi cầu nối `auth_user_id` trỏ tới một slug có viết record tĩnh. Board rewire
+  (2026-08-28) đã cho ALL KUDOS đọc dữ liệu thật, nhưng nuance này vẫn còn: kudos động resolve
+  sender qua đúng cầu nối `auth_user_id` đó (`sender_slug` trong `list_board_kudos()`), không phải
+  một cơ chế mới — chưa tự hết như ghi chú cũ dự đoán.
 
 ## Source Walkthrough
 

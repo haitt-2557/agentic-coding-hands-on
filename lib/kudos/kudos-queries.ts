@@ -34,3 +34,12 @@ export function highlightTop5(records: KudosRecord[], filter: KudosFilter): Kudo
     .sort((a, b) => b.heartCount - a.heartCount)
     .slice(0, 5);
 }
+
+/** Newest-first order for the ALL KUDOS feed. `KUDOS_RECORDS` is authored in the order each
+ * kudos was sent (kudos-1 first, kudos-9 most recent) and every record shares the same display
+ * `timestamp` string (kudos-records.ts), so recency is the record's position in that array, not
+ * its `timestamp` field. Reversing preserves whatever relative order the caller already
+ * filtered down to. */
+export function sortLatestFirst(records: KudosRecord[]): KudosRecord[] {
+  return records.slice().reverse();
+}

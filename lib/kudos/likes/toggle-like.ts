@@ -40,18 +40,46 @@ export async function toggleKudosLike(kudosId: string): Promise<ToggleLikeResult
     return { ok: false, error: AUTH_REQUIRED_ERROR };
   }
 
+  // Static records validate in-process; a DB-persisted kudos (board rewire, TC ca8f60b3)
+  // validates against the real table below instead — through security-definer RPCs
+  // (20260828154500), because `kudos_select_own` correctly hides other senders' rows from a
+  // direct select and `kudos_likes.kudos_id` has no FK to stop garbage ids on its own.
   const record = KUDOS_RECORDS.find((r) => r.id === kudosId);
-  if (!record) {
-    return { ok: false, error: UNKNOWN_KUDOS_ERROR };
-  }
 
-  const viewerSlug = await resolveViewerSlug(user.id);
-  if (viewerSlug !== null && viewerSlug === record.senderId) {
-    return { ok: false, error: SELF_LIKE_ERROR };
+  if (record) {
+    const viewerSlug = await resolveViewerSlug(user.id);
+    if (viewerSlug !== null && viewerSlug === record.senderId) {
+      return { ok: false, error: SELF_LIKE_ERROR };
+    }
   }
 
   try {
     const supabase = await createClient();
+
+    if (!record) {
+      const { data: exists, error: existsError } = await supabase.rpc('dynamic_kudos_exists', {
+        p_kudos_id: kudosId,
+      });
+      if (existsError) {
+        throw new Error(existsError.message);
+      }
+      if (!exists) {
+        return { ok: false, error: UNKNOWN_KUDOS_ERROR };
+      }
+
+      // BR-002 for dynamic rows, mirrored in application code the way the static branch mirrors
+      // it above — the insert policy's `is_dynamic_kudos_author` check is the real boundary.
+      const { data: isAuthor, error: authorError } = await supabase.rpc('is_dynamic_kudos_author', {
+        p_kudos_id: kudosId,
+        p_user: user.id,
+      });
+      if (authorError) {
+        throw new Error(authorError.message);
+      }
+      if (isAuthor) {
+        return { ok: false, error: SELF_LIKE_ERROR };
+      }
+    }
 
     const { data: existing, error: existingError } = await supabase
       .from('kudos_likes')

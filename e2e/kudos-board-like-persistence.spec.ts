@@ -3,6 +3,7 @@ import { seedSupabaseSession } from './support/supabase-session';
 import { cleanupTestRows } from './support/local-db';
 import { kudosCardByIdentity } from './support/kudos-card-locator';
 import { clickHeartAndSettle } from './support/heart-toggle';
+import { revealAllKudosCards } from './support/reveal-kudos-feed';
 
 // Defect A: this file is the exclusive owner of kudos-1 among the kudos-board like specs
 // (kudos-board-like-rules.spec.ts owns kudos-3/4, kudos-board-like-sidebar.spec.ts owns kudos-2).
@@ -21,6 +22,14 @@ test.describe('Kudos Board Like Persistence /kudos (e2e-red-first gate)', () => 
   // SC-001 (FR-001/FR-002) — the core RED: heart state must survive reload
   // The fixture user's auth_user_id bridges to 'nguyen-hoang-linh', so we must click a heart
   // on a kudos sent by SOMEONE ELSE to avoid BR-002 (sender cannot like own kudos).
+  //
+  // Targets kudos-1 by identity ('Nguyễn Bá Chức' → 'Đỗ hoàng Hiệp') rather than "the first
+  // enabled heart": this file's exclusive ownership of kudos-1 (see the file header) only holds
+  // if the test actually touches kudos-1. Under the old feed order that was incidentally true —
+  // kudos-1 rendered first — but the ALL KUDOS feed now renders latest-first (`sortLatestFirst`
+  // in kudos-queries.ts), so "first enabled heart" resolves to whatever record is newest instead,
+  // an id no file cleans up and that concurrent workers running OTHER spec files may be
+  // toggling at the same moment. Reveal every batch first — kudos-1 is now the LAST record.
   test('SC-001: clicking heart increments count and survives reload, then toggle reverts on second reload', async ({
     page,
     context,
@@ -29,19 +38,13 @@ test.describe('Kudos Board Like Persistence /kudos (e2e-red-first gate)', () => 
     await seedSupabaseSession(context, 'http://localhost:3200');
 
     await page.goto('/kudos');
+    await revealAllKudosCards(page);
 
-    // Locate the ALL KUDOS section and find a heart button on a kudos NOT sent by fixture user
-    const allKudosSection = page.locator('section:has(h2:text-is("ALL KUDOS"))').first();
-    const heartButtons = allKudosSection.locator('button[aria-label*="heart"], button[aria-label*="like"]');
-
-    // Ensure at least one heart is enabled (not the sender)
-    const enabledHearts = allKudosSection.locator(
-      'button[aria-label*="heart"]:not([disabled]), button[aria-label*="like"]:not([disabled])'
+    const kudos1Heart = kudosCardByIdentity(page, 'Nguyễn Bá Chức', 'Đỗ hoàng Hiệp').locator(
+      'button[aria-label*="heart"], button[aria-label*="like"]'
     );
-    expect(await enabledHearts.count()).toBeGreaterThan(0);
-
-    const firstEnabledHeart = enabledHearts.first();
-    const initialCountText = await firstEnabledHeart.textContent();
+    await expect(kudos1Heart).toBeEnabled();
+    const initialCountText = await kudos1Heart.textContent();
     const initialCount = parseInt((initialCountText || '0').replace(/\D/g, ''));
 
     // FR-001: Click to like — count should increment and aria-pressed should be true. Waits for
@@ -49,22 +52,21 @@ test.describe('Kudos Board Like Persistence /kudos (e2e-red-first gate)', () => 
     // step reloads the page and reads the DB fresh, so if that reload raced ahead of the insert
     // actually committing, it would read stale (pre-like) state and fail the persistence check
     // for reasons that have nothing to do with FR-001 itself.
-    await clickHeartAndSettle(page, firstEnabledHeart);
+    await clickHeartAndSettle(page, kudos1Heart);
 
-    const afterClickText = await firstEnabledHeart.textContent();
+    const afterClickText = await kudos1Heart.textContent();
     const afterClickCount = parseInt((afterClickText || '0').replace(/\D/g, ''));
     expect(afterClickCount).toBe(initialCount + 1);
-    await expect(firstEnabledHeart).toHaveAttribute('aria-pressed', 'true');
+    await expect(kudos1Heart).toHaveAttribute('aria-pressed', 'true');
 
     // FR-001: Reload the page and assert the like persists
     await page.reload();
     await page.waitForTimeout(300);
+    await revealAllKudosCards(page);
 
-    const reloadedButton = page
-      .locator('section:has(h2:text-is("ALL KUDOS"))')
-      .first()
-      .locator('button[aria-label*="heart"], button[aria-label*="like"]')
-      .first();
+    const reloadedButton = kudosCardByIdentity(page, 'Nguyễn Bá Chức', 'Đỗ hoàng Hiệp').locator(
+      'button[aria-label*="heart"], button[aria-label*="like"]'
+    );
 
     const reloadedCountText = await reloadedButton.textContent();
     const reloadedCount = parseInt((reloadedCountText || '0').replace(/\D/g, ''));
@@ -82,12 +84,11 @@ test.describe('Kudos Board Like Persistence /kudos (e2e-red-first gate)', () => 
     // FR-002: Reload again and assert the unlike also persists
     await page.reload();
     await page.waitForTimeout(300);
+    await revealAllKudosCards(page);
 
-    const finalButton = page
-      .locator('section:has(h2:text-is("ALL KUDOS"))')
-      .first()
-      .locator('button[aria-label*="heart"], button[aria-label*="like"]')
-      .first();
+    const finalButton = kudosCardByIdentity(page, 'Nguyễn Bá Chức', 'Đỗ hoàng Hiệp').locator(
+      'button[aria-label*="heart"], button[aria-label*="like"]'
+    );
 
     const finalCountText = await finalButton.textContent();
     const finalCount = parseInt((finalCountText || '0').replace(/\D/g, ''));
@@ -120,7 +121,10 @@ test.describe('Kudos Board Like Persistence /kudos (e2e-red-first gate)', () => 
     // secondary like on, and the instant that like lands the rendered count becomes '46', so a
     // concurrently-running SC-003 would search for a '45' that no longer exists on the page and
     // fail with "Should find kudos-2...". Matching the sender/receiver identity instead is
-    // unaffected by how many likes the kudos currently has.
+    // unaffected by how many likes the kudos currently has. Reveal every batch first — kudos-2's
+    // position in the feed depends on `sortLatestFirst` (kudos-queries.ts), not a fixed
+    // REVEAL_BATCH.
+    await revealAllKudosCards(page);
     const card = kudosCardByIdentity(page, 'Nguyễn Hoàng Linh', 'Mai phương Thúy');
     await expect(card).toHaveCount(1);
 
@@ -167,6 +171,9 @@ test.describe('Kudos Board Like Persistence /kudos (e2e-red-first gate)', () => 
 
   // FR-003 — displayed count = static heartCount + real like delta
   // This test verifies the rendering formula; the actual persistence is covered by SC-001.
+  // Targets kudos-1 by identity for the same reason as SC-001 above — this file's `afterEach`
+  // only cleans up kudos-1, so the test must actually touch kudos-1, not whichever id "first
+  // enabled heart" resolves to under the current feed order.
   test('FR-003: displayed count equals static heartCount plus real-like delta', async ({
     page,
     context,
@@ -174,15 +181,12 @@ test.describe('Kudos Board Like Persistence /kudos (e2e-red-first gate)', () => 
     await seedSupabaseSession(context, 'http://localhost:3200');
 
     await page.goto('/kudos');
+    await revealAllKudosCards(page);
 
-    const allKudosSection = page.locator('section:has(h2:text-is("ALL KUDOS"))').first();
-    const enabledHearts = allKudosSection.locator(
-      'button[aria-label*="heart"]:not([disabled]), button[aria-label*="like"]:not([disabled])'
+    const heart = kudosCardByIdentity(page, 'Nguyễn Bá Chức', 'Đỗ hoàng Hiệp').locator(
+      'button[aria-label*="heart"], button[aria-label*="like"]'
     );
-
-    expect(await enabledHearts.count()).toBeGreaterThan(0);
-
-    const heart = enabledHearts.first();
+    await expect(heart).toBeEnabled();
     const beforeText = await heart.textContent();
     const before = parseInt((beforeText || '0').replace(/\D/g, ''));
 
