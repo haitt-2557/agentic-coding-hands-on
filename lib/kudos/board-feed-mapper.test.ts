@@ -18,6 +18,7 @@ const BASE_ROW: BoardKudosRow = {
   recipient_name: 'Dương thúy An',
   recipient_dept: 'CEVC10',
   hashtags: ['#WASSHOI'],
+  is_own: false,
 };
 
 test.describe('mapBoardKudosRow', () => {
@@ -54,6 +55,30 @@ test.describe('mapBoardKudosRow', () => {
     expect(record.senderId).toBe(`db:${BASE_ROW.id}`);
     expect(record.senderName).toBe('Sunner');
     expect(record.senderDept).toBe('');
+  });
+
+  // TC 63645b03 regression — the slug rule alone cannot see ownership of an anonymous or
+  // unbridged row (senderId becomes 'db:…'), so the RPC's per-caller `is_own` must survive the
+  // mapping as `viewerIsSender` for the heart button to disable on the sender's own kudos.
+  test('is_own survives mapping as viewerIsSender even when the sender identity is withheld', () => {
+    const anonymousOwn = mapBoardKudosRow({
+      ...BASE_ROW,
+      is_anonymous: true,
+      nickname: 'Sunner bí ẩn',
+      is_own: true,
+    });
+    expect(anonymousOwn.viewerIsSender).toBe(true);
+
+    const unbridgedOwn = mapBoardKudosRow({
+      ...BASE_ROW,
+      sender_slug: null,
+      sender_name: null,
+      sender_dept: null,
+      is_own: true,
+    });
+    expect(unbridgedOwn.viewerIsSender).toBe(true);
+
+    expect(mapBoardKudosRow(BASE_ROW).viewerIsSender).toBe(false);
   });
 
   test('empty title leaves the message untouched', () => {

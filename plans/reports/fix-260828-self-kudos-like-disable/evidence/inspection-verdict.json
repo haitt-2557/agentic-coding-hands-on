@@ -1,0 +1,39 @@
+{
+  "score": 9,
+  "criticalCount": 0,
+  "decision": "SEALED",
+  "acceptanceCovered": [
+    "mapper carries is_own to viewerIsSender even when sender identity is withheld (regression test in board-feed-mapper.test.ts) - verified: test file lib/kudos/board-feed-mapper.test.ts:63-82 covers anonymous-own and unbridged-own cases plus a false control; independently reran, 6/6 pass",
+    "heart button disabled with own-kudos label on the sender's own DB kudos for an unbridged/anonymous author - verified via components/kudos/kudos-card-actions.tsx:50-51,58-59 union rule plus reported live-browser check on the affected account",
+    "unit suite, typecheck and lint stay green - verified: independently reran npx tsc --noEmit (exit 0) and the board-feed-mapper suite (6/6 pass); full 148/148 unit suite and lint reported in temper-results.json"
+  ],
+  "regressionChecked": [
+    "9 static KudosRecord entries in lib/kudos/kudos-records.ts carry no viewerIsSender, so `record.viewerIsSender === true` is false for them and behavior falls through unchanged to the pre-existing senderId===viewerSlug rule",
+    "DEC-001 ordering preserved: disabled = !isAuthenticated || isOwnKudos, and the label ternary still checks !isAuthenticated first, so a logged-out visitor gets the sign-in label even though viewerIsSender can never be true for an anon caller (auth.uid() is null -> coalesce false)",
+    "server-side authorization for the toggle (lib/kudos/likes/toggle-like.ts) was already correct before this fix: DB-persisted rows are checked via is_dynamic_kudos_author(kudos_id, user_id) against auth.uid()-derived sender_id, not the slug space, and the kudos_likes_insert_own RLS policy (20260828154500) is the real backstop independent of this UI change - this fix only realigns client-side UX with a server truth that was already enforced",
+    "BoardKudosRow.is_own is a required field but has exactly one non-test construction site (lib/kudos/board-feed.ts casts RPC data, no literal to update) and one test site (already updated) - no other call sites broken, confirmed by grep and by tsc --noEmit exit 0",
+    "no generated Supabase types file exists in the repo to fall out of sync with the RPC's new column",
+    "migration correctly restates revoke/grant (anon, authenticated) after drop+recreate, since DROP FUNCTION discards prior grants - matches the same discipline the prior migration used",
+    "sender_id is NOT NULL and forced from auth.uid() at insert time (20260824031123) even for anonymous kudos, so `k.sender_id = auth.uid()` in the new SQL is a sound comparison for every row shape; coalesce(...,false) only guards the anon-caller (auth.uid() IS NULL) case, confirmed against psql evidence (anon role sees is_own=false, authoring caller sees true)"
+  ],
+  "contractStatus": "CHANGED",
+  "refuted": [],
+  "unproven": [],
+  "reachableRegressions": [],
+  "findings": [
+    {
+      "severity": "Low",
+      "category": "API Contract",
+      "location": "supabase/migrations/20260828181500_board_feed_own_flag.sql:16-31",
+      "summary": "list_board_kudos()'s return table gained an additive is_own boolean column via drop+recreate (required because Postgres disallows changing a function's return columns with CREATE OR REPLACE). This is a backward-compatible contract change for existing callers (extra column, nothing removed/reordered before it) but should be called out explicitly as a public RPC surface change if any other consumer besides lib/kudos/board-feed.ts exists outside this repo's scan.",
+      "disposition": "Accept"
+    },
+    {
+      "severity": "Low",
+      "category": "Resilience",
+      "location": "lib/kudos/board-feed-mapper.ts:95",
+      "summary": "If the app code deploys before the migration applies in some environment, the RPC row would lack is_own and row.is_own would be undefined; viewerIsSender would become undefined, isOwnKudos falls back to the slug rule (same as before this fix) rather than throwing - degrades safely, not a defect, noted for completeness.",
+      "disposition": "Accept"
+    }
+  ]
+}

@@ -46,6 +46,10 @@ export interface KudosRecord {
   heartCount: number;
   timestamp: string;
   variant: 'highlight' | 'post';
+  /** True when the current viewer authored this kudos, resolved server-side from `auth.uid()`
+   * by `list_board_kudos` (BR-002 / TC 63645b03). Only DB-persisted records carry it — the 9
+   * static records rely on the `senderId === viewerSlug` rule instead, so it stays optional. */
+  viewerIsSender?: boolean;
 }
 
 /** The mock viewer's identity — see the file header for why this is duplicated, not imported,

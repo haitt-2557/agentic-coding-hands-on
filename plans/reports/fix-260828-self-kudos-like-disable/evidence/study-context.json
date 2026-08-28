@@ -1,0 +1,18 @@
+{
+  "task": "Disable the like (heart) button on kudos the viewer authored, including DB-persisted kudos whose sender is anonymous or has no profile bridge (TC 63645b03), by carrying a per-caller is_own flag from the list_board_kudos RPC into the card's disable rule",
+  "mode": "auto",
+  "acceptanceCriteria": [
+    "mapper carries is_own to viewerIsSender even when sender identity is withheld (regression test in board-feed-mapper.test.ts)",
+    "heart button disabled with own-kudos label on the sender's own DB kudos for an unbridged/anonymous author",
+    "unit suite, typecheck and lint stay green"
+  ],
+  "touchpoints": [
+    "supabase/migrations/20260828181500_board_feed_own_flag.sql",
+    "lib/kudos/board-feed-mapper.ts",
+    "lib/kudos/kudos-records.ts",
+    "components/kudos/kudos-card-actions.tsx",
+    "lib/kudos/board-feed-mapper.test.ts"
+  ],
+  "blastRadius": ["/kudos board feed rendering", "heart toggle disable rule", "list_board_kudos RPC projection"],
+  "contracts": ["public.list_board_kudos() returns table now includes is_own boolean; grants to anon+authenticated restated"]
+}
