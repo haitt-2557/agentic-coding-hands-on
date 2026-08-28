@@ -4,30 +4,38 @@ import { seedSupabaseSession } from './support/supabase-session';
 import { cleanupTestRows } from './support/local-db';
 import { kudosCardByIdentity } from './support/kudos-card-locator';
 import { clickHeartAndSettle } from './support/heart-toggle';
+import { revealAllKudosCards } from './support/reveal-kudos-feed';
 
 test.describe('Kudos Feed Interactions /kudos', () => {
   test.beforeEach(seedDefaultSession);
 
   test.describe('Heart Toggle (7a7ec63e, 63645b03)', () => {
+    // `fullyParallel: true` parallelizes tests WITHIN this file too, and this describe's shared
+    // beforeEach cleans kudos-5 for BOTH tests — so 63645b03's cleanup, fired while 7a7ec63e is
+    // mid-toggle, deleted the like row the first click had just inserted; the second click then
+    // re-INSERTED instead of deleting and the count stuck at +1 (observed across the kudos-6 era
+    // too: Expected 512/678, Received 513/679 — always this file racing itself, never another
+    // file). Serial is the same remedy every other kudos-board like spec already uses.
+    test.describe.configure({ mode: 'serial' });
+
     test.beforeEach(async ({ context }) => {
       // FR-005: hearts are disabled when unauthenticated. This test requires a real
       // Supabase session so the heart button is enabled (not disabled by design).
       // The old precondition (localStorage mock only) is insufficient now.
       await seedSupabaseSession(context, 'http://localhost:3200');
       // Defect A (cross-file race, found while verifying the isolation fix for the like-* specs):
-      // this test used to click "the first enabled heart" on the board, which resolves to kudos-1
-      // — the SAME kudos-1 that kudos-board-like-persistence.spec.ts owns and mutates (SC-001,
-      // FR-003). `fullyParallel: true` runs these two files concurrently on different workers with
-      // no ordering guarantee, so this test's click and persistence's click landed on the same row
-      // at the same time (observed: `Expected: 1502, Received: 1500` — persistence's like was
-      // "consumed" as this test's own increment). This file now owns kudos-6 exclusively — a card
-      // untouched by every other kudos-board spec — instead of whichever card happens to render
-      // first, and resets it before/after each test the same way the like-* specs reset their ids.
-      cleanupTestRows(['kudos-6']);
+      // this test used to click "the first enabled heart" on the board, which raced whichever
+      // spec file owned that card under `fullyParallel: true` (observed: `Expected: 1502,
+      // Received: 1500` against kudos-1). It then moved to kudos-6 — but kudos-board-like-
+      // coalesce.spec.ts ALSO owns kudos-6, and the two files raced the same way (observed:
+      // `Expected: 512, Received: 513` when coalesce's like landed mid-toggle). This file now
+      // owns kudos-5 exclusively — sender 'Lê Kiều Trang', receiver = the bridged viewer, so the
+      // heart stays enabled (BR-002 disables the SENDER only) and no other spec file touches it.
+      cleanupTestRows(['kudos-5']);
     });
 
     test.afterEach(() => {
-      cleanupTestRows(['kudos-6']);
+      cleanupTestRows(['kudos-5']);
     });
 
     test('clicking heart toggles count increment on first click, decrement on second (7a7ec63e)', async ({
@@ -41,17 +49,13 @@ test.describe('Kudos Feed Interactions /kudos', () => {
       // Assert at least one heart exists (required by the test case)
       expect(await heartButtons.count()).toBeGreaterThan(0);
 
-      // kudos-6 (sender 'Mai phương Thúy' → receiver 'Dương thúy An') — not the board's first
-      // enabled heart, but not the viewer's own kudos either, so it is a valid, always-enabled
-      // target for this toggle test. See the beforeEach comment above for why "first enabled
-      // heart" was replaced. It is only the board's 6th card, past the initial REVEAL_BATCH of 4
-      // (components/kudos/all-kudos-feed.tsx), so the lazy-load sentinel must be scrolled into
-      // view first to reveal it.
-      const revealSentinel = allKudosSection.locator('div.h-px.w-full[aria-hidden="true"]');
-      if (await revealSentinel.count() > 0) {
-        await revealSentinel.scrollIntoViewIfNeeded();
-      }
-      const firstHeart = kudosCardByIdentity(page, 'Mai phương Thúy', 'Dương thúy An').locator(
+      // kudos-5 (sender 'Lê Kiều Trang' → receiver 'Nguyễn Hoàng Linh') — not the viewer's own
+      // SENT kudos (the viewer only receives it), so its heart is always enabled. See the
+      // beforeEach comment above for why this file owns kudos-5 and nothing else. Its feed
+      // position depends on how many DB rows sit above the static records (board rewire) —
+      // reveal every batch rather than scrolling once.
+      await revealAllKudosCards(page);
+      const firstHeart = kudosCardByIdentity(page, 'Lê Kiều Trang', 'Nguyễn Hoàng Linh').locator(
         'button[aria-label*="heart"], button[aria-label*="like"]'
       );
       await expect(firstHeart).toBeEnabled();
@@ -66,9 +70,13 @@ test.describe('Kudos Feed Interactions /kudos', () => {
       // first one's request settles is silently dropped by the provider's own in-flight guard.
       await clickHeartAndSettle(page, firstHeart);
 
-      const afterFirstClick = await firstHeart.textContent();
-      const countAfterFirst = parseInt((afterFirstClick || '0').replace(/\D/g, ''));
-      expect(countAfterFirst).toBe(initialCount + 1);
+      // POLL for the count rather than reading it once: when a click lands while the previous
+      // request is still in flight, likes-provider.tsx coalesces it and the DOM only updates
+      // when the replay commits — which under 4 parallel workers can outlast the fixed settle
+      // (observed: Expected 678, Received 679 — the replay's delete landed after the read).
+      const readCount = async () =>
+        parseInt(((await firstHeart.textContent()) || '0').replace(/\D/g, ''));
+      await expect.poll(readCount, { timeout: 10_000 }).toBe(initialCount + 1);
 
       // Active state must be explicit. `getAttribute('aria-pressed') ?? 'true'` would let a
       // component that never sets the attribute pass, leaving half of TC 7a7ec63e unverified.
@@ -77,9 +85,7 @@ test.describe('Kudos Feed Interactions /kudos', () => {
       // Click again to decrement (toggle off) — same reasoning as above.
       await clickHeartAndSettle(page, firstHeart);
 
-      const afterSecondClick = await firstHeart.textContent();
-      const countAfterSecond = parseInt((afterSecondClick || '0').replace(/\D/g, ''));
-      expect(countAfterSecond).toBe(initialCount);
+      await expect.poll(readCount, { timeout: 10_000 }).toBe(initialCount);
       await expect(firstHeart).toHaveAttribute('aria-pressed', 'false');
     });
 
@@ -91,6 +97,11 @@ test.describe('Kudos Feed Interactions /kudos', () => {
 
       // Assert at least one card exists
       expect(await kudosCards.count()).toBeGreaterThan(0);
+
+      // The feed now renders latest-first (ALL KUDOS sort fix), so the viewer's own kudos
+      // (kudos-2, seeded second) is no longer guaranteed to land in the initial REVEAL_BATCH of
+      // 4 — reveal every batch before counting (see reveal-kudos-feed.ts).
+      await revealAllKudosCards(page);
 
       // clarifications.md (second pass) requires the seed set to contain at least one kudos sent
       // BY the mock viewer and at least one sent by someone else. Both states must therefore be

@@ -21,6 +21,7 @@ import { KudosSentToast } from '@/components/kudos/kudos-sent-toast';
 import { getSupabaseUserOrNull } from '@/lib/supabase/current-user';
 import { resolveViewerSlug } from '@/lib/kudos/viewer-identity';
 import { loadBoardLikeState } from '@/lib/kudos/likes/queries';
+import { loadBoardKudos } from '@/lib/kudos/board-feed';
 import { heartsReceivedBySlug } from '@/lib/kudos/likes/ledger';
 import type { LikeBoardState } from '@/components/kudos/likes-provider';
 
@@ -28,11 +29,14 @@ export default async function KudosPage() {
   const user = await getSupabaseUserOrNull();
   const userId = user?.id ?? null;
 
-  // `slug` and `boardState` each depend only on `userId`, so they run concurrently; `hearts`
-  // depends on the resolved `slug` and follows once it settles (architecture §1 diagram).
-  const [slug, boardState] = await Promise.all([
+  // `slug`, `boardState` and `dbRecords` are mutually independent, so they run concurrently;
+  // `hearts` depends on the resolved `slug` and follows once it settles (architecture §1).
+  // `dbRecords` is the board-rewire read side (TC ca8f60b3): kudos persisted by the send flow
+  // render in ALL KUDOS alongside the 9 static records.
+  const [slug, boardState, dbRecords] = await Promise.all([
     resolveViewerSlug(userId),
     loadBoardLikeState(userId),
+    loadBoardKudos(),
   ]);
   const heartsReceived = await heartsReceivedBySlug(slug);
 
@@ -48,7 +52,7 @@ export default async function KudosPage() {
     <div className="flex min-h-full w-full flex-col bg-background">
       <SiteHeader />
       <main className="flex w-full flex-col">
-        <KudosBoard likes={likes} />
+        <KudosBoard likes={likes} dbRecords={dbRecords} />
       </main>
       <SiteFooter />
       {/* F014 E5 — renders nothing unless a send-kudos success flag was just set */}

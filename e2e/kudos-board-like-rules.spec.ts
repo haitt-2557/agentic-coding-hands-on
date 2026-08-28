@@ -4,6 +4,7 @@ import { seedSupabaseSession } from './support/supabase-session';
 import { execSql, withSpecialDay, cleanupTestRows } from './support/local-db';
 import { kudosCardByIdentity } from './support/kudos-card-locator';
 import { clickHeartAndSettle } from './support/heart-toggle';
+import { revealAllKudosCards } from './support/reveal-kudos-feed';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -191,12 +192,14 @@ test.describe('Kudos Board Like Rules (SC-002, SC-005, SC-006, SC-007, BR-002 DB
       await seedSupabaseSession(context, 'http://localhost:3200');
       await page.goto('/kudos');
 
-      // Defect E: the query below reads `kudos_id = 'kudos-4'`, but "the first enabled heart" on
-      // /kudos resolves to kudos-1 (ALL KUDOS renders kudos-1..kudos-4 by default — REVEAL_BATCH
-      // in components/kudos/all-kudos-feed.tsx — and kudos-2 is the only one disabled, being the
-      // viewer's own kudos), never kudos-4. Clicking "first enabled" therefore liked kudos-1, and
-      // the SQL check against kudos-4 deterministically found zero rows regardless of database
-      // isolation or timing. Locating kudos-4 by identity fixes the mismatch at its source.
+      // Defect E: "the first enabled heart" on /kudos does not reliably resolve to kudos-4 —
+      // kudos-2 is the only disabled one (viewer's own kudos), but which OTHER id renders first
+      // depends on feed order (`sortLatestFirst` in kudos-queries.ts). Clicking "first enabled"
+      // liked the wrong id, and the SQL check against kudos-4 deterministically found zero rows
+      // regardless of database isolation or timing. Locating kudos-4 by identity fixes the
+      // mismatch at its source; reveal every batch first since kudos-4 is not guaranteed to sit
+      // in the initial REVEAL_BATCH of 4 (components/kudos/all-kudos-feed.tsx).
+      await revealAllKudosCards(page);
       const card = kudosCardByIdentity(page, 'Nguyễn Văn Quy', 'Nguyễn Bá Chức');
       await expect(card).toHaveCount(1);
       const heart = card.locator('button[aria-label*="heart"], button[aria-label*="like"]');
@@ -270,7 +273,9 @@ test.describe('Kudos Board Like Rules (SC-002, SC-005, SC-006, SC-007, BR-002 DB
       await page.goto('/kudos');
 
       // Like during special day. Defect E (same as SC-005): locate kudos-4 explicitly rather
-      // than "the first enabled heart", which actually resolves to kudos-1.
+      // than "the first enabled heart", and reveal every batch first (kudos-4's position in the
+      // feed depends on `sortLatestFirst`, not a fixed REVEAL_BATCH).
+      await revealAllKudosCards(page);
       const card = kudosCardByIdentity(page, 'Nguyễn Văn Quy', 'Nguyễn Bá Chức');
       await expect(card).toHaveCount(1);
       const heart = card.locator('button[aria-label*="heart"], button[aria-label*="like"]');
@@ -315,6 +320,7 @@ test.describe('Kudos Board Like Rules (SC-002, SC-005, SC-006, SC-007, BR-002 DB
     // identity (same helper as the like click above) removes the ambiguity entirely.
     await seedSupabaseSession(context, 'http://localhost:3200');
     await page.goto('/kudos');
+    await revealAllKudosCards(page);
     const kudos4Card = kudosCardByIdentity(page, 'Nguyễn Văn Quy', 'Nguyễn Bá Chức');
     await expect(kudos4Card).toHaveCount(1);
     const likedHeart = kudos4Card.locator('button[aria-label*="heart"], button[aria-label*="like"]');

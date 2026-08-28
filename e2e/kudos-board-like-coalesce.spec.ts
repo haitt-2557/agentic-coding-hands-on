@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { seedSupabaseSession } from './support/supabase-session';
 import { execSql, cleanupTestRows } from './support/local-db';
 import { kudosCardByIdentity } from './support/kudos-card-locator';
+import { revealAllKudosCards } from './support/reveal-kudos-feed';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -34,9 +35,9 @@ test.describe('Kudos Board Like Coalescing (edge-cases.md row 1 / SM-001)', () =
     await seedSupabaseSession(context, 'http://localhost:3200');
     await page.goto('/kudos');
 
-    // Scroll to end to trigger IntersectionObserver and load all kudos beyond REVEAL_BATCH of 4
-    await page.keyboard.press('End');
-    await page.waitForTimeout(500);
+    // Reveal every batch (board rewire: DB rows above the static records make the feed longer
+    // than a single 'End' scroll used to cover — see reveal-kudos-feed.ts).
+    await revealAllKudosCards(page);
 
     // Locate kudos-6 by (sender, receiver) identity: 'Mai phương Thúy ' → 'Dương thúy An'
     // (Note: senderName has a trailing space in the records)
@@ -93,9 +94,9 @@ test.describe('Kudos Board Like Coalescing (edge-cases.md row 1 / SM-001)', () =
     await seedSupabaseSession(context, 'http://localhost:3200');
     await page.goto('/kudos');
 
-    // Scroll to end to trigger IntersectionObserver and load all kudos beyond REVEAL_BATCH of 4
-    await page.keyboard.press('End');
-    await page.waitForTimeout(500);
+    // Reveal every batch (board rewire: DB rows above the static records make the feed longer
+    // than a single 'End' scroll used to cover — see reveal-kudos-feed.ts).
+    await revealAllKudosCards(page);
 
     const card = kudosCardByIdentity(page, 'Mai phương Thúy ', 'Dương thúy An');
     await expect(card).toHaveCount(1);

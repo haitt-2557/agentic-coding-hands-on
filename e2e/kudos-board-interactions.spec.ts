@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { seedDefaultSession } from './support/seed-defaults';
+import { revealAllKudosCards } from './support/reveal-kudos-feed';
 
 test.describe('Kudos Board Carousel & Filters /kudos', () => {
   test.beforeEach(seedDefaultSession);
@@ -85,12 +86,13 @@ test.describe('Kudos Board Carousel & Filters /kudos', () => {
       const cards = allKudosSection.locator('div[role="article"], article');
       const options = page.locator('[role="option"], [role="menuitem"]');
 
-      // Deliberately option index 1, NOT 0. A count-based assertion cannot detect this filter at
-      // all: the reveal batch is 4 and option 0 (`#Dedicated`) matches exactly the first 4 seeded
-      // records, so the visible count is identical before and after — and every visible card
-      // already carries the tag, so a content assertion on option 0 passes vacuously too.
-      // Option 1 (`#Inspring`, frozen by dom-contract S3/F21) is not carried by every record in
-      // the first batch, so both the content invariant and the change are genuinely falsifiable.
+      // Deliberately option index 1, NOT 0: `#Dedicated` (index 0) sits on 4 of the 9 seeded
+      // records and `#Inspring` (index 1, frozen by dom-contract S3/F21) on 5, so whichever one
+      // would otherwise leave every visible card sharing the same tag is avoided independent of
+      // feed order. Reveal every batch first (see reveal-kudos-feed.ts) — the ALL KUDOS feed
+      // renders latest-first (`sortLatestFirst`), so which 4 records land in the initial
+      // REVEAL_BATCH depends on that order and is not a stable thing to assert against.
+      await revealAllKudosCards(page);
       const unfilteredTexts = await cards.allTextContents();
 
       await hashtagButton.click();
@@ -106,9 +108,11 @@ test.describe('Kudos Board Carousel & Filters /kudos', () => {
       // And the view must actually have changed: the unfiltered feed held a card lacking this tag.
       expect(unfilteredTexts.some((t) => !t.includes(tag))).toBe(true);
 
-      // Clearing restores records that do not carry the tag (TC 0e56cacb, third step).
+      // Clearing restores records that do not carry the tag (TC 0e56cacb, third step). Reveal
+      // again: clearing the filter resets `revealedCount` back to the first REVEAL_BATCH too.
       await hashtagButton.click();
       await options.filter({ hasText: 'Tất cả' }).first().click();
+      await revealAllKudosCards(page);
       const clearedTexts = await cards.allTextContents();
       expect(clearedTexts.some((t) => !t.includes(tag))).toBe(true);
     });
@@ -124,10 +128,11 @@ test.describe('Kudos Board Carousel & Filters /kudos', () => {
       const cards = allKudosSection.locator('div[role="article"], article');
       const options = page.locator('[role="option"], [role="menuitem"]');
 
-      // Option index 1 for the same reason as the hashtag test above: option 0 (`CEVC10`) is
-      // carried by every record in the first reveal batch, so neither a count nor a content
-      // assertion on it could fail. Option 1 (`CECV10`, frozen by dom-contract S3/F21) appears in
-      // no first-batch record, so selecting it must visibly change the feed.
+      // Option index 1 for the same reason as the hashtag test above: option 0 (`CEVC10`) sits
+      // on 7 of the 9 seeded records and option 1 (`CECV10`, frozen by dom-contract S3/F21) on 2,
+      // so the count/content assertions stay genuinely falsifiable independent of feed order.
+      // Reveal every batch first — see the hashtag test's comment above for why.
+      await revealAllKudosCards(page);
       const unfilteredTexts = await cards.allTextContents();
 
       await deptButton.click();
@@ -144,6 +149,7 @@ test.describe('Kudos Board Carousel & Filters /kudos', () => {
       // Clearing restores records from other departments (TC 159fed13, third step).
       await deptButton.click();
       await options.filter({ hasText: 'Tất cả' }).first().click();
+      await revealAllKudosCards(page);
       const clearedTexts = await cards.allTextContents();
       expect(clearedTexts.some((t) => !t.includes(dept))).toBe(true);
     });

@@ -12,8 +12,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { KudosCard } from './kudos-card';
 import { KudosSidebar } from './kudos-sidebar';
-import { KUDOS_RECORDS } from '@/lib/kudos/kudos-records';
-import { filterRecords, type KudosFilter } from '@/lib/kudos/kudos-queries';
+import type { KudosRecord } from '@/lib/kudos/kudos-records';
+import { filterRecords, sortLatestFirst, type KudosFilter } from '@/lib/kudos/kudos-queries';
 
 // dom-contract.md Key Insights / S4 / S6 — the frame draws four post cards; the seed contract's
 // filter-count (0e56cacb/159fed13) and heart-ownership (63645b03) assertions are calibrated to
@@ -21,6 +21,10 @@ import { filterRecords, type KudosFilter } from '@/lib/kudos/kudos-queries';
 const REVEAL_BATCH = 4;
 
 interface AllKudosFeedProps {
+  /** Full record pool in authored order (static seed + DB rows, board rewire) — the shell owns
+   * composition so this feed and the highlight carousel always read the same pool (DEC-001's
+   * one-source discipline extended to the records themselves). */
+  records: KudosRecord[];
   filter: KudosFilter;
   viewerId: string;
   onHashtagClick: (hashtag: string) => void;
@@ -31,8 +35,8 @@ function filterIdentity(filter: KudosFilter): string {
   return `${filter.hashtag ?? ''}|${filter.department ?? ''}`;
 }
 
-export function AllKudosFeed({ filter, viewerId, onHashtagClick }: AllKudosFeedProps) {
-  const filtered = filterRecords(KUDOS_RECORDS, filter);
+export function AllKudosFeed({ records, filter, viewerId, onHashtagClick }: AllKudosFeedProps) {
+  const filtered = sortLatestFirst(filterRecords(records, filter));
   const [revealedCount, setRevealedCount] = useState(REVEAL_BATCH);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 

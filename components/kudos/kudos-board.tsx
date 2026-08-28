@@ -20,7 +20,7 @@
 
 import { useState } from 'react';
 import { useSession } from '@/lib/session/session-provider';
-import { KUDOS_RECORDS, MOCK_VIEWER_ID } from '@/lib/kudos/kudos-records';
+import { KUDOS_RECORDS, MOCK_VIEWER_ID, type KudosRecord } from '@/lib/kudos/kudos-records';
 import { highlightTop5, type KudosFilter } from '@/lib/kudos/kudos-queries';
 import { LikesProvider, type LikeBoardState } from './likes-provider';
 import { KudosBanner } from './kudos-banner';
@@ -35,14 +35,21 @@ const NOOP_ON_COPIED = () => {};
 
 interface KudosBoardProps {
   likes: LikeBoardState;
+  /** DB-persisted kudos from Supabase local (board rewire, TC ca8f60b3) — already mapped to
+   * KudosRecord and ordered oldest-first, so appending after KUDOS_RECORDS keeps one global
+   * authored-order array for `sortLatestFirst` to flip. */
+  dbRecords?: KudosRecord[];
 }
 
-export function KudosBoard({ likes }: KudosBoardProps) {
+export function KudosBoard({ likes, dbRecords = [] }: KudosBoardProps) {
   const { userId } = useSession();
   const [filter, setFilter] = useState<KudosFilter>(INITIAL_FILTER);
 
   const viewerId = userId || MOCK_VIEWER_ID;
-  const highlightRecords = highlightTop5(KUDOS_RECORDS, filter);
+  // One record pool for both sections. DB rows carry heartCount 0, so highlightTop5's static
+  // ranking is unchanged in practice (min static count is 95) — no special-casing needed.
+  const allRecords = [...KUDOS_RECORDS, ...dbRecords];
+  const highlightRecords = highlightTop5(allRecords, filter);
 
   function handleHashtagClick(hashtag: string) {
     setFilter((current) => ({ ...current, hashtag }));
@@ -64,6 +71,7 @@ export function KudosBoard({ likes }: KudosBoardProps) {
       </section>
       <SpotlightBoard />
       <AllKudosFeed
+        records={allRecords}
         filter={filter}
         viewerId={viewerId}
         onHashtagClick={handleHashtagClick}
