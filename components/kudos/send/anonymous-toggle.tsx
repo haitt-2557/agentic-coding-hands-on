@@ -1,6 +1,6 @@
 'use client';
 
-// FR-009, US007, BR-006 — "Gửi ẩn danh" checkbox (frame node I1612:5057;520:14099, componentId
+// FR-009, US007, BR-006 — "Gửi ẩn danh" checkbox (frame node I662:9637;520:14099, componentId
 // 520:14090, "Checkbox Group Send anonymously") + "Nickname ẩn danh" reveal field. Default
 // UNCHECKED (frame image happens to show the *checked* state — ID-6 requires the opposite
 // default, called out in clarifications.md "Behaviour taken directly from ihQ26W78P2").
@@ -41,37 +41,43 @@ export function AnonymousToggle({
   const nicknameId = useId();
 
   return (
-    // mm:I1612:5057;520:14099
+    // mm:I662:9637;520:14099
     <div className="flex w-full max-w-[672px] flex-col items-start gap-4">
-      {/* mm:I1612:5057;520:14099;520:16272 */}
+      {/* mm:I662:9637;520:14099;520:16272 */}
       <label htmlFor={checkboxId} className="flex items-center gap-4 text-[22px] leading-7 font-bold text-background">
-        {/* mm:I1612:5057;520:14099;520:14087 */}
+        {/* mm:I662:9637;520:14099;520:14087 */}
         <input
           id={checkboxId}
           type="checkbox"
           checked={isAnonymous}
           onChange={(event) => onToggleAnonymous(event.target.checked)}
-          className="h-6 w-6 rounded border border-border-accent accent-border-accent"
+          className="h-6 w-6 rounded border border-border-accent bg-white accent-border-accent"
         />
         {t('sendKudos.anonymousLabel')}
       </label>
-      {/* mm:I1612:5057;520:14099;520:16221 — D10: always in the DOM, hidden via CSS when off */}
-      <div className={`flex w-full max-w-[672px] flex-col gap-2 ${isAnonymous ? '' : 'hidden'}`} hidden={!isAnonymous}>
-        <label htmlFor={nicknameId} className="flex items-center gap-0.5 text-[22px] leading-7 font-bold text-background">
+      {/* mm:I662:9637;520:14099;520:16221 — Frame 533, row: label beside input, gap 16px,
+          alignItems center. D10: always in the DOM, hidden via CSS when off */}
+      <div className={`flex w-full max-w-[672px] items-center gap-4 ${isAnonymous ? '' : 'hidden'}`} hidden={!isAnonymous}>
+        <label
+          htmlFor={nicknameId}
+          className="flex shrink-0 items-center gap-0.5 whitespace-nowrap text-[22px] leading-7 font-bold text-background"
+        >
           {t('sendKudos.nicknameLabel')}
           <span className="text-badge-danger">*</span>
         </label>
-        {/* mm:I1612:5057;520:14099;520:16223 */}
-        <input
-          id={nicknameId}
-          type="text"
-          value={nickname}
-          placeholder={t('sendKudos.nicknamePlaceholder')}
-          onChange={(event) => onNicknameChange(event.target.value)}
-          onBlur={onNicknameBlur}
-          className={`h-14 w-full flex-1 rounded-lg border bg-white px-6 py-4 text-base leading-6 font-bold tracking-[0.15px] text-background placeholder:text-muted-text focus:outline-none ${fieldBorderClass(Boolean(nicknameError))}`}
-        />
-        {nicknameError && <FieldErrorText text={nicknameError} />}
+        <div className="flex flex-1 flex-col gap-2">
+          {/* mm:I662:9637;520:14099;520:16223 */}
+          <input
+            id={nicknameId}
+            type="text"
+            value={nickname}
+            placeholder={t('sendKudos.nicknamePlaceholder')}
+            onChange={(event) => onNicknameChange(event.target.value)}
+            onBlur={onNicknameBlur}
+            className={`h-14 w-full rounded-lg border bg-white px-6 py-4 text-base leading-6 font-bold tracking-[0.15px] text-background placeholder:text-muted-text focus:outline-none ${fieldBorderClass(Boolean(nicknameError))}`}
+          />
+          {nicknameError && <FieldErrorText text={nicknameError} />}
+        </div>
       </div>
     </div>
   );

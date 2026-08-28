@@ -1,0 +1,25 @@
+{
+  "task": "Fix /kudos/send visual conformance vs MoMorph frame RO7O6QOhfJ: the design's cream card container (node 662:9637, #FFF8E1, radius 24px, padding 40px, gap 32px) was never implemented, so dark-on-light text (heading, labels, toolbar glyphs, checkbox label — all text-background #00101a) rendered invisibly on the site's dark bg-background page; heading was 24px left-aligned instead of 32px centered; footer buttons lacked icons and Hủy used text-white; field labels were stacked above controls instead of beside them (design rows are flexDirection: row).",
+  "mode": "auto",
+  "acceptanceCriteria": [
+    "Form renders on a #FFF8E1 card with 24px radius and 40px padding; all labels, heading, toolbar glyphs, and checkbox label are visible",
+    "Heading is 32px/40px bold, centered, per node I662:9637;520:9870",
+    "Field labels sit beside their controls per row nodes (I662:9637;520:9871 flexDirection row)",
+    "Existing send-kudos e2e specs still pass (dom-contract D5/D8/D13 unchanged)",
+    "npx tsc --noEmit and npm run lint exit 0"
+  ],
+  "touchpoints": [
+    "app/kudos/send/page.tsx",
+    "components/kudos/send/kudos-send-form.tsx",
+    "components/kudos/send/form-footer.tsx",
+    "components/kudos/send/anonymous-toggle.tsx",
+    "components/kudos/send/recipient-field.tsx",
+    "components/kudos/send/title-field.tsx",
+    "components/kudos/send/hashtag-picker.tsx",
+    "components/kudos/send/image-attachments.tsx"
+  ],
+  "blastRadius": ["/kudos/send page visuals", "send-kudos e2e layout specs"],
+  "contracts": [
+    "node .claude/skills/_shared/lib/evidence-gate.cjs --evidence-dir <abs> --stage hard"
+  ]
+}

@@ -55,10 +55,10 @@ export function ImageAttachments({ files, onAdd, onRemove }: ImageAttachmentsPro
   const canAddMore = files.length < IMAGE_MAX;
 
   return (
-    // mm:I1612:5057;520:9896
-    <div className="flex w-full max-w-[672px] items-start gap-4">
-      {/* mm:I1612:5057;520:9897 */}
-      <label className="pt-1 text-[22px] leading-7 font-bold text-background">{t('sendKudos.imageLabel')}</label>
+    // mm:I662:9637;520:9896 — Frame 537, row, gap 16px, alignItems center
+    <div className="flex w-full max-w-[672px] items-center gap-4">
+      {/* mm:I662:9637;520:9897 */}
+      <label className="shrink-0 whitespace-nowrap text-[22px] leading-7 font-bold text-background">{t('sendKudos.imageLabel')}</label>
       <div className="flex flex-1 flex-col gap-2">
         <div className="flex flex-wrap items-center gap-4">
           {files.map((file, index) => (

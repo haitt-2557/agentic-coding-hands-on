@@ -17,7 +17,7 @@ export default async function KudosSendPage() {
   return (
     <div className="flex min-h-full w-full flex-col bg-background">
       <SiteHeader />
-      <main className="flex w-full flex-col items-center">
+      <main className="flex w-full flex-col items-center px-6 py-20">
         <KudosSendPageClient profiles={profiles} hashtags={hashtags} />
       </main>
       <SiteFooter />
